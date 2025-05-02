@@ -73,7 +73,7 @@ export const referralController = {
   getBusinessReferrals: async (req: AuthRequest, res: Response) => {
     try {
       const referrals = await Referral.find({ 
-        businessId: req.user?.userId 
+        businessId: req.user?._id 
       })
       .populate('campaignId', 'title')
       .sort({ createdAt: -1 });
@@ -96,7 +96,7 @@ export const referralController = {
       }
 
       // Check if user owns this referral
-      if (referral.businessId.toString() !== req.user?.userId) {
+      if (referral.businessId.toString() !== req.user?._id.toString()) {
         return res.status(403).json({ message: 'Not authorized to view this referral' });
       }
 

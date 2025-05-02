@@ -19,7 +19,6 @@ const BUSINESS_TYPES = [
 
 export interface User extends Document {
   _id: Types.ObjectId;
-  userId: string;
   email: string;
   password: string;
   firstName: string;

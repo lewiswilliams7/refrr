@@ -85,8 +85,8 @@ export const campaignController = {
   getBusinessCampaigns: async (req: AuthRequest, res: Response) => {
     try {
       const campaigns = await Campaign.find({ 
-        businessId: req.user?.userId 
-      }).sort({ createdAt: -1 }); // Most recent first
+        businessId: req.user?._id 
+      }).sort({ createdAt: -1 });
       
       res.json(campaigns);
     } catch (error) {
@@ -105,7 +105,7 @@ export const campaignController = {
       }
 
       // Check if user owns this campaign
-      if (campaign.businessId.toString() !== req.user?.userId) {
+      if (campaign.businessId.toString() !== req.user?._id.toString()) {
         return res.status(403).json({ message: 'Not authorized to view this campaign' });
       }
 

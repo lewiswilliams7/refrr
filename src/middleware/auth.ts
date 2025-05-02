@@ -6,6 +6,19 @@ const JWT_SECRET = process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl';
 
 export interface AuthRequest extends Request {
   user?: User;
+  body: any;
+  params: {
+    [key: string]: string;
+  };
+  headers: {
+    [key: string]: string | string[] | undefined;
+  };
+  query: {
+    [key: string]: string | string[] | undefined;
+  };
+  cookies: {
+    [key: string]: string;
+  };
 }
 
 export const authenticateToken = (
@@ -22,7 +35,7 @@ export const authenticateToken = (
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string; role?: string };
+    const decoded = jwt.verify(token, JWT_SECRET) as { _id: string; email: string; role?: string };
     req.user = decoded as User;
     next();
   } catch (error) {
