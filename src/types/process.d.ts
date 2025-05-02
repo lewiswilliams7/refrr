@@ -9,6 +9,16 @@ declare namespace NodeJS {
     SMTP_USER?: string;
     SMTP_PASS?: string;
     SMTP_FROM?: string;
+    FRONTEND_URL: string;
+    API_URL: string;
+    RATE_LIMIT_WINDOW_MS: string;
+    RATE_LIMIT_MAX_REQUESTS: string;
+    ADMIN_EMAIL: string;
+    ADMIN_PASSWORD: string;
+    ADMIN_FIRST_NAME: string;
+    ADMIN_LAST_NAME: string;
+    EMAIL_USER: string;
+    EMAIL_PASSWORD: string;
   }
 }
 
