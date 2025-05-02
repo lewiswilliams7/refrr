@@ -113,7 +113,7 @@ export const campaignController = {
       }
 
       // Check if user owns this campaign
-      if (campaign.businessId.toString() !== req.user?.userId) {
+      if (campaign.businessId.toString() !== req.user?._id.toString()) {
         return res.status(403).json({ message: 'Not authorized to modify this campaign' });
       }
 
@@ -140,7 +140,7 @@ export const campaignController = {
 
       // Find campaign and populate business data
       const campaign = await Campaign.findById(campaignId)
-        .populate<{ businessId: PopulatedBusiness }>('businessId', 'businessName businessType location')
+        .populate('businessId', 'businessName businessType location')
         .lean()
         .exec();
 
@@ -155,7 +155,7 @@ export const campaignController = {
       }
 
       // Ensure business data exists
-      const businessData = campaign.businessId as PopulatedBusiness;
+      const businessData = campaign.businessId;
       if (!businessData) {
         console.error('Business data not found for campaign:', campaignId);
         return res.status(500).json({ message: 'Business data not found' });
@@ -201,7 +201,7 @@ export const campaignController = {
       
       // Find all active campaigns and populate business data
       const campaigns = await Campaign.find({ status: 'active' })
-        .populate<{ businessId: PopulatedBusiness }>('businessId', 'businessName businessType location')
+        .populate('businessId', 'businessName businessType location')
         .lean()
         .exec();
 
@@ -209,7 +209,7 @@ export const campaignController = {
 
       // Prepare response data
       const responseData = campaigns.map(campaign => {
-        const businessData = campaign.businessId as PopulatedBusiness;
+        const businessData = campaign.businessId;
         return {
           id: campaign._id,
           title: campaign.title,

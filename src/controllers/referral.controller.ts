@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Referral from '../models/referrals';
 import { Campaign } from '../models/campaign.model';
-import { AuthRequest } from '../types/types';
+import { AuthRequest } from '../middleware/auth';
 import { generateReferralCode } from '../utils/codeGenerator';
 import { validateEmail } from '../utils/validators';
 import { IPopulatedReferral } from '../types/referral.types';
