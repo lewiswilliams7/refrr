@@ -21,7 +21,7 @@ interface ReferralDocument extends IReferral, Document {}
 export const customerController = {
   getAnalytics: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const userId = req.user?.userId;
+      const userId = req.user?._id;
       const userEmail = req.user?.email;
 
       if (!userId || !userEmail) {

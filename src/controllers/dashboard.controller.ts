@@ -9,7 +9,7 @@ import { User } from '../models/user.model';
 export const dashboardController = {
   getStats: async (req: AuthRequest, res: Response) => {
     try {
-      const businessId = req.user?.userId;
+      const businessId = req.user?._id;
 
       // Get active campaigns count
       const activeCampaigns = await Campaign.countDocuments({
