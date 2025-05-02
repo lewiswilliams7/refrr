@@ -31,14 +31,18 @@ export interface IUser {
     postcode: string;
   };
   businessDescription?: string;
+  avatar?: string;
 }
 
-export interface User extends IUser, Document {
+export interface UserDocument extends IUser, Document {
   _id: Types.ObjectId;
   comparePassword(candidatePassword: string): Promise<boolean>;
+  toObject(): IUser & { _id: Types.ObjectId };
 }
 
-const userSchema = new Schema<User>({
+const DEFAULT_AVATAR = 'https://ui-avatars.com/api/?name=';
+
+const userSchema = new Schema<UserDocument>({
   email: {
     type: String,
     required: true,
@@ -85,6 +89,12 @@ const userSchema = new Schema<User>({
     type: String,
     required: false
   },
+  avatar: {
+    type: String,
+    default: function() {
+      return `${DEFAULT_AVATAR}${encodeURIComponent(this.firstName + ' ' + this.lastName)}&background=random`;
+    }
+  }
 });
 
 // Hash password before saving
@@ -109,5 +119,5 @@ userSchema.methods.comparePassword = async function(candidatePassword: string): 
   }
 };
 
-export const User = mongoose.model<User>('User', userSchema);
+export const User = mongoose.model<UserDocument>('User', userSchema);
 export { BUSINESS_TYPES };

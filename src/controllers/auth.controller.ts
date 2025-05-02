@@ -1,16 +1,17 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { User } from '../models/user.model';
-import { AuthRequest } from '../types/types';
+import { User, UserDocument } from '../models/user.model';
+import { AuthRequest } from '../middleware/auth';
 import bcrypt from 'bcryptjs';
 import { sendEmail } from '../utils/email';
 import crypto from 'crypto';
+import mongoose from 'mongoose';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl';
 
 export const authController = {
   // Register new user
-  register: async (req: AuthRequest, res: Response) => {
+  register: async (req: Request, res: Response) => {
     try {
       const { 
         email, 
@@ -89,8 +90,8 @@ export const authController = {
 
       // Generate JWT token
       const token = jwt.sign(
-        { _id: user._id, email: user.email, role: user.role },
-        process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl',
+        { _id: user._id.toString(), email: user.email, role: user.role },
+        JWT_SECRET,
         { expiresIn: '24h' }
       );
 
@@ -179,8 +180,8 @@ export const authController = {
 
       // Generate JWT token
       const token = jwt.sign(
-        { _id: savedUser._id, email: savedUser.email, role: savedUser.role },
-        process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl',
+        { _id: savedUser._id.toString(), email: savedUser.email, role: savedUser.role },
+        JWT_SECRET,
         { expiresIn: '24h' }
       );
 
@@ -231,8 +232,8 @@ export const authController = {
 
       // Generate JWT token
       const token = jwt.sign(
-        { _id: user._id, email: user.email, role: user.role },
-        process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl',
+        { _id: user._id.toString(), email: user.email, role: user.role },
+        JWT_SECRET,
         { expiresIn: '24h' }
       );
 
@@ -269,7 +270,16 @@ export const authController = {
   // Get current user
   getCurrentUser: async (req: AuthRequest, res: Response) => {
     try {
-      const user = await User.findById(req.user?._id).select('-password');
+      if (!req.user) {
+        return res.status(401).json({ message: 'User not authenticated' });
+      }
+
+      const userId = req.user._id;
+      if (!userId) {
+        return res.status(401).json({ message: 'Invalid user ID' });
+      }
+
+      const user = await User.findById(userId).select('-password');
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }

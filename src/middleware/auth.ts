@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { User } from '../models/user.model';
+import { User, UserDocument } from '../models/user.model';
 import mongoose from 'mongoose';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl';
 
 export interface AuthRequest extends Request {
-  user?: User;
+  user?: UserDocument;
   body: any;
   params: {
     [key: string]: string;
@@ -22,42 +22,37 @@ export interface AuthRequest extends Request {
   };
 }
 
-export const authenticateToken = (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): void => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.toString().split(' ')[1];
-
-  if (!token) {
-    res.status(401).json({ message: 'Authentication required' });
-    return;
-  }
-
+export const authenticateToken = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { _id: string; email: string; role?: string };
-    // Create a partial user object that matches the User type
-    const user: Partial<User> = {
-      _id: new mongoose.Types.ObjectId(decoded._id),
-      email: decoded.email,
-      role: decoded.role as 'business' | 'customer' | 'admin'
-    };
-    req.user = user as User;
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+      return res.status(401).json({ message: 'Access token is required' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as jwt.JwtPayload;
+    
+    if (!decoded._id) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+
+    const user = await User.findById(decoded._id).select('-password');
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    req.user = user;
     next();
   } catch (error) {
-    res.status(403).json({ message: 'Invalid or expired token' });
+    console.error('Authentication error:', error);
+    res.status(401).json({ message: 'Invalid token' });
   }
 };
 
-export const isAdmin = (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): void => {
-  if (!req.user || req.user.role !== 'admin') {
-    res.status(403).json({ message: 'Access denied. Admin privileges required.' });
-    return;
+export const isAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
+  if (req.user?.role !== 'admin') {
+    return res.status(403).json({ message: 'Access denied' });
   }
   next();
 };
