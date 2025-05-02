@@ -4,7 +4,7 @@ import { Campaign } from '../models/campaign';
 import Referral from '../models/referrals';
 import Business from '../models/business';
 import mongoose from 'mongoose';
-import User from '../models/user';
+import { User } from '../models/user.model';
 
 export const dashboardController = {
   getStats: async (req: AuthRequest, res: Response) => {

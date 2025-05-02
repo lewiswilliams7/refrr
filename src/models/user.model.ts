@@ -34,6 +34,7 @@ export interface IUser {
 }
 
 export interface User extends IUser, Document {
+  _id: Types.ObjectId;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 

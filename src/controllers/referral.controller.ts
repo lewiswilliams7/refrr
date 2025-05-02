@@ -7,6 +7,7 @@ import { validateEmail } from '../utils/validators';
 import { IPopulatedReferral } from '../types/referral.types';
 import { User } from '../models/user.model';
 import { sendEmail } from '../utils/email';
+import mongoose from 'mongoose';
 
 export const referralController = {
   // Create new referral
@@ -33,7 +34,7 @@ export const referralController = {
       // Check if campaign exists and belongs to the business
       const campaign = await Campaign.findOne({ 
         _id: campaignId,
-        businessId: req.user?.userId
+        businessId: req.user?._id
       });
 
       if (!campaign) {
@@ -47,7 +48,7 @@ export const referralController = {
 
       const referral = new Referral({
         campaignId,
-        businessId: req.user?.userId,
+        businessId: req.user?._id,
         referrerEmail,
         code,
         status: 'pending'
@@ -125,7 +126,7 @@ export const referralController = {
       }
 
       // Check if user owns this referral
-      if (referral.businessId.toString() !== req.user?.userId) {
+      if (referral.businessId.toString() !== req.user?._id.toString()) {
         return res.status(403).json({ message: 'Not authorized to update this referral' });
       }
 
@@ -227,7 +228,7 @@ export const referralController = {
       console.log('Generating referral link for campaign:', {
         campaignId,
         referrerEmail,
-        userId: req.user?.userId,
+        userId: req.user?._id,
         headers: req.headers,
         body: req.body
       });
@@ -287,6 +288,79 @@ export const referralController = {
         message: 'Error generating referral link',
         error: error instanceof Error ? error.message : String(error)
       });
+    }
+  },
+
+  createReferral: async (req: AuthRequest, res: Response) => {
+    try {
+      const referral = new Referral({
+        ...req.body,
+        businessId: req.user?._id
+      });
+      await referral.save();
+      res.status(201).json(referral);
+    } catch (error) {
+      console.error('Error creating referral:', error);
+      res.status(500).json({ message: 'Error creating referral' });
+    }
+  },
+
+  getReferrals: async (req: AuthRequest, res: Response) => {
+    try {
+      const referrals = await Referral.find({ businessId: req.user?._id });
+      res.json(referrals);
+    } catch (error) {
+      console.error('Error fetching referrals:', error);
+      res.status(500).json({ message: 'Error fetching referrals' });
+    }
+  },
+
+  getReferralById: async (req: AuthRequest, res: Response) => {
+    try {
+      const referral = await Referral.findOne({
+        _id: req.params.id,
+        businessId: req.user?._id
+      });
+      if (!referral) {
+        return res.status(404).json({ message: 'Referral not found' });
+      }
+      res.json(referral);
+    } catch (error) {
+      console.error('Error fetching referral:', error);
+      res.status(500).json({ message: 'Error fetching referral' });
+    }
+  },
+
+  updateReferral: async (req: AuthRequest, res: Response) => {
+    try {
+      const referral = await Referral.findOneAndUpdate(
+        { _id: req.params.id, businessId: req.user?._id },
+        req.body,
+        { new: true }
+      );
+      if (!referral) {
+        return res.status(404).json({ message: 'Referral not found' });
+      }
+      res.json(referral);
+    } catch (error) {
+      console.error('Error updating referral:', error);
+      res.status(500).json({ message: 'Error updating referral' });
+    }
+  },
+
+  deleteReferral: async (req: AuthRequest, res: Response) => {
+    try {
+      const referral = await Referral.findOneAndDelete({
+        _id: req.params.id,
+        businessId: req.user?._id
+      });
+      if (!referral) {
+        return res.status(404).json({ message: 'Referral not found' });
+      }
+      res.json({ message: 'Referral deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting referral:', error);
+      res.status(500).json({ message: 'Error deleting referral' });
     }
   }
 };

@@ -89,9 +89,9 @@ export const authController = {
 
       // Generate JWT token
       const token = jwt.sign(
-        { userId: user._id, email: user.email },
+        { _id: user._id, email: user.email, role: user.role },
         process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl',
-        { expiresIn: '7d' }
+        { expiresIn: '24h' }
       );
 
       res.status(201).json({
@@ -179,9 +179,9 @@ export const authController = {
 
       // Generate JWT token
       const token = jwt.sign(
-        { userId: savedUser._id, email: savedUser.email },
+        { _id: savedUser._id, email: savedUser.email, role: savedUser.role },
         process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl',
-        { expiresIn: '7d' }
+        { expiresIn: '24h' }
       );
 
       res.status(201).json({
@@ -231,9 +231,9 @@ export const authController = {
 
       // Generate JWT token
       const token = jwt.sign(
-        { userId: user._id, email: user.email },
+        { _id: user._id, email: user.email, role: user.role },
         process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl',
-        { expiresIn: '7d' }
+        { expiresIn: '24h' }
       );
 
       // Return user data based on role
