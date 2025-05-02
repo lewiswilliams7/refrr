@@ -1,8 +1,8 @@
 {
-  "name": "backend",
+  "name": "refrr",
   "version": "1.0.0",
-  "description": "",
-  "main": "dist/server.js",
+  "description": "Refrr - Referral Management System",
+  "main": "src/server.ts",
   "scripts": {
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
@@ -11,9 +11,6 @@
     "test:watch": "jest --watch",
     "migrate": "ts-node src/migrations/addRewardDescription.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@types/nodemailer": "^6.4.17",
     "bcryptjs": "^2.4.3",
@@ -48,5 +45,8 @@
       "dotenv/config"
     ],
     "testTimeout": 60000
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
-}
+} 
