@@ -11,6 +11,5 @@ export interface AuthRequest extends Request {
   headers: any;
   query: any;
   cookies: any;
-  get(name: string): string | undefined;
-  header(name: string): string | undefined;
+  [key: string]: any;
 } 
