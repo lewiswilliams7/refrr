@@ -17,31 +17,26 @@ const BUSINESS_TYPES = [
   'Other'
 ] as const;
 
-export interface IUser extends Document {
+export interface User extends Document {
   _id: Types.ObjectId;
+  userId: string;
   email: string;
   password: string;
-  businessName?: string;
   firstName: string;
   lastName: string;
-  businessType?: typeof BUSINESS_TYPES[number];
+  role: 'business' | 'customer' | 'admin';
+  businessName?: string;
+  businessType?: string;
   location?: {
     address: string;
     city: string;
     postcode: string;
-    coordinates?: {
-      lat: number;
-      lng: number;
-    }
   };
   businessDescription?: string;
-  role: 'admin' | 'business' | 'customer';
-  createdAt: Date;
-  updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const userSchema = new Schema<IUser>({
+const userSchema = new Schema<User>({
   email: {
     type: String,
     required: true,
@@ -54,11 +49,6 @@ const userSchema = new Schema<IUser>({
     required: true,
     minlength: 6,
   },
-  businessName: {
-    type: String,
-    required: function() { return this.role === 'business'; },
-    trim: true,
-  },
   firstName: {
     type: String,
     required: true,
@@ -67,6 +57,16 @@ const userSchema = new Schema<IUser>({
   lastName: {
     type: String,
     required: true,
+    trim: true,
+  },
+  role: {
+    type: String,
+    enum: ['business', 'customer', 'admin'],
+    default: 'business',
+  },
+  businessName: {
+    type: String,
+    required: function() { return this.role === 'business'; },
     trim: true,
   },
   businessType: {
@@ -78,27 +78,10 @@ const userSchema = new Schema<IUser>({
     address: { type: String, required: function() { return this.role === 'business'; } },
     city: { type: String, required: function() { return this.role === 'business'; } },
     postcode: { type: String, required: function() { return this.role === 'business'; } },
-    coordinates: {
-      lat: Number,
-      lng: Number
-    }
   },
   businessDescription: {
     type: String,
     required: false
-  },
-  role: {
-    type: String,
-    enum: ['admin', 'business', 'customer'],
-    default: 'business',
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
   },
 });
 
@@ -120,9 +103,9 @@ userSchema.methods.comparePassword = async function(candidatePassword: string): 
   try {
     return await bcrypt.compare(candidatePassword, this.password);
   } catch (error) {
-    return false;
+    throw error;
   }
 };
 
-export const User = mongoose.model<IUser>('User', userSchema);
+export const User = mongoose.model<User>('User', userSchema);
 export { BUSINESS_TYPES };
