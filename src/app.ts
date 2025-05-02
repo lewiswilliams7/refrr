@@ -3,12 +3,16 @@ import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-
-// Import routes
+import { errorHandler } from './middleware/error';
+import adminRoutes from './routes/admin';
 import authRoutes from './routes/auth';
-import campaignRoutes from './routes/campaigns';
+import businessRoutes from './routes/business';
+import campaignRoutes from './routes/campaign';
 import customerRoutes from './routes/customer';
-import referralRoutes from './routes/referrals';
+import dashboardRoutes from './routes/dashboard';
+import healthRoutes from './routes/health';
+import referralRoutes from './routes/referral';
+import { setupSecurity } from './config/security';
 
 // Load environment variables
 dotenv.config();
