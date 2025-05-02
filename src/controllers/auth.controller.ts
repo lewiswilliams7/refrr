@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/user.model';
-import { AuthRequest } from '../middleware/auth';
+import { AuthRequest } from '../types/types';
 import bcrypt from 'bcryptjs';
 import { sendEmail } from '../utils/email';
 import crypto from 'crypto';

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { AuthRequest } from '../middleware/auth';
-import { Campaign } from '../models/campaign';
+import { AuthRequest } from '../types/types';
+import { Campaign } from '../models/campaign.model';
 import { User } from '../models/user.model';
 import mongoose from 'mongoose';
 import Business from '../models/business';
