@@ -1,15 +1,24 @@
 import { Request } from 'express';
 
-export interface AuthRequest {
-  user?: {
-    id: string;
-    email: string;
-    role: string;
-  };
+interface User {
+  id: string;
+  email: string;
+  role: string;
+}
+
+export interface AuthRequest extends Request {
+  user?: User;
   body: any;
-  params: any;
-  headers: any;
-  query: any;
-  cookies: any;
-  [key: string]: any;
+  params: {
+    [key: string]: string;
+  };
+  headers: {
+    [key: string]: string | string[] | undefined;
+  };
+  query: {
+    [key: string]: string | string[] | undefined;
+  };
+  cookies: {
+    [key: string]: string;
+  };
 } 
