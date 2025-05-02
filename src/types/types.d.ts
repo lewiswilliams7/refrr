@@ -11,4 +11,5 @@ export interface AuthRequest extends Request {
   headers: any;
   query: any;
   cookies: any;
+  [key: string]: any;
 } 
