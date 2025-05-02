@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
-import { Campaign } from '../models/campaign';
+import { Campaign } from '../models/campaign.model';
 import { User } from '../models/user.model';
 import mongoose from 'mongoose';
 import Business from '../models/business';
@@ -31,7 +31,7 @@ interface CampaignWithBusiness extends mongoose.Document {
 
 export const campaignController = {
   // Create new campaign
-  create: async (req: AuthRequest, res: Response) => {
+  createCampaign: async (req: AuthRequest, res: Response) => {
     try {
       const { title, description, rewardType, rewardValue, rewardDescription } = req.body;
       
@@ -64,122 +64,78 @@ export const campaignController = {
       }
 
       const campaign = new Campaign({
-        businessId: req.user?.userId,
-        title,
-        description,
-        rewardType,
-        rewardValue,
-        rewardDescription,
-        status: 'active'
+        ...req.body,
+        businessId: req.user?._id
       });
 
       await campaign.save();
       res.status(201).json(campaign);
     } catch (error) {
-      console.error('Campaign creation error:', error);
-      res.status(500).json({ message: 'Error creating campaign', error });
+      console.error('Error creating campaign:', error);
+      res.status(500).json({ message: 'Error creating campaign' });
     }
   },
 
   // Get all campaigns for a business
-  getBusinessCampaigns: async (req: AuthRequest, res: Response) => {
+  getCampaigns: async (req: AuthRequest, res: Response) => {
     try {
-      const campaigns = await Campaign.find({ 
-        businessId: req.user?.userId 
-      }).sort({ createdAt: -1 }); // Most recent first
-      
+      const campaigns = await Campaign.find({ businessId: req.user?._id });
       res.json(campaigns);
     } catch (error) {
-      console.error('Campaign fetch error:', error);
-      res.status(500).json({ message: 'Error fetching campaigns', error });
+      console.error('Error fetching campaigns:', error);
+      res.status(500).json({ message: 'Error fetching campaigns' });
     }
   },
 
   // Get single campaign
-  getCampaign: async (req: AuthRequest, res: Response) => {
+  getCampaignById: async (req: AuthRequest, res: Response) => {
     try {
-      const campaign = await Campaign.findById(req.params.id);
-      
+      const campaign = await Campaign.findOne({
+        _id: req.params.id,
+        businessId: req.user?._id
+      });
       if (!campaign) {
         return res.status(404).json({ message: 'Campaign not found' });
       }
-
-      // Check if user owns this campaign
-      if (campaign.businessId.toString() !== req.user?.userId) {
-        return res.status(403).json({ message: 'Not authorized to view this campaign' });
-      }
-
       res.json(campaign);
     } catch (error) {
-      console.error('Campaign fetch error:', error);
-      res.status(500).json({ message: 'Error fetching campaign', error });
+      console.error('Error fetching campaign:', error);
+      res.status(500).json({ message: 'Error fetching campaign' });
     }
   },
 
   // Update campaign
-  update: async (req: AuthRequest, res: Response) => {
+  updateCampaign: async (req: AuthRequest, res: Response) => {
     try {
-      const campaign = await Campaign.findById(req.params.id);
-      
+      const campaign = await Campaign.findOneAndUpdate(
+        { _id: req.params.id, businessId: req.user?._id },
+        req.body,
+        { new: true }
+      );
       if (!campaign) {
         return res.status(404).json({ message: 'Campaign not found' });
       }
-
-      // Check if user owns this campaign
-      if (campaign.businessId.toString() !== req.user?.userId) {
-        return res.status(403).json({ message: 'Not authorized to update this campaign' });
-      }
-
-      const { title, description, rewardType, rewardValue, rewardDescription } = req.body;
-
-      // Validate required fields if they're being updated
-      if ((rewardType && !['percentage', 'fixed'].includes(rewardType)) ||
-          (rewardValue !== undefined && (typeof rewardValue !== 'number' || rewardValue <= 0)) ||
-          (rewardType === 'percentage' && rewardValue > 100)) {
-        return res.status(400).json({ 
-          message: 'Invalid reward configuration' 
-        });
-      }
-
-      const updatedCampaign = await Campaign.findByIdAndUpdate(
-        req.params.id,
-        {
-          title,
-          description,
-          rewardType,
-          rewardValue,
-          rewardDescription,
-          businessId: campaign.businessId // Ensure businessId can't be changed
-        },
-        { new: true, runValidators: true }
-      );
-
-      res.json(updatedCampaign);
+      res.json(campaign);
     } catch (error) {
-      console.error('Campaign update error:', error);
-      res.status(500).json({ message: 'Error updating campaign', error });
+      console.error('Error updating campaign:', error);
+      res.status(500).json({ message: 'Error updating campaign' });
     }
   },
 
   // Delete campaign
-  delete: async (req: AuthRequest, res: Response) => {
+  deleteCampaign: async (req: AuthRequest, res: Response) => {
     try {
-      const campaign = await Campaign.findById(req.params.id);
-      
+      const campaign = await Campaign.findOneAndDelete({
+        _id: req.params.id,
+        businessId: req.user?._id
+      });
       if (!campaign) {
         return res.status(404).json({ message: 'Campaign not found' });
       }
-
-      // Check if user owns this campaign
-      if (campaign.businessId.toString() !== req.user?.userId) {
-        return res.status(403).json({ message: 'Not authorized to delete this campaign' });
-      }
-
-      await Campaign.findByIdAndDelete(req.params.id);
       res.json({ message: 'Campaign deleted successfully' });
     } catch (error) {
-      console.error('Campaign deletion error:', error);
-      res.status(500).json({ message: 'Error deleting campaign', error });
+      console.error('Error deleting campaign:', error);
+      res.status(500).json({ message: 'Error deleting campaign' });
     }
   },
 
@@ -187,136 +143,45 @@ export const campaignController = {
   toggleActive: async (req: AuthRequest, res: Response) => {
     try {
       const campaign = await Campaign.findById(req.params.id);
-      
       if (!campaign) {
         return res.status(404).json({ message: 'Campaign not found' });
       }
-
-      // Check if user owns this campaign
-      if (campaign.businessId.toString() !== req.user?.userId) {
-        return res.status(403).json({ message: 'Not authorized to modify this campaign' });
+      if (campaign.businessId.toString() !== req.user?._id.toString()) {
+        return res.status(403).json({ message: 'Not authorized to update this campaign' });
       }
-
-      // Toggle between active and paused
-      campaign.status = campaign.status === 'active' ? 'paused' : 'active';
+      campaign.isActive = !campaign.isActive;
       await campaign.save();
-
       res.json(campaign);
     } catch (error) {
-      console.error('Campaign toggle error:', error);
-      res.status(500).json({ message: 'Error toggling campaign status', error });
+      console.error('Error toggling campaign status:', error);
+      res.status(500).json({ message: 'Error toggling campaign status' });
     }
   },
 
   // Get public campaign details
   getPublicCampaign: async (req: Request, res: Response) => {
     try {
-      const campaignId = req.params.id;
-      console.log('Fetching public campaign with ID:', campaignId);
-      
-      if (!mongoose.Types.ObjectId.isValid(campaignId)) {
-        return res.status(400).json({ message: 'Invalid campaign ID' });
-      }
-
-      // Find campaign and populate business data
-      const campaign = await Campaign.findById(campaignId)
-        .populate<{ businessId: PopulatedBusiness }>('businessId', 'businessName businessType location')
-        .lean()
-        .exec();
-
+      const campaign = await Campaign.findById(req.params.id)
+        .populate('businessId', 'businessName businessType location');
       if (!campaign) {
-        console.log('Campaign not found in database:', campaignId);
         return res.status(404).json({ message: 'Campaign not found' });
       }
-
-      if (campaign.status !== 'active') {
-        console.log('Campaign is not active:', campaignId);
-        return res.status(404).json({ message: 'Campaign is not active' });
-      }
-
-      // Ensure business data exists
-      const businessData = campaign.businessId as PopulatedBusiness;
-      if (!businessData) {
-        console.error('Business data not found for campaign:', campaignId);
-        return res.status(500).json({ message: 'Business data not found' });
-      }
-
-      // Prepare response data
-      const responseData = {
-        id: campaign._id,
-        title: campaign.title,
-        description: campaign.description || '',
-        rewardType: campaign.rewardType,
-        rewardValue: campaign.rewardValue,
-        rewardDescription: campaign.rewardDescription,
-        showRewardDisclaimer: campaign.showRewardDisclaimer,
-        rewardDisclaimerText: campaign.rewardDisclaimerText,
-        businessName: businessData.businessName,
-        businessType: businessData.businessType,
-        location: businessData.location,
-        status: campaign.status,
-        tags: campaign.tags,
-        referralCount: campaign.analytics?.totalReferrals,
-        expirationDate: campaign.expirationDate,
-        popularity: campaign.analytics?.conversionRate
-      };
-
-      res.json(responseData);
+      res.json(campaign);
     } catch (error) {
       console.error('Error fetching public campaign:', error);
-      if (error instanceof mongoose.Error.CastError) {
-        return res.status(400).json({ message: 'Invalid campaign ID format' });
-      }
-      res.status(500).json({ 
-        message: 'Error fetching campaign details',
-        error: error instanceof Error ? error.message : String(error)
-      });
+      res.status(500).json({ message: 'Error fetching public campaign' });
     }
   },
 
   // Get all public campaigns
   getPublicCampaigns: async (req: Request, res: Response) => {
     try {
-      console.log('Fetching all public campaigns...');
-      
-      // Find all active campaigns and populate business data
-      const campaigns = await Campaign.find({ status: 'active' })
-        .populate<{ businessId: PopulatedBusiness }>('businessId', 'businessName businessType location')
-        .lean()
-        .exec();
-
-      console.log(`Found ${campaigns.length} active campaigns`);
-
-      // Prepare response data
-      const responseData = campaigns.map(campaign => {
-        const businessData = campaign.businessId as PopulatedBusiness;
-        return {
-          id: campaign._id,
-          title: campaign.title,
-          description: campaign.description || '',
-          rewardType: campaign.rewardType,
-          rewardValue: campaign.rewardValue,
-          rewardDescription: campaign.rewardDescription,
-          showRewardDisclaimer: campaign.showRewardDisclaimer,
-          rewardDisclaimerText: campaign.rewardDisclaimerText,
-          businessName: businessData.businessName,
-          businessType: businessData.businessType,
-          location: businessData.location,
-          status: campaign.status,
-          tags: campaign.tags,
-          referralCount: campaign.analytics?.totalReferrals,
-          expirationDate: campaign.expirationDate,
-          popularity: campaign.analytics?.conversionRate
-        };
-      });
-
-      res.json(responseData);
+      const campaigns = await Campaign.find({ isActive: true })
+        .populate('businessId', 'businessName businessType location');
+      res.json(campaigns);
     } catch (error) {
       console.error('Error fetching public campaigns:', error);
-      res.status(500).json({ 
-        message: 'Error fetching campaigns',
-        error: error instanceof Error ? error.message : String(error)
-      });
+      res.status(500).json({ message: 'Error fetching public campaigns' });
     }
   }
 };

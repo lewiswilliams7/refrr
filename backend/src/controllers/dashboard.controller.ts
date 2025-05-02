@@ -1,11 +1,36 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
-import { Campaign } from '../models/campaign';
-import Referral from '../models/referrals';
-import Business from '../models/business';
+import { User } from '../models/user.model';
+import { Campaign } from '../models/campaign.model';
+import { Referral } from '../models/referral.model';
 import mongoose from 'mongoose';
 
 export const dashboardController = {
+  getBusinessDashboard: async (req: AuthRequest, res: Response) => {
+    try {
+      const business = await User.findById(req.user?._id).select('-password');
+      if (!business) {
+        return res.status(404).json({ message: 'Business not found' });
+      }
+
+      const campaigns = await Campaign.find({ businessId: req.user?._id });
+      const referrals = await Referral.find({ businessId: req.user?._id })
+        .populate('customerId', 'firstName lastName email')
+        .populate('campaignId', 'title rewardType rewardValue');
+
+      const dashboardData = {
+        business,
+        campaigns,
+        referrals
+      };
+
+      res.json(dashboardData);
+    } catch (error) {
+      console.error('Error fetching business dashboard:', error);
+      res.status(500).json({ message: 'Error fetching business dashboard' });
+    }
+  },
+
   getStats: async (req: AuthRequest, res: Response) => {
     try {
       const businessId = req.user?.userId;

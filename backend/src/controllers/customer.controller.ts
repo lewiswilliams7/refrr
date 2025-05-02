@@ -78,5 +78,17 @@ export const customerController = {
       console.error('Error fetching customer analytics:', error);
       res.status(500).json({ message: 'Error fetching customer analytics' });
     }
+  },
+  getCustomerProfile: async (req: AuthRequest, res: Response) => {
+    try {
+      const user = await User.findById(req.user?._id).select('-password');
+      if (!user) {
+        return res.status(404).json({ message: 'Customer not found' });
+      }
+      res.json(user);
+    } catch (error) {
+      console.error('Error fetching customer profile:', error);
+      res.status(500).json({ message: 'Error fetching customer profile' });
+    }
   }
 }; 

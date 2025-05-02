@@ -33,7 +33,7 @@ export const referralController = {
       // Check if campaign exists and belongs to the business
       const campaign = await Campaign.findOne({ 
         _id: campaignId,
-        businessId: req.user?.userId
+        businessId: req.user?._id
       });
 
       if (!campaign) {
@@ -47,7 +47,7 @@ export const referralController = {
 
       const referral = new Referral({
         campaignId,
-        businessId: req.user?.userId,
+        businessId: req.user?._id,
         referrerEmail,
         code,
         status: 'pending'
@@ -73,9 +73,10 @@ export const referralController = {
   getBusinessReferrals: async (req: AuthRequest, res: Response) => {
     try {
       const referrals = await Referral.find({ 
-        businessId: req.user?.userId 
+        businessId: req.user?._id 
       })
-      .populate('campaignId', 'title')
+      .populate('customerId', 'firstName lastName email')
+      .populate('campaignId', 'title rewardType rewardValue')
       .sort({ createdAt: -1 });
       
       res.json(referrals);
@@ -88,15 +89,19 @@ export const referralController = {
   // Get single referral
   getReferral: async (req: AuthRequest, res: Response) => {
     try {
-      const referral = await Referral.findById(req.params.id)
-        .populate('campaignId', 'title rewardType rewardValue');
+      const referral = await Referral.findOne({
+        _id: req.params.id,
+        businessId: req.user?._id
+      })
+      .populate('customerId', 'firstName lastName email')
+      .populate('campaignId', 'title rewardType rewardValue');
       
       if (!referral) {
         return res.status(404).json({ message: 'Referral not found' });
       }
 
       // Check if user owns this referral
-      if (referral.businessId.toString() !== req.user?.userId) {
+      if (referral.businessId.toString() !== req.user?._id.toString()) {
         return res.status(403).json({ message: 'Not authorized to view this referral' });
       }
 
@@ -118,14 +123,17 @@ export const referralController = {
         });
       }
 
-      const referral = await Referral.findById(req.params.id);
+      const referral = await Referral.findOne({
+        _id: req.params.id,
+        businessId: req.user?._id
+      });
       
       if (!referral) {
         return res.status(404).json({ message: 'Referral not found' });
       }
 
       // Check if user owns this referral
-      if (referral.businessId.toString() !== req.user?.userId) {
+      if (referral.businessId.toString() !== req.user?._id.toString()) {
         return res.status(403).json({ message: 'Not authorized to update this referral' });
       }
 
@@ -148,10 +156,9 @@ export const referralController = {
       console.log('Fetching referral for code:', code);
 
       const referral = await Referral.findOne({ code })
-        .populate({
-          path: 'campaignId',
-          select: 'title description rewardType rewardValue rewardDescription'
-        }) as IPopulatedReferral | null;
+        .populate('customerId', 'firstName lastName email')
+        .populate('campaignId', 'title description rewardType rewardValue rewardDescription')
+        .populate('businessId', 'firstName lastName email');
 
       if (!referral) {
         return res.status(404).json({ message: 'Referral not found' });
@@ -168,6 +175,11 @@ export const referralController = {
           rewardType: referral.campaignId.rewardType,
           rewardValue: referral.campaignId.rewardValue,
           rewardDescription: referral.campaignId.rewardDescription
+        },
+        businessDetails: {
+          firstName: referral.businessId.firstName,
+          lastName: referral.businessId.lastName,
+          email: referral.businessId.email
         }
       });
     } catch (error) {
@@ -176,42 +188,21 @@ export const referralController = {
     }
   },
 
-  completeReferral: async (req: Request, res: Response) => {
+  completeReferral: async (req: AuthRequest, res: Response) => {
     try {
-      const { code } = req.params;
-      const { referredEmail } = req.body;
-      console.log('Completing referral:', { code, referredEmail });
-
-      if (!validateEmail(referredEmail)) {
-        return res.status(400).json({ message: 'Invalid email format' });
-      }
-
-      const referral = await Referral.findOne({ code });
+      const referral = await Referral.findOne({
+        _id: req.params.id,
+        businessId: req.user?._id
+      });
       
       if (!referral) {
         return res.status(404).json({ message: 'Referral not found' });
       }
 
-      if (referral.referredEmail) {
-        return res.status(400).json({ message: 'This referral has already been used' });
-      }
-
-      if (referral.referrerEmail.toLowerCase() === referredEmail.toLowerCase()) {
-        return res.status(400).json({ message: 'You cannot refer yourself' });
-      }
-
-      referral.referredEmail = referredEmail;
+      referral.status = 'completed';
+      referral.completedAt = new Date();
       await referral.save();
-
-      res.json({ 
-        message: 'Referral completed successfully',
-        referral: {
-          code: referral.code,
-          referrerEmail: referral.referrerEmail,
-          referredEmail: referral.referredEmail,
-          status: referral.status
-        }
-      });
+      res.json(referral);
     } catch (error) {
       console.error('Error completing referral:', error);
       res.status(500).json({ message: 'Error completing referral' });
@@ -221,21 +212,19 @@ export const referralController = {
   // Generate referral link for a campaign
   generateReferralLink: async (req: AuthRequest, res: Response) => {
     try {
-      const { campaignId } = req.params;
-      const { referrerEmail } = req.body;
+      const { campaignId } = req.body;
       
       console.log('Generating referral link for campaign:', {
         campaignId,
-        referrerEmail,
-        userId: req.user?.userId,
+        userId: req.user?._id,
         headers: req.headers,
         body: req.body
       });
 
-      if (!referrerEmail) {
-        console.log('Missing referrer email');
+      if (!campaignId) {
+        console.log('Missing campaignId');
         return res.status(400).json({ 
-          message: 'Referrer email is required' 
+          message: 'Campaign ID is required' 
         });
       }
 
@@ -252,15 +241,17 @@ export const referralController = {
         });
       }
 
+      if (campaign.businessId.toString() !== req.user?._id.toString()) {
+        return res.status(403).json({ message: 'Not authorized to generate referral link for this campaign' });
+      }
+
       // Generate unique referral code
       const code = await generateReferralCode();
 
       // Create referral record
       const referral = new Referral({
         campaignId,
-        businessId: campaign.businessId,
-        referrerEmail,
-        code,
+        businessId: req.user?._id,
         status: 'pending'
       });
 
@@ -269,24 +260,17 @@ export const referralController = {
       console.log('Referral created successfully:', {
         code,
         campaignId,
-        referrerEmail,
-        businessId: campaign.businessId
+        businessId: req.user?._id
       });
 
+      const referralLink = `${process.env.FRONTEND_URL}/referral/${referral.code}`;
       res.status(201).json({
-        code,
-        referrerEmail,
-        campaignId
+        referralLink,
+        code: referral.code
       });
     } catch (error) {
-      console.error('Error generating referral link:', {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined
-      });
-      res.status(500).json({ 
-        message: 'Error generating referral link',
-        error: error instanceof Error ? error.message : String(error)
-      });
+      console.error('Error generating referral link:', error);
+      res.status(500).json({ message: 'Error generating referral link' });
     }
   }
 };

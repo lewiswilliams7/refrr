@@ -10,61 +10,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl';
 
 export const authController = {
   // Register new user
-  register: async (req: AuthRequest, res: Response) => {
+  register: async (req: Request, res: Response) => {
     try {
-      const { 
-        email, 
-        password, 
-        businessName, 
-        firstName, 
-        lastName,
-        businessType,
-        location,
-        businessDescription 
-      } = req.body;
-
-      // Debug log
-      console.log('Registration attempt:', { 
-        email, 
-        businessName, 
-        firstName, 
-        lastName, 
-        businessType,
-        location 
-      });
-
-      // Validate required fields
-      if (!email || !password || !businessName || !firstName || !lastName || !businessType) {
-        console.log('Missing fields:', { 
-          email: !!email, 
-          password: !!password,
-          businessName: !!businessName, 
-          firstName: !!firstName, 
-          lastName: !!lastName,
-          businessType: !!businessType
-        });
-        return res.status(400).json({ 
-          message: 'All fields are required: email, password, businessName, firstName, lastName, businessType' 
-        });
-      }
-
-      // Validate location fields
-      if (!location || !location.address || !location.city || !location.postcode) {
-        return res.status(400).json({
-          message: 'Location fields are required: address, city, postcode'
-        });
-      }
-
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        return res.status(400).json({ message: 'Invalid email format' });
-      }
-
-      // Validate password length
-      if (password.length < 6) {
-        return res.status(400).json({ message: 'Password must be at least 6 characters long' });
-      }
+      const { email, password, firstName, lastName, role, businessName, businessType, location, businessDescription } = req.body;
 
       // Check if user already exists
       const existingUser = await User.findOne({ email });
@@ -72,48 +20,32 @@ export const authController = {
         return res.status(400).json({ message: 'User already exists' });
       }
 
-      // Create new user with all fields
+      // Create new user
       const user = new User({
         email,
-        password, // Will be hashed by the pre-save hook
-        businessName,
+        password,
         firstName,
         lastName,
+        role,
+        businessName,
         businessType,
         location,
-        businessDescription,
-        role: 'business' // Explicitly set role as business
+        businessDescription
       });
 
       await user.save();
 
       // Generate JWT token
       const token = jwt.sign(
-        { userId: user._id, email: user.email },
-        process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl',
-        { expiresIn: '7d' }
+        { _id: user._id, email: user.email, role: user.role },
+        process.env.JWT_SECRET || 'your-secret-key',
+        { expiresIn: '24h' }
       );
 
-      res.status(201).json({
-        message: 'User created successfully',
-        token,
-        user: {
-          id: user._id,
-          email: user.email,
-          businessName: user.businessName,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          businessType: user.businessType,
-          location: user.location,
-          businessDescription: user.businessDescription
-        },
-      });
+      res.status(201).json({ token, user: { ...user.toObject(), password: undefined } });
     } catch (error) {
-      console.error('Registration error:', error);
-      res.status(500).json({ 
-        message: 'Error creating user', 
-        error: error instanceof Error ? error.message : String(error)
-      });
+      console.error('Error registering user:', error);
+      res.status(500).json({ message: 'Error registering user' });
     }
   },
 
@@ -179,9 +111,9 @@ export const authController = {
 
       // Generate JWT token
       const token = jwt.sign(
-        { userId: savedUser._id, email: savedUser.email },
-        process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl',
-        { expiresIn: '7d' }
+        { _id: savedUser._id, email: savedUser.email, role: savedUser.role },
+        process.env.JWT_SECRET || 'your-secret-key',
+        { expiresIn: '24h' }
       );
 
       res.status(201).json({
@@ -213,11 +145,11 @@ export const authController = {
   },
 
   // Login user
-  login: async (req: AuthRequest, res: Response) => {
+  login: async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
 
-      // Find user
+      // Find user by email
       const user = await User.findOne({ email });
       if (!user) {
         return res.status(401).json({ message: 'Invalid credentials' });
@@ -231,61 +163,129 @@ export const authController = {
 
       // Generate JWT token
       const token = jwt.sign(
-        { userId: user._id, email: user.email },
-        process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl',
-        { expiresIn: '7d' }
+        { _id: user._id, email: user.email, role: user.role },
+        process.env.JWT_SECRET || 'your-secret-key',
+        { expiresIn: '24h' }
       );
 
-      // Return user data based on role
-      const userResponse = {
-        id: user._id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role || 'business' // Default to business if role not set
-      };
-
-      // Add business-specific fields if user is a business
-      if (user.role === 'business') {
-        Object.assign(userResponse, {
-          businessName: user.businessName,
-          businessType: user.businessType,
-          location: user.location,
-          businessDescription: user.businessDescription
-        });
-      }
-
-      res.json({
-        message: 'Login successful',
-        token,
-        user: userResponse
-      });
+      res.json({ token, user: { ...user.toObject(), password: undefined } });
     } catch (error) {
-      console.error('Login error:', error);
-      res.status(500).json({ message: 'Error logging in', error });
+      console.error('Error logging in:', error);
+      res.status(500).json({ message: 'Error logging in' });
     }
   },
 
   // Get current user
-  getCurrentUser: async (req: AuthRequest, res: Response) => {
+  getProfile: async (req: AuthRequest, res: Response) => {
     try {
-      const user = await User.findById(req.user?.userId).select('-password');
+      const user = await User.findById(req.user?._id).select('-password');
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
       res.json(user);
     } catch (error) {
-      console.error('Error fetching user:', error);
-      res.status(500).json({ message: 'Error fetching user' });
+      console.error('Error fetching profile:', error);
+      res.status(500).json({ message: 'Error fetching profile' });
     }
   },
 
-  forgotPassword: async (req: AuthRequest, res: Response) => {
-    // ... existing code ...
+  updateProfile: async (req: AuthRequest, res: Response) => {
+    try {
+      const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        req.body,
+        { new: true, runValidators: true }
+      ).select('-password');
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      res.status(500).json({ message: 'Error updating profile' });
+    }
   },
 
-  resetPassword: async (req: AuthRequest, res: Response) => {
-    // ... existing code ...
+  changePassword: async (req: AuthRequest, res: Response) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      
+      const user = await User.findById(req.user?._id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Verify current password
+      const isMatch = await user.comparePassword(currentPassword);
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Current password is incorrect' });
+      }
+
+      // Update password
+      user.password = newPassword;
+      await user.save();
+
+      res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+      console.error('Error changing password:', error);
+      res.status(500).json({ message: 'Error changing password' });
+    }
+  },
+
+  forgotPassword: async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body;
+      
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Generate reset token
+      const resetToken = jwt.sign(
+        { _id: user._id },
+        process.env.JWT_SECRET || 'your-secret-key',
+        { expiresIn: '1h' }
+      );
+
+      // Send reset email
+      const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+      await sendEmail({
+        to: user.email,
+        subject: 'Password Reset Request',
+        text: `Click this link to reset your password: ${resetUrl}`
+      });
+
+      res.json({ message: 'Password reset email sent' });
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      res.status(500).json({ message: 'Error sending password reset email' });
+    }
+  },
+
+  resetPassword: async (req: Request, res: Response) => {
+    try {
+      const { token, newPassword } = req.body;
+      
+      // Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { _id: string };
+      
+      const user = await User.findById(decoded._id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Update password
+      user.password = newPassword;
+      await user.save();
+
+      res.json({ message: 'Password reset successfully' });
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      res.status(500).json({ message: 'Error resetting password' });
+    }
   },
 
   verifyEmail: async (req: AuthRequest, res: Response) => {
