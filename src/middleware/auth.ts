@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/user.model';
+import mongoose from 'mongoose';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl';
 
@@ -36,7 +37,13 @@ export const authenticateToken = (
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as { _id: string; email: string; role?: string };
-    req.user = decoded as User;
+    // Create a partial user object that matches the User type
+    const user: Partial<User> = {
+      _id: new mongoose.Types.ObjectId(decoded._id),
+      email: decoded.email,
+      role: decoded.role as 'business' | 'customer' | 'admin'
+    };
+    req.user = user as User;
     next();
   } catch (error) {
     res.status(403).json({ message: 'Invalid or expired token' });

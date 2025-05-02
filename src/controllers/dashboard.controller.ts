@@ -4,6 +4,7 @@ import { Campaign } from '../models/campaign';
 import Referral from '../models/referrals';
 import Business from '../models/business';
 import mongoose from 'mongoose';
+import User from '../models/user';
 
 export const dashboardController = {
   getStats: async (req: AuthRequest, res: Response) => {
@@ -104,6 +105,19 @@ export const dashboardController = {
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
       res.status(500).json({ message: 'Error fetching dashboard statistics' });
+    }
+  },
+
+  getBusinessDashboard: async (req: AuthRequest, res: Response) => {
+    try {
+      const business = await User.findById(req.user?._id).select('-password');
+      if (!business) {
+        return res.status(404).json({ message: 'Business not found' });
+      }
+      res.json(business);
+    } catch (error) {
+      console.error('Error fetching business dashboard:', error);
+      res.status(500).json({ message: 'Error fetching business dashboard' });
     }
   }
 };

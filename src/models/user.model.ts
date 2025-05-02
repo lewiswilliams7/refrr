@@ -17,8 +17,7 @@ const BUSINESS_TYPES = [
   'Other'
 ] as const;
 
-export interface User extends Document {
-  _id: Types.ObjectId;
+export interface IUser {
   email: string;
   password: string;
   firstName: string;
@@ -32,6 +31,9 @@ export interface User extends Document {
     postcode: string;
   };
   businessDescription?: string;
+}
+
+export interface User extends IUser, Document {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
