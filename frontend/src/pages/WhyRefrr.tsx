@@ -10,7 +10,6 @@ import {
   Stack,
   alpha,
   useTheme,
-  Button,
 } from '@mui/material';
 import {
   TrendingUp as TrendingUpIcon,
