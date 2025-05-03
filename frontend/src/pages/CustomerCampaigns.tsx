@@ -19,34 +19,24 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Divider,
   useTheme,
-  FormControlLabel,
-  Switch,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  LinearProgress,
-  Badge,
 } from '@mui/material';
 import {
   Search as SearchIcon,
   ContentCopy as CopyIcon,
   FilterList as FilterIcon,
-  Sort as SortIcon,
   Share as ShareIcon,
   Bookmark as BookmarkIcon,
   BookmarkBorder as BookmarkBorderIcon,
-  TrendingUp as TrendingUpIcon,
-  AccessTime as AccessTimeIcon,
-  People as PeopleIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { campaignApi } from '../services/api';
 import Navigation from '../components/common/Navigation';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, ResponsiveContainer } from 'recharts';
 
 interface Campaign {
   _id: string;
@@ -119,7 +109,7 @@ export default function CustomerCampaigns() {
   const [bookmarkedCampaigns, setBookmarkedCampaigns] = useState<string[]>([]);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
-  const [analyticsData, setAnalyticsData] = useState<any[]>([]);
+  const [analyticsData, setAnalyticsData] = useState(null);
 
   useEffect(() => {
     fetchCampaigns();
