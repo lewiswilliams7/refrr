@@ -49,5 +49,7 @@ const campaignSchema = new mongoose.Schema({
   expirationDate: { type: Date }
 }, { timestamps: true });
 
-const Campaign = mongoose.model<ICampaign>('Campaign', campaignSchema);
-export { Campaign }; 
+// Check if the model already exists before creating it
+const Campaign = mongoose.models.Campaign || mongoose.model<ICampaign>('Campaign', campaignSchema);
+
+export default Campaign; 
