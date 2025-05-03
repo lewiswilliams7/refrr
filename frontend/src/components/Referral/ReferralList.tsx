@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -37,7 +37,7 @@ export default function ReferralList() {
   const [selectedReferral, setSelectedReferral] = useState<string | null>(null);
   const { token } = useAuth();
 
-  const fetchReferrals = async () => {
+  const fetchReferrals = useCallback(async () => {
     try {
       const response = await fetch('/api/referrals', {
         headers: {
@@ -55,7 +55,7 @@ export default function ReferralList() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     fetchReferrals();

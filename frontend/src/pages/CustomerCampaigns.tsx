@@ -19,7 +19,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  useTheme,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -104,12 +103,10 @@ export default function CustomerCampaigns() {
   });
   const { user } = useAuth();
   const navigate = useNavigate();
-  const theme = useTheme();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [bookmarkedCampaigns, setBookmarkedCampaigns] = useState<string[]>([]);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
-  const [analyticsData, setAnalyticsData] = useState(null);
 
   useEffect(() => {
     fetchCampaigns();
