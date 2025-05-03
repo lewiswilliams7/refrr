@@ -18,7 +18,6 @@ import {
   Switch,
   Divider,
 } from '@mui/material';
-import { useAuth } from '../../context/AuthContext';
 import { campaignApi, Campaign } from '../../services/api';
 
 interface Props {
@@ -41,7 +40,6 @@ export default function CampaignForm({ open, onClose, campaign, onSubmit }: Prop
   const [maxReferrals, setMaxReferrals] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { token } = useAuth();
 
   useEffect(() => {
     if (campaign) {

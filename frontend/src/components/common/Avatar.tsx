@@ -1,6 +1,5 @@
 import React from 'react';
-import { Avatar as MuiAvatar, Box, SxProps, Theme } from '@mui/material';
-import { Person } from '@mui/icons-material';
+import { Avatar as MuiAvatar } from '@mui/material';
 
 interface AvatarProps {
   src?: string | null;
@@ -9,7 +8,7 @@ interface AvatarProps {
   className?: string;
   firstName?: string;
   lastName?: string;
-  sx?: SxProps<Theme>;
+  sx?: any;
 }
 
 const Avatar: React.FC<AvatarProps> = ({ 

@@ -59,7 +59,7 @@ export default function ReferralList() {
 
   useEffect(() => {
     fetchReferrals();
-  }, [token]);
+  }, [fetchReferrals]);
 
   const handleStatusChange = async (referralId: string, newStatus: string) => {
     try {
