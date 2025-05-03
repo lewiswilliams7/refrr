@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { Referral } from '../models/referrals';
-import { Campaign } from '../models/campaign';
+import Campaign, { ICampaign } from '../models/campaign.model';
 import { User } from '../models/user.model';
 import mongoose from 'mongoose';
 import { generateReferralCode } from '../utils/codeGenerator';
