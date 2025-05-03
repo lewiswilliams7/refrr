@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Paper,
@@ -45,11 +45,7 @@ export default function ReferralDetails() {
   const [campaignDetails, setCampaignDetails] = useState<CampaignDetails | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
 
-  useEffect(() => {
-    fetchCampaignDetails();
-  }, [fetchCampaignDetails]);
-
-  const fetchCampaignDetails = async () => {
+  const fetchCampaignDetails = useCallback(async () => {
     if (!campaignId) {
       console.error('No campaign ID provided in URL');
       setError('Campaign ID is missing');
@@ -77,7 +73,11 @@ export default function ReferralDetails() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [campaignId]);
+
+  useEffect(() => {
+    fetchCampaignDetails();
+  }, [fetchCampaignDetails]);
 
   const handleCopyLink = () => {
     if (campaignDetails?.referralLink) {

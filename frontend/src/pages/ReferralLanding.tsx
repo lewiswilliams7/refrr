@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Paper,
@@ -40,11 +40,7 @@ export default function ReferralLanding() {
   const [success, setSuccess] = useState(false);
   const [campaignDetails, setCampaignDetails] = useState<CampaignDetails | null>(null);
 
-  useEffect(() => {
-    fetchReferralDetails();
-  }, [fetchReferralDetails]);
-
-  const fetchReferralDetails = async () => {
+  const fetchReferralDetails = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -55,7 +51,11 @@ export default function ReferralLanding() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [code]);
+
+  useEffect(() => {
+    fetchReferralDetails();
+  }, [fetchReferralDetails]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
