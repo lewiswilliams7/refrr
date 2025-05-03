@@ -6,9 +6,13 @@ import mongoose from 'mongoose';
 
 // Import routes
 import authRoutes from './routes/auth';
-import campaignRoutes from './routes/campaigns';
+import adminRoutes from './routes/admin';
+import businessRoutes from './routes/business';
 import customerRoutes from './routes/customer';
-import referralRoutes from './routes/referrals';
+import campaignRoutes from './routes/campaign';
+import dashboardRoutes from './routes/dashboard';
+import referralRoutes from './routes/referral';
+import healthRoutes from './routes/health';
 
 // Load environment variables
 dotenv.config();
@@ -27,9 +31,13 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/refrr')
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/campaigns', campaignRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/business', businessRoutes);
 app.use('/api/customer', customerRoutes);
+app.use('/api/campaigns', campaignRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/referrals', referralRoutes);
+app.use('/api/health', healthRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
