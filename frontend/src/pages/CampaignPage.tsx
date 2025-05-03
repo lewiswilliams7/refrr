@@ -5,15 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import CampaignList from '../components/Campaign/CampaignList';
 import CampaignForm from '../components/Campaign/CampaignForm';
 
-interface Campaign {
-  _id: string;
-  title: string;
-  description: string;
-  rewardType: 'percentage' | 'fixed';
-  rewardValue: number;
-  rewardDescription: string;
-}
-
 export default function CampaignPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const navigate = useNavigate();
