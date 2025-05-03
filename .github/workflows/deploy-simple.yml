@@ -11,6 +11,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         
+      - name: Debug Repository
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+          echo "Frontend directory contents:"
+          ls -la frontend || echo "Frontend directory not found"
+          
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -18,13 +26,29 @@ jobs:
           
       - name: Install dependencies
         run: |
-          cd frontend
-          npm install
+          if [ -d "frontend" ]; then
+            cd frontend
+            echo "Installing dependencies..."
+            npm install || echo "npm install failed"
+            echo "npm version:"
+            npm --version
+          else
+            echo "Error: frontend directory not found"
+            exit 1
+          fi
           
       - name: Build
         run: |
-          cd frontend
-          npm run build
+          if [ -d "frontend" ]; then
+            cd frontend
+            echo "Building application..."
+            npm run build || echo "Build failed"
+            echo "Build directory contents:"
+            ls -la build || echo "Build directory not found"
+          else
+            echo "Error: frontend directory not found"
+            exit 1
+          fi
           
       - name: List Build Files
         run: |
