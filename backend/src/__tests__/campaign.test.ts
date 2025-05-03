@@ -1,9 +1,10 @@
 import request from 'supertest';
 import { app } from '../server';
-import Campaign, { ICampaign } from '../models/campaign.model';
+import { Campaign, ICampaign } from '../models/campaign';
 import { User, IUser } from '../models/user.model';
 import mongoose, { Types } from 'mongoose';
 import jwt from 'jsonwebtoken';
+import { expect } from 'chai';
 
 const MONGODB_URI = 'mongodb+srv://lewiswilliams077:YS9XaEpwNtaGJ5rl@cluster0.pxooejq.mongodb.net/refrr_test?retryWrites=true&w=majority';
 

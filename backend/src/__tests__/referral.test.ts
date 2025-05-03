@@ -2,9 +2,10 @@ import request from 'supertest';
 import { app } from '../server';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { User, IUser } from '../models/user.model';
-import Campaign, { ICampaign } from '../models/campaign.model';
+import { Campaign, ICampaign } from '../models/campaign';
 import Referral from '../models/referrals';
 import jwt from 'jsonwebtoken';
+import { expect } from 'chai';
 
 const MONGODB_URI = 'mongodb+srv://lewiswilliams077:YS9XaEpwNtaGJ5rl@cluster0.pxooejq.mongodb.net/refrr_test?retryWrites=true&w=majority';
 

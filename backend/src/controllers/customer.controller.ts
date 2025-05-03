@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { User } from '../models/user.model';
-import Campaign, { ICampaign } from '../models/campaign.model';
+import { Campaign, ICampaign } from '../models/campaign';
 import { Referral } from '../models/referrals';
 import Business from '../models/business';
 import mongoose from 'mongoose';
