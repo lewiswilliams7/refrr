@@ -6,6 +6,12 @@ import {
   Grid,
   Card,
   CardContent,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Tooltip,
+  CircularProgress,
+  Alert,
   Paper,
   Stack,
   alpha,
@@ -18,6 +24,12 @@ import {
   Speed as SpeedIcon,
   Analytics as AnalyticsIcon,
   LocalOffer as LocalOfferIcon,
+  Search as SearchIcon,
+  ContentCopy as CopyIcon,
+  FilterList as FilterIcon,
+  Share as ShareIcon,
+  Bookmark as BookmarkIcon,
+  BookmarkBorder as BookmarkBorderIcon,
 } from '@mui/icons-material';
 import PublicLayout from '../components/Layout/PublicLayout';
 

@@ -9,10 +9,23 @@ import {
   CircularProgress,
   Card,
   CardContent,
+  Grid,
+  InputAdornment,
+  IconButton,
+  Tooltip,
+  Chip,
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import PublicLayout from '../components/Layout/PublicLayout';
+import {
+  Search as SearchIcon,
+  ContentCopy as CopyIcon,
+  FilterList as FilterIcon,
+  Share as ShareIcon,
+  Bookmark as BookmarkIcon,
+  BookmarkBorder as BookmarkBorderIcon,
+} from '@mui/icons-material';
 
 interface CampaignDetails {
   title: string;
@@ -53,6 +66,7 @@ export default function ReferralLanding() {
     }
   }, [code]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchReferralDetails();
   }, [fetchReferralDetails]);

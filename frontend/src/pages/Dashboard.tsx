@@ -16,8 +16,27 @@ import {
   Alert,
   Checkbox,
   Stack,
+  TextField,
+  InputAdornment,
+  Tooltip,
+  FormControl,
+  InputLabel,
+  Select,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
-import { MoreVert as MoreVertIcon, Campaign as CampaignIcon } from '@mui/icons-material';
+import {
+  MoreVert as MoreVertIcon,
+  Campaign as CampaignIcon,
+  Search as SearchIcon,
+  ContentCopy as CopyIcon,
+  FilterList as FilterIcon,
+  Share as ShareIcon,
+  Bookmark as BookmarkIcon,
+  BookmarkBorder as BookmarkBorderIcon,
+} from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';

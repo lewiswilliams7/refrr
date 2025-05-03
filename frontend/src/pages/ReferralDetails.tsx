@@ -75,6 +75,7 @@ export default function ReferralDetails() {
     }
   }, [campaignId]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchCampaignDetails();
   }, [fetchCampaignDetails]);

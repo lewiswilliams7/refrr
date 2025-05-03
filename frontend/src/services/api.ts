@@ -1,6 +1,7 @@
 import axios from 'axios';
 import config from '../config';
 import { RegisterData, LoginData, AuthResponse } from '../types/auth';
+import { getToken } from '../utils/auth';
 
 const api = axios.create({
   baseURL: config.apiUrl,

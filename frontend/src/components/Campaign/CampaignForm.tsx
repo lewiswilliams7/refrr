@@ -19,6 +19,7 @@ import {
   Divider,
 } from '@mui/material';
 import { campaignApi, Campaign } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 interface Props {
   open: boolean;
@@ -28,6 +29,8 @@ interface Props {
 }
 
 export default function CampaignForm({ open, onClose, campaign, onSubmit }: Props) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { user, token } = useAuth();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [rewardType, setRewardType] = useState<'percentage' | 'fixed'>('percentage');

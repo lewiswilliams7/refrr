@@ -48,7 +48,6 @@ interface Campaign {
   businessName: string;
   businessType: string;
   location: {
-    address: string;
     city: string;
     postcode: string;
   };
@@ -173,7 +172,6 @@ export default function CustomerCampaigns() {
 
       const referralLink = `${window.location.origin}/refer/${response.code}`;
       
-      // Update campaigns state with the new referral link
       setCampaigns(prevCampaigns => 
         prevCampaigns.map(campaign => 
           campaign._id === campaignId 

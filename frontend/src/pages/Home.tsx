@@ -188,20 +188,20 @@ export default function Home() {
                   spacing={2}
                   sx={{ mb: 4 }}
                 >
-                <Button
-                  variant="contained"
-                  size="large"
+                  <Button
+                    variant="contained"
+                    size="large"
                     endIcon={<ArrowForwardIcon />}
-                  sx={{
+                    sx={{
                       minWidth: '250px',
                       py: 1.5,
                       fontSize: '1.1rem',
-                    bgcolor: 'white',
-                    color: 'primary.main',
-                    '&:hover': {
-                      bgcolor: 'grey.100',
-                    },
-                  }}
+                      bgcolor: 'white',
+                      color: 'primary.main',
+                      '&:hover': {
+                        bgcolor: 'grey.100',
+                      },
+                    }}
                     onClick={() => navigate('/register/customer')}
                   >
                     Register as Customer
@@ -220,10 +220,10 @@ export default function Home() {
                         bgcolor: 'rgba(255, 255, 255, 0.1)',
                       },
                     }}
-                  onClick={() => navigate('/register')}
-                >
-                  Register Your Business
-                </Button>
+                    onClick={() => navigate('/register')}
+                  >
+                    Register Your Business
+                  </Button>
                 </Stack>
               </Grid>
               <Grid item xs={12} md={6}>
@@ -451,7 +451,7 @@ export default function Home() {
                             No Active Campaigns
                           </Button>
                         )}
-                    </Box>
+                      </Box>
                     </Box>
                     {business.activeCampaigns.rewards.length > 0 ? (
                       <Box mt={2}>
@@ -459,7 +459,7 @@ export default function Home() {
                           Active Rewards:
                         </Typography>
                         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                        {business.activeCampaigns.rewards.map((reward, index) => (
+                          {business.activeCampaigns.rewards.map((reward, index) => (
                             <Chip
                               key={index}
                               label={`${reward.value}${reward.type === 'percentage' ? '%' : ' points'} - ${reward.description}`}
@@ -467,7 +467,7 @@ export default function Home() {
                               size="small"
                               sx={{ borderRadius: 1 }}
                             />
-                        ))}
+                          ))}
                         </Stack>
                         <Button
                           size="small"

@@ -12,6 +12,12 @@ import {
   DialogContent,
   DialogActions,
   Container,
+  TextField,
+  InputAdornment,
+  Tooltip,
+  CircularProgress,
+  Paper,
+  Chip,
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { campaignApi, Campaign } from '../../services/api';

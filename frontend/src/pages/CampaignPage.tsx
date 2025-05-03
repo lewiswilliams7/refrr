@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Button, Box, Typography, Stack } from '@mui/material';
 import { Add as AddIcon, Dashboard as DashboardIcon } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import CampaignList from '../components/Campaign/CampaignList';
 import CampaignForm from '../components/Campaign/CampaignForm';
+import { campaignApi } from '../services/api';
 
 export default function CampaignPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
