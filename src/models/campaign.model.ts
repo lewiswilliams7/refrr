@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-export interface Campaign extends mongoose.Document {
+export interface ICampaign extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
   title: string;
   description?: string;
@@ -49,4 +49,5 @@ const campaignSchema = new mongoose.Schema({
   expirationDate: { type: Date }
 }, { timestamps: true });
 
-export const Campaign = mongoose.model<Campaign>('Campaign', campaignSchema); 
+const Campaign = mongoose.model<ICampaign>('Campaign', campaignSchema);
+export { Campaign }; 

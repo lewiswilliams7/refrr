@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
-import { Campaign } from '../models/campaign';
+import { Campaign } from '../models/campaign.model';
 import { User } from '../models/user.model';
 import mongoose from 'mongoose';
 import Business from '../models/business';
@@ -32,11 +32,37 @@ interface CampaignWithBusiness extends mongoose.Document {
 export const campaignController = {
   createCampaign: async (req: AuthRequest, res: Response) => {
     try {
-      const campaign = new Campaign({
-        ...req.body,
-        businessId: req.user?._id
+      const { 
+        title, 
+        description, 
+        rewardType, 
+        rewardValue, 
+        rewardDescription,
+        startDate,
+        endDate
+      } = req.body;
+
+      if (!req.user?._id) {
+        return res.status(400).json({ message: 'User ID is required' });
+      }
+
+      const business = await Business.findOne({ userId: req.user._id });
+      if (!business) {
+        return res.status(404).json({ message: 'Business not found' });
+      }
+
+      const campaign = await Campaign.create({
+        businessId: business._id,
+        title,
+        description,
+        rewardType,
+        rewardValue,
+        rewardDescription,
+        startDate,
+        endDate,
+        status: 'active'
       });
-      await campaign.save();
+
       res.status(201).json(campaign);
     } catch (error) {
       console.error('Error creating campaign:', error);
@@ -72,14 +98,46 @@ export const campaignController = {
 
   updateCampaign: async (req: AuthRequest, res: Response) => {
     try {
-      const campaign = await Campaign.findOneAndUpdate(
-        { _id: req.params.id, businessId: req.user?._id },
-        req.body,
+      const { campaignId } = req.params;
+      const { 
+        title, 
+        description, 
+        rewardType, 
+        rewardValue, 
+        rewardDescription,
+        startDate,
+        endDate,
+        status
+      } = req.body;
+
+      if (!req.user?._id) {
+        return res.status(400).json({ message: 'User ID is required' });
+      }
+
+      const business = await Business.findOne({ userId: req.user._id });
+      if (!business) {
+        return res.status(404).json({ message: 'Business not found' });
+      }
+
+      const campaign = await Campaign.findByIdAndUpdate(
+        campaignId,
+        {
+          title,
+          description,
+          rewardType,
+          rewardValue,
+          rewardDescription,
+          startDate,
+          endDate,
+          status
+        },
         { new: true }
       );
+
       if (!campaign) {
         return res.status(404).json({ message: 'Campaign not found' });
       }
+
       res.json(campaign);
     } catch (error) {
       console.error('Error updating campaign:', error);
@@ -155,7 +213,7 @@ export const campaignController = {
       }
 
       // Ensure business data exists
-      const businessData = campaign.businessId;
+      const businessData = campaign.businessId as any;
       if (!businessData) {
         console.error('Business data not found for campaign:', campaignId);
         return res.status(500).json({ message: 'Business data not found' });
@@ -209,7 +267,7 @@ export const campaignController = {
 
       // Prepare response data
       const responseData = campaigns.map(campaign => {
-        const businessData = campaign.businessId;
+        const businessData = campaign.businessId as any;
         return {
           id: campaign._id,
           title: campaign.title,

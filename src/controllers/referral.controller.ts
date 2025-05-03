@@ -152,7 +152,7 @@ export const referralController = {
         .populate({
           path: 'campaignId',
           select: 'title description rewardType rewardValue rewardDescription'
-        }) as IPopulatedReferral | null;
+        }) as unknown as IPopulatedReferral | null;
 
       if (!referral) {
         return res.status(404).json({ message: 'Referral not found' });

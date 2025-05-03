@@ -56,4 +56,5 @@ businessSchema.pre('save', async function(next) {
 });
 
 const Business = mongoose.model<IBusiness>('Business', businessSchema);
+export { Business };
 export default Business;

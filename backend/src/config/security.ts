@@ -1,6 +1,7 @@
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import cors from 'cors';
+import { Request, Response, NextFunction } from 'express';
 
 // CORS Configuration
 export const corsOptions = {
@@ -10,12 +11,16 @@ export const corsOptions = {
   credentials: true,
 };
 
-// Rate Limiting
-export const limiter = rateLimit({
-  windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-  max: Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
-});
+// Rate Limiting Middleware Factory
+export const createRateLimiter = () => {
+  return rateLimit({
+    windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+    max: Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+};
 
 // Security Headers
 export const helmetConfig = helmet({

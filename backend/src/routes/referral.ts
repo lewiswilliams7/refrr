@@ -1,4 +1,4 @@
-import express, { Router } from 'express';
+import express, { Router, Request, Response, NextFunction } from 'express';
 import { referralController } from '../controllers/referral.controller';
 import { authenticateToken } from '../middleware/auth';
 
@@ -15,7 +15,7 @@ router.get('/code/:code', referralController.getReferralByCode as express.Reques
 router.post('/complete/:code', referralController.completeReferral as express.RequestHandler);
 
 // Protected routes (require authentication)
-router.use(authenticateToken); // Authentication middleware for routes below this line
+router.use(authenticateToken as express.RequestHandler); // Authentication middleware for routes below this line
 
 // These routes require authentication
 router.post('/', referralController.create as express.RequestHandler);

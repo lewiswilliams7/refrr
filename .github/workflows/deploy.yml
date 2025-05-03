@@ -3,8 +3,6 @@ name: Deploy
 on:
   push:
     branches: [ main, staging ]
-  pull_request:
-    branches: [ main, staging ]
 
 jobs:
   test:
@@ -16,7 +14,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'
           
       - name: Install dependencies
         run: |
@@ -28,10 +25,9 @@ jobs:
           cd frontend
           npm test
           
-  build-and-deploy:
+  deploy:
     needs: test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
     steps:
       - uses: actions/checkout@v3
       
@@ -39,7 +35,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'
           
       - name: Install dependencies
         run: |
@@ -52,30 +47,10 @@ jobs:
           npm run build
         env:
           REACT_APP_API_URL: ${{ secrets.API_URL }}
-          REACT_APP_ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
           
-      - name: Deploy to Production
-        if: github.ref == 'refs/heads/main'
+      - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./frontend/build
-          publish_branch: gh-pages
-          
-      - name: Deploy to Staging
-        if: github.ref == 'refs/heads/staging'
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./frontend/build
-          publish_branch: staging-gh-pages
-          
-      - name: Notify Deployment
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_CHANNEL: deployments
-          SLACK_COLOR: ${{ github.ref == 'refs/heads/main' && 'good' || 'warning' }}
-          SLACK_TITLE: Deployment
-          SLACK_MESSAGE: 'Deployed to ${{ github.ref == "refs/heads/main" && "Production" || "Staging" }}'
-          SLACK_FOOTER: 'Commit: ${{ github.sha }}' 
+          publish_branch: gh-pages 

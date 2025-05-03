@@ -19,7 +19,6 @@ import {
 import {
   Check as CheckIcon,
   Business as BusinessIcon,
-  Store as StoreIcon,
   Diamond as DiamondIcon,
 } from '@mui/icons-material';
 import PublicLayout from '../components/Layout/PublicLayout';

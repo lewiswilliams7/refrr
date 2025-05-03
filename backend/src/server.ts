@@ -1,7 +1,8 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth';
 import campaignRoutes from './routes/campaign';
 import referralRoutes from './routes/referral';
@@ -10,7 +11,7 @@ import businessRoutes from './routes/business';
 import customerRoutes from './routes/customer';
 import adminRoutes from './routes/admin';
 import healthRoutes from './routes/health';
-import { corsOptions, limiter, helmetConfig } from './config/security';
+import { corsOptions, helmetConfig } from './config/security';
 
 // Load environment variables
 dotenv.config();
@@ -27,16 +28,31 @@ export const app = express();
 app.use(helmetConfig);
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(limiter);
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/campaigns', campaignRoutes);
-app.use('/api/referrals', referralRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/businesses', businessRoutes);
-app.use('/api/customer', customerRoutes);
-app.use('/api/admin', adminRoutes);
+// Rate limiting configuration
+const apiLimiter = rateLimit({
+  windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+  max: Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+}) as unknown as express.RequestHandler;
+
+// Create API router with rate limiting
+const apiRouter = express.Router();
+apiRouter.use(apiLimiter);
+
+// Apply routes to API router
+apiRouter.use('/auth', authRoutes);
+apiRouter.use('/campaigns', campaignRoutes);
+apiRouter.use('/referrals', referralRoutes);
+apiRouter.use('/dashboard', dashboardRoutes);
+apiRouter.use('/businesses', businessRoutes);
+apiRouter.use('/customer', customerRoutes);
+apiRouter.use('/admin', adminRoutes);
+
+// Mount API router and health routes
+app.use('/api', apiRouter);
 app.use('/api', healthRoutes);
 
 // MongoDB connection

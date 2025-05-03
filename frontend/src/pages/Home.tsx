@@ -22,7 +22,6 @@ import {
 } from '@mui/material';
 import {
   Search as SearchIcon,
-  Store as StoreIcon,
   FilterList as FilterIcon,
   LocationOn as LocationIcon,
   ArrowForward as ArrowForwardIcon,

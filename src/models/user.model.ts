@@ -40,7 +40,7 @@ export interface UserDocument extends IUser, Document {
   toObject(): IUser & { _id: Types.ObjectId };
 }
 
-const DEFAULT_AVATAR = 'https://ui-avatars.com/api/?name=';
+const DEFAULT_AVATAR = 'https://ui-avatars.com/api/';
 
 const userSchema = new Schema<UserDocument>({
   email: {
@@ -92,7 +92,8 @@ const userSchema = new Schema<UserDocument>({
   avatar: {
     type: String,
     default: function() {
-      return `${DEFAULT_AVATAR}${encodeURIComponent(this.firstName + ' ' + this.lastName)}&background=random`;
+      const name = encodeURIComponent(`${this.firstName || ''} ${this.lastName || ''}`.trim());
+      return `${DEFAULT_AVATAR}?name=${name}&background=random&size=128`;
     }
   }
 });

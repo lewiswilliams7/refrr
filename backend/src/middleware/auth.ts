@@ -1,63 +1,83 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { User } from '../models/user.model';
+import { User, UserDocument } from '../models/user.model';
 import mongoose from 'mongoose';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl';
+// Debug logging utility
+const debug = (message: string, data?: any) => {
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] 🔍 ${message}`, data ? JSON.stringify(data, null, 2) : '');
+};
 
+// Error logging utility
+const error = (message: string, err: any) => {
+  const timestamp = new Date().toISOString();
+  console.error(`[${timestamp}] ❌ ${message}`, {
+    error: err instanceof Error ? err.message : 'Unknown error',
+    stack: err instanceof Error ? err.stack : undefined,
+    raw: err
+  });
+};
+
+// Simple request interface
 export interface AuthRequest extends Request {
-  user?: User;
-  body: any;
-  params: {
-    [key: string]: string;
-  };
-  headers: {
-    [key: string]: string | string[] | undefined;
-  };
-  query: {
-    [key: string]: string | string[] | undefined;
-  };
-  cookies: {
-    [key: string]: string;
-  };
+  user?: UserDocument;
 }
 
-export const authenticateToken = (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): void => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.toString().split(' ')[1];
+// JWT secret with fallback
+const JWT_SECRET = process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl';
+debug('Using JWT secret:', { hasEnvSecret: !!process.env.JWT_SECRET });
 
-  if (!token) {
-    res.status(401).json({ message: 'Authentication required' });
-    return;
-  }
-
+export const authenticateToken = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { _id: string; email: string; role?: string };
-    // Create a partial user object that matches the User type
-    const user: Partial<User> = {
-      _id: new mongoose.Types.ObjectId(decoded._id),
-      email: decoded.email,
-      role: decoded.role as 'business' | 'customer' | 'admin'
-    };
-    req.user = user as User;
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader) {
+      return res.status(401).json({ message: 'Access token is required' });
+    }
+
+    // Get the authorization header as a string
+    let authToken: string;
+    if (typeof authHeader === 'string') {
+      authToken = authHeader;
+    } else if (Array.isArray(authHeader)) {
+      authToken = authHeader[0] || '';
+    } else {
+      return res.status(401).json({ message: 'Invalid authorization header' });
+    }
+
+    if (!authToken) {
+      return res.status(401).json({ message: 'Access token is required' });
+    }
+
+    // Split the token and validate format
+    const [bearer, token] = authToken.split(' ');
+    if (bearer !== 'Bearer' || !token) {
+      return res.status(401).json({ message: 'Invalid token format' });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET) as jwt.JwtPayload;
+    
+    if (!decoded._id) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+
+    const user = await User.findById(decoded._id).select('-password');
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    req.user = user;
     next();
   } catch (error) {
-    res.status(403).json({ message: 'Invalid or expired token' });
+    console.error('Authentication error:', error);
+    res.status(401).json({ message: 'Invalid token' });
   }
 };
 
-export const isAdmin = (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): void => {
-  if (!req.user || req.user.role !== 'admin') {
-    res.status(403).json({ message: 'Access denied. Admin privileges required.' });
-    return;
+export const isAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
+  if (req.user?.role !== 'admin') {
+    return res.status(403).json({ message: 'Access denied' });
   }
   next();
 };

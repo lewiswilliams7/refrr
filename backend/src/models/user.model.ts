@@ -36,8 +36,16 @@ export interface IUser extends Document {
   };
   businessDescription?: string;
   role: 'admin' | 'business' | 'customer';
+  status: 'active' | 'inactive' | 'suspended';
+  resetToken?: string;
+  resetTokenExpires?: Date;
   createdAt: Date;
   updatedAt: Date;
+  comparePassword(candidatePassword: string): Promise<boolean>;
+}
+
+export interface UserDocument extends IUser {
+  _id: Types.ObjectId;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -92,15 +100,20 @@ const userSchema = new Schema<IUser>({
     enum: ['admin', 'business', 'customer'],
     default: 'business',
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
+  status: {
+    type: String,
+    enum: ['active', 'inactive', 'suspended'],
+    default: 'active',
   },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
+  resetToken: {
+    type: String,
+    required: false,
   },
-});
+  resetTokenExpires: {
+    type: Date,
+    required: false,
+  }
+}, { timestamps: true });
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {

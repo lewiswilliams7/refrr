@@ -13,77 +13,35 @@ export const authController = {
   // Register new user
   register: async (req: Request, res: Response) => {
     try {
-      const { 
-        email, 
-        password, 
-        businessName, 
-        firstName, 
+      const {
+        email,
+        password,
+        firstName,
         lastName,
+        role,
+        businessName,
         businessType,
         location,
-        businessDescription 
+        businessDescription
       } = req.body;
-
-      // Debug log
-      console.log('Registration attempt:', { 
-        email, 
-        businessName, 
-        firstName, 
-        lastName, 
-        businessType,
-        location 
-      });
-
-      // Validate required fields
-      if (!email || !password || !businessName || !firstName || !lastName || !businessType) {
-        console.log('Missing fields:', { 
-          email: !!email, 
-          password: !!password,
-          businessName: !!businessName, 
-          firstName: !!firstName, 
-          lastName: !!lastName,
-          businessType: !!businessType
-        });
-        return res.status(400).json({ 
-          message: 'All fields are required: email, password, businessName, firstName, lastName, businessType' 
-        });
-      }
-
-      // Validate location fields
-      if (!location || !location.address || !location.city || !location.postcode) {
-        return res.status(400).json({
-          message: 'Location fields are required: address, city, postcode'
-        });
-      }
-
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        return res.status(400).json({ message: 'Invalid email format' });
-      }
-
-      // Validate password length
-      if (password.length < 6) {
-        return res.status(400).json({ message: 'Password must be at least 6 characters long' });
-      }
 
       // Check if user already exists
       const existingUser = await User.findOne({ email });
       if (existingUser) {
-        return res.status(400).json({ message: 'User already exists' });
+        return res.status(400).json({ message: 'Email already registered' });
       }
 
-      // Create new user with all fields
+      // Create new user
       const user = new User({
         email,
-        password, // Will be hashed by the pre-save hook
-        businessName,
+        password,
         firstName,
         lastName,
+        role,
+        businessName,
         businessType,
         location,
-        businessDescription,
-        role: 'business' // Explicitly set role as business
+        businessDescription
       });
 
       await user.save();
@@ -96,25 +54,23 @@ export const authController = {
       );
 
       res.status(201).json({
-        message: 'User created successfully',
         token,
         user: {
-          id: user._id,
+          _id: user._id,
           email: user.email,
-          businessName: user.businessName,
           firstName: user.firstName,
           lastName: user.lastName,
+          role: user.role,
+          businessName: user.businessName,
           businessType: user.businessType,
           location: user.location,
-          businessDescription: user.businessDescription
-        },
+          businessDescription: user.businessDescription,
+          avatar: user.avatar
+        }
       });
     } catch (error) {
       console.error('Registration error:', error);
-      res.status(500).json({ 
-        message: 'Error creating user', 
-        error: error instanceof Error ? error.message : String(error)
-      });
+      res.status(500).json({ message: 'Error registering user' });
     }
   },
 
@@ -214,7 +170,7 @@ export const authController = {
   },
 
   // Login user
-  login: async (req: AuthRequest, res: Response) => {
+  login: async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
 
@@ -237,33 +193,24 @@ export const authController = {
         { expiresIn: '24h' }
       );
 
-      // Return user data based on role
-      const userResponse = {
-        id: user._id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role || 'business' // Default to business if role not set
-      };
-
-      // Add business-specific fields if user is a business
-      if (user.role === 'business') {
-        Object.assign(userResponse, {
+      res.json({
+        token,
+        user: {
+          _id: user._id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
           businessName: user.businessName,
           businessType: user.businessType,
           location: user.location,
-          businessDescription: user.businessDescription
-        });
-      }
-
-      res.json({
-        message: 'Login successful',
-        token,
-        user: userResponse
+          businessDescription: user.businessDescription,
+          avatar: user.avatar
+        }
       });
     } catch (error) {
       console.error('Login error:', error);
-      res.status(500).json({ message: 'Error logging in', error });
+      res.status(500).json({ message: 'Error logging in' });
     }
   },
 
@@ -283,10 +230,11 @@ export const authController = {
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
+
       res.json(user);
     } catch (error) {
-      console.error('Error fetching user:', error);
-      res.status(500).json({ message: 'Error fetching user' });
+      console.error('Get current user error:', error);
+      res.status(500).json({ message: 'Error getting user' });
     }
   },
 
