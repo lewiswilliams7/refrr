@@ -22,6 +22,19 @@ const error = (message: string, err: any) => {
 // Simple request interface
 export interface AuthRequest extends Request {
   user?: UserDocument;
+  body: any;
+  params: {
+    [key: string]: string;
+  };
+  headers: {
+    [key: string]: string | string[] | undefined;
+  };
+  query: {
+    [key: string]: string | string[] | undefined;
+  };
+  cookies: {
+    [key: string]: string;
+  };
 }
 
 // JWT secret with fallback
