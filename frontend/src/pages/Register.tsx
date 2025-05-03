@@ -7,14 +7,11 @@ import {
   Typography,
   Box,
   Alert,
-  Grid,
   Select,
   MenuItem,
   FormControl,
   InputLabel,
-  Divider,
   SelectChangeEvent,
-  FormHelperText,
   Tabs,
   Tab,
   CircularProgress,
@@ -22,7 +19,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../services/api';
-import Logo from '../components/common/Logo';
 import { BUSINESS_TYPES, BusinessType } from '../types/business';
 import PublicLayout from '../components/Layout/PublicLayout';
 import { RegisterData } from '../types/auth';
@@ -90,7 +86,6 @@ const Register: React.FC = () => {
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
