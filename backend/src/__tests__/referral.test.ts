@@ -2,7 +2,7 @@ import request from 'supertest';
 import { app } from '../server';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { User, IUser } from '../models/user.model';
-import { Campaign } from '../models/campaign';
+import Campaign, { ICampaign } from '../models/campaign.model';
 import Referral from '../models/referrals';
 import jwt from 'jsonwebtoken';
 

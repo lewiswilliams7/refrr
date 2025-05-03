@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { app } from '../server';
-import { Campaign, ICampaign } from '../models/campaign';
+import Campaign, { ICampaign } from '../models/campaign.model';
 import { User, IUser } from '../models/user.model';
 import mongoose, { Types } from 'mongoose';
 import jwt from 'jsonwebtoken';
