@@ -1,6 +1,5 @@
 import axios from 'axios';
 import config from '../config';
-import { BusinessType } from '../types/business';
 import { RegisterData, LoginData, AuthResponse } from '../types/auth';
 
 const api = axios.create({
