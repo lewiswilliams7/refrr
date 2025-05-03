@@ -28,7 +28,7 @@ export default function ReferralLinkGenerator({ campaignId, open, onClose }: Pro
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
-  const { token } = useAuth();
+  const { user } = useAuth();
 
   const generateLink = async () => {
     if (!referrerEmail) {
