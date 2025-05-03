@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { RequestHandler } from 'express';
 import { authenticateToken, isAdmin } from '../middleware/auth';
 import { adminController } from '../controllers/admin.controller';
 
@@ -12,16 +12,16 @@ router.use((req, res, next) => {
 });
 
 // Admin routes
-router.get('/campaigns', adminController.getAllCampaigns);
-router.delete('/campaigns/:id', adminController.deleteCampaign);
-router.patch('/campaigns/:id/status', adminController.updateCampaignStatus);
+router.get('/campaigns', adminController.getCampaigns as RequestHandler);
+router.get('/campaigns/:id', adminController.getCampaign as RequestHandler);
+router.patch('/campaigns/:id/status', adminController.updateCampaignStatus as RequestHandler);
 
-router.get('/companies', adminController.getAllCompanies);
-router.delete('/companies/:id', adminController.deleteCompany);
-router.patch('/companies/:id/status', adminController.updateCompanyStatus);
+router.get('/businesses', adminController.getBusinesses as RequestHandler);
+router.get('/businesses/:id', adminController.getBusiness as RequestHandler);
+router.patch('/businesses/:id/status', adminController.updateBusinessStatus as RequestHandler);
 
-router.get('/users', adminController.getAllUsers);
-router.delete('/users/:id', adminController.deleteUser);
-router.patch('/users/:id/status', adminController.updateUserStatus);
+router.get('/users', adminController.getUsers as RequestHandler);
+router.get('/users/:id', adminController.getUser as RequestHandler);
+router.patch('/users/:id/status', adminController.updateUserStatus as RequestHandler);
 
 export default router; 
