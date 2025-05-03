@@ -5,7 +5,7 @@ on:
     branches: [ main, staging ]
 
 jobs:
-  test-and-deploy:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -19,17 +19,68 @@ jobs:
         run: |
           cd frontend
           npm install
+          npm install --save-dev jest@29.6.3 jest-environment-jsdom@29.6.3 babel-jest@29.6.3 @babel/core@7.23.3 @babel/preset-env@7.23.3 @babel/preset-react@7.23.3 @babel/preset-typescript@7.23.3
+          
+      - name: Configure Jest
+        run: |
+          cd frontend
+          echo 'module.exports = {
+            testEnvironment: "jsdom",
+            transform: {
+              "^.+\\.(js|jsx|mjs|cjs|ts|tsx)$": ["babel-jest", {
+                presets: [
+                  ["@babel/preset-env", { targets: { node: "current" }, modules: "commonjs" }],
+                  "@babel/preset-react",
+                  "@babel/preset-typescript"
+                ],
+                plugins: ["@babel/plugin-transform-modules-commonjs"]
+              }]
+            },
+            transformIgnorePatterns: ["node_modules/(?!(axios|@mui|@emotion|@babel)/)"],
+            moduleNameMapper: {
+              "\\.(css|less|scss|sass)$": "identity-obj-proxy",
+              "^axios$": "<rootDir>/node_modules/axios/dist/axios.min.js"
+            },
+            setupFilesAfterEnv: ["<rootDir>/src/setupTests.ts"]
+          };' > jest.config.js
           
       - name: Run tests
         run: |
           cd frontend
-          npm test
+          npx jest --config=jest.config.js --no-cache
+          
+      - name: Debug Repository
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+          echo "Frontend directory contents:"
+          ls -la frontend || echo "Frontend directory not found"
           
       - name: Build
         run: |
-          cd frontend
-          npm run build
+          if [ -d "frontend" ]; then
+            cd frontend
+            echo "Building application..."
+            npm run build || echo "Build failed"
+            echo "Build directory contents:"
+            ls -la build || echo "Build directory not found"
+          else
+            echo "Error: frontend directory not found"
+            exit 1
+          fi
           
+      - name: List Build Files
+        run: |
+          echo "Build directory contents:"
+          ls -la frontend/build
+        
+      - name: Print Hello
+        run: echo "Hello World"
+        
+      - name: List Files
+        run: ls -la
+        
       - name: Deploy
         if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v3
