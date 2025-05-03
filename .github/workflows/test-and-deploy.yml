@@ -1,0 +1,85 @@
+name: Test and Deploy
+
+on:
+  push:
+    branches: [ main, staging ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm install
+          npm install --save-dev jest@29.6.3 jest-environment-jsdom@29.6.3 babel-jest@29.6.3 @babel/core@7.23.3 @babel/preset-env@7.23.3 @babel/preset-react@7.23.3 @babel/preset-typescript@7.23.3
+          
+      - name: Configure Jest
+        run: |
+          cd frontend
+          echo 'module.exports = {
+            testEnvironment: "jsdom",
+            transform: {
+              "^.+\\.(js|jsx|mjs|cjs|ts|tsx)$": ["babel-jest", {
+                presets: [
+                  ["@babel/preset-env", { targets: { node: "current" }, modules: "commonjs" }],
+                  "@babel/preset-react",
+                  "@babel/preset-typescript"
+                ],
+                plugins: ["@babel/plugin-transform-modules-commonjs"]
+              }]
+            },
+            transformIgnorePatterns: ["node_modules/(?!(axios|@mui|@emotion|@babel)/)"],
+            moduleNameMapper: {
+              "\\.(css|less|scss|sass)$": "identity-obj-proxy",
+              "^axios$": "<rootDir>/node_modules/axios/dist/axios.min.js"
+            },
+            setupFilesAfterEnv: ["<rootDir>/src/setupTests.ts"]
+          };' > jest.config.js
+          
+      - name: Run tests
+        run: |
+          cd frontend
+          npx jest --config=jest.config.js --no-cache
+          
+      - name: Build
+        run: |
+          cd frontend
+          npm run build
+          
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm install
+          
+      - name: Build
+        run: |
+          cd frontend
+          npm run build
+          
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend/build
+          publish_branch: gh-pages
+          commit_message: "Deploy: ${{ github.event.head_commit.message }}" 
