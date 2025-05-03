@@ -7,7 +7,6 @@ import {
   Card,
   CardContent,
   Paper,
-  Stack,
   alpha,
   useTheme,
   Button,
@@ -19,7 +18,6 @@ import {
 } from '@mui/material';
 import {
   Check as CheckIcon,
-  Star as StarIcon,
   Business as BusinessIcon,
   Store as StoreIcon,
   Diamond as DiamondIcon,
