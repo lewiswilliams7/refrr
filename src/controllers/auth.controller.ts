@@ -208,11 +208,6 @@ export const authController = {
           businessDescription: user.businessDescription,
           avatar: user.avatar
         },
-        businesses: businesses.map(business => ({
-          _id: business._id,
-          name: business.businessName,
-          type: business.businessType
-        })),
         token
       });
     } catch (error) {
