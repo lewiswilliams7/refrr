@@ -54,7 +54,7 @@ export const authController = {
       );
 
       res.status(201).json({
-        token,
+        message: 'User registered successfully',
         user: {
           _id: user._id,
           email: user.email,
@@ -66,7 +66,8 @@ export const authController = {
           location: user.location,
           businessDescription: user.businessDescription,
           avatar: user.avatar
-        }
+        },
+        token
       });
     } catch (error) {
       console.error('Registration error:', error);
@@ -194,7 +195,7 @@ export const authController = {
       );
 
       res.json({
-        token,
+        message: 'Login successful',
         user: {
           _id: user._id,
           email: user.email,
@@ -206,7 +207,13 @@ export const authController = {
           location: user.location,
           businessDescription: user.businessDescription,
           avatar: user.avatar
-        }
+        },
+        businesses: businesses.map(business => ({
+          _id: business._id,
+          name: business.businessName,
+          type: business.businessType
+        })),
+        token
       });
     } catch (error) {
       console.error('Login error:', error);

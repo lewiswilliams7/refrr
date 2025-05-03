@@ -23,7 +23,7 @@ export interface LoginData {
 export interface AuthResponse {
   token: string;
   user: {
-    id: string;
+    _id: string;
     email: string;
     businessName?: string;
     firstName: string;
@@ -35,5 +35,6 @@ export interface AuthResponse {
       postcode: string;
     };
     businessDescription?: string;
+    avatar?: string;
   };
 } 
