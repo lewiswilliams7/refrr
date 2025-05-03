@@ -15,7 +15,6 @@ import {
   Tooltip,
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { campaignApi } from '../services/api';
 import { ContentCopy as CopyIcon } from '@mui/icons-material';
 import Navigation from '../components/common/Navigation';
@@ -47,15 +46,8 @@ export default function ReferralDetails() {
   const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
-    if (!campaignId) {
-      console.error('No campaign ID provided in URL');
-      setError('Campaign ID is missing');
-      setLoading(false);
-      return;
-    }
-    console.log('Fetching campaign details for ID:', campaignId);
     fetchCampaignDetails();
-  }, [campaignId]);
+  }, [fetchCampaignDetails]);
 
   const fetchCampaignDetails = async () => {
     if (!campaignId) {

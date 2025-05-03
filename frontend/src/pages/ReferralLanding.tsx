@@ -5,7 +5,6 @@ import {
   Typography,
   TextField,
   Button,
-  Box,
   Alert,
   CircularProgress,
   Card,
@@ -43,7 +42,7 @@ export default function ReferralLanding() {
 
   useEffect(() => {
     fetchReferralDetails();
-  }, [code]);
+  }, [fetchReferralDetails]);
 
   const fetchReferralDetails = async () => {
     try {

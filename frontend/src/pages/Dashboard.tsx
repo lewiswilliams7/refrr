@@ -17,7 +17,7 @@ import {
   Checkbox,
   Stack,
 } from '@mui/material';
-import { Add as AddIcon, MoreVert as MoreVertIcon, Campaign as CampaignIcon } from '@mui/icons-material';
+import { MoreVert as MoreVertIcon, Campaign as CampaignIcon } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -62,7 +62,6 @@ const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const campaignId = location.state?.campaignId;
 
   useEffect(() => {
     fetchDashboardStats();
