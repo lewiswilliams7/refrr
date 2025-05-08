@@ -2,8 +2,9 @@ services:
   - type: web
     name: refrr-frontend
     env: node
-    buildCommand: npm run build
-    startCommand: npm start
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: node server.js
     envVars:
       - key: REACT_APP_API_URL
         value: https://refrr.onrender.com
@@ -19,8 +20,9 @@ services:
   - type: web
     name: refrr-backend
     env: node
-    buildCommand: cd backend && npm install && npm run build
-    startCommand: cd backend && npm start
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
