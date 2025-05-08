@@ -41,14 +41,9 @@ export interface IUser extends Document {
   avatar?: string;
 }
 
-export interface UserDocument extends IUser, Document {
-  _id: Types.ObjectId;
-  toObject(): IUser & { _id: Types.ObjectId };
-}
-
 const DEFAULT_AVATAR = 'https://ui-avatars.com/api/';
 
-const userSchema = new Schema<UserDocument>({
+const userSchema = new Schema<IUser>({
   email: {
     type: String,
     required: true,
@@ -88,18 +83,18 @@ const userSchema = new Schema<UserDocument>({
   resetTokenExpires: Date,
   businessName: {
     type: String,
-    required: function() { return this.role === 'business'; },
+    required: function(this: IUser) { return this.role === 'business'; },
     trim: true,
   },
   businessType: {
     type: String,
     enum: BUSINESS_TYPES,
-    required: function() { return this.role === 'business'; },
+    required: function(this: IUser) { return this.role === 'business'; },
   },
   location: {
-    address: { type: String, required: function() { return this.role === 'business'; } },
-    city: { type: String, required: function() { return this.role === 'business'; } },
-    postcode: { type: String, required: function() { return this.role === 'business'; } },
+    address: { type: String, required: function(this: IUser) { return this.role === 'business'; } },
+    city: { type: String, required: function(this: IUser) { return this.role === 'business'; } },
+    postcode: { type: String, required: function(this: IUser) { return this.role === 'business'; } },
   },
   businessDescription: {
     type: String,
@@ -107,7 +102,7 @@ const userSchema = new Schema<UserDocument>({
   },
   avatar: {
     type: String,
-    default: function() {
+    default: function(this: IUser) {
       const name = encodeURIComponent(`${this.firstName || ''} ${this.lastName || ''}`.trim());
       return `${DEFAULT_AVATAR}?name=${name}&background=random&size=128`;
     }
@@ -115,14 +110,14 @@ const userSchema = new Schema<UserDocument>({
 }, { timestamps: true });
 
 // Hash password before saving
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
-  } catch (error: any) {
+  } catch (error) {
     next(error as Error);
   }
 });
@@ -132,5 +127,5 @@ userSchema.methods.comparePassword = async function(candidatePassword: string): 
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-export const User = mongoose.model<UserDocument>('User', userSchema);
+export const User = mongoose.model<IUser>('User', userSchema);
 export { BUSINESS_TYPES };

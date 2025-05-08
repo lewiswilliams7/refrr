@@ -1,12 +1,12 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, Types } from 'mongoose';
 import { IBusiness } from './business.model';
 
 export interface ICampaign extends Document {
   title: string;
   description: string;
-  businessId: mongoose.Types.ObjectId;
+  businessId: Types.ObjectId;
   business?: IBusiness;
-  status: 'active' | 'inactive' | 'completed';
+  status: 'active' | 'inactive' | 'completed' | 'paused';
   rewardType: string;
   rewardValue: number;
   rewardDescription: string;
@@ -17,6 +17,8 @@ export interface ICampaign extends Document {
     views: number;
     clicks: number;
     conversions: number;
+    totalReferrals: number;
+    conversionRate: number;
   };
   expirationDate?: Date;
   createdAt: Date;
@@ -28,7 +30,7 @@ const campaignSchema = new Schema<ICampaign>(
     title: { type: String, required: true },
     description: { type: String, required: true },
     businessId: { type: Schema.Types.ObjectId, ref: 'Business', required: true },
-    status: { type: String, enum: ['active', 'inactive', 'completed'], default: 'active' },
+    status: { type: String, enum: ['active', 'inactive', 'completed', 'paused'], default: 'active' },
     rewardType: { type: String, required: true },
     rewardValue: { type: Number, required: true },
     rewardDescription: { type: String, required: true },
@@ -38,7 +40,9 @@ const campaignSchema = new Schema<ICampaign>(
     analytics: {
       views: { type: Number, default: 0 },
       clicks: { type: Number, default: 0 },
-      conversions: { type: Number, default: 0 }
+      conversions: { type: Number, default: 0 },
+      totalReferrals: { type: Number, default: 0 },
+      conversionRate: { type: Number, default: 0 }
     },
     expirationDate: { type: Date }
   },
@@ -46,3 +50,4 @@ const campaignSchema = new Schema<ICampaign>(
 );
 
 export const Campaign = mongoose.model<ICampaign>('Campaign', campaignSchema);
+export type CampaignDocument = ICampaign;

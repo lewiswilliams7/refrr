@@ -1,27 +1,22 @@
-import mongoose, { Document, Schema } from 'mongoose';
-import { Business } from './business.model';
+import mongoose, { Document, Schema, Types } from 'mongoose';
+import { IBusiness } from './business.model';
 
 export interface ICustomer extends Document {
-  businessId: mongoose.Types.ObjectId;
-  business?: Business;
-  email: string;
-  firstName: string;
-  lastName: string;
-  phone?: string;
+  userId: Types.ObjectId;
+  businessId: Types.ObjectId;
+  business?: IBusiness;
   status: 'active' | 'inactive';
   createdAt: Date;
   updatedAt: Date;
 }
 
-const customerSchema = new Schema<ICustomer>({
-  businessId: { type: Schema.Types.ObjectId, ref: 'Business', required: true },
-  email: { type: String, required: true, unique: true },
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  phone: String,
-  status: { type: String, enum: ['active', 'inactive'], default: 'active' }
-}, {
-  timestamps: true
-});
+const customerSchema = new Schema<ICustomer>(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    businessId: { type: Schema.Types.ObjectId, ref: 'Business', required: true },
+    status: { type: String, enum: ['active', 'inactive'], default: 'active' }
+  },
+  { timestamps: true }
+);
 
 export const Customer = mongoose.model<ICustomer>('Customer', customerSchema); 
