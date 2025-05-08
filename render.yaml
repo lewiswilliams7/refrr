@@ -18,7 +18,7 @@ services:
       - key: SKIP_PREFLIGHT_CHECK
         value: "true"
       - key: PORT
-        value: "10000"
+        value: "3000"
       - key: REACT_APP_API_URL
         value: "https://refrr.onrender.com"
       - key: NPM_CONFIG_PRODUCTION
