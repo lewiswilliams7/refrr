@@ -19,8 +19,7 @@
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
-    "prepare": "node -e \"if (process.env.NODE_ENV !== 'production') require('husky').install()\"",
-    "postinstall": "npm install --no-save @types/jest"
+    "prepare": "node -e \"if (process.env.NODE_ENV !== 'production') require('husky').install()\""
   },
   "keywords": [],
   "author": "",
@@ -29,6 +28,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
+    "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/mongoose": "^5.11.96",
     "@types/morgan": "^1.9.9",
@@ -51,7 +51,6 @@
     "typescript": "^5.0.0"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.14",
     "eslint": "^8.0.0",
     "husky": "^8.0.0",
     "jest": "^29.7.0",
