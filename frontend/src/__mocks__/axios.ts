@@ -1,4 +1,4 @@
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, AxiosHeaderValue, RawAxiosHeaders } from 'axios';
+import { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, AxiosHeaderValue, AxiosHeaders } from 'axios';
 
 interface MockAxiosInstance extends AxiosInstance {
   create: jest.Mock;
