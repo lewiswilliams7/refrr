@@ -28,7 +28,7 @@ app.get('*', (req, res) => {
 });
 
 const port = process.env.PORT || 10000;
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`Server is running on port ${port}`);
   console.log('Environment:', process.env.NODE_ENV);
   console.log('API URL:', process.env.REACT_APP_API_URL);
