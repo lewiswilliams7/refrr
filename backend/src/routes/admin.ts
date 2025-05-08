@@ -34,34 +34,54 @@ router.delete('/users/:id', asyncHandler(async (req: AuthRequest, res: Response)
 }));
 
 // Get all businesses
-router.get('/businesses', asyncHandler(adminController.getAllBusinesses));
+router.get('/businesses', asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+  await adminController.getAllBusinesses(req, res);
+}));
 
 // Get business by ID
-router.get('/businesses/:id', asyncHandler(adminController.getBusiness));
+router.get('/businesses/:id', asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+  await adminController.getBusiness(req, res);
+}));
 
 // Update business status
-router.patch('/businesses/:id/status', asyncHandler(adminController.updateBusinessStatus));
+router.patch('/businesses/:id/status', asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+  await adminController.updateBusinessStatus(req, res);
+}));
 
 // Delete business
-router.delete('/businesses/:id', asyncHandler(adminController.deleteBusiness));
+router.delete('/businesses/:id', asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+  await adminController.deleteBusiness(req, res);
+}));
 
 // Get all campaigns
-router.get('/campaigns', asyncHandler(adminController.getCampaigns));
+router.get('/campaigns', asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+  await adminController.getCampaigns(req, res);
+}));
 
 // Get campaign by ID
-router.get('/campaigns/:id', asyncHandler(adminController.getCampaign));
+router.get('/campaigns/:id', asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+  await adminController.getCampaign(req, res);
+}));
 
 // Update campaign status
-router.put('/campaigns/:id/status', asyncHandler(adminController.updateCampaignStatus));
+router.put('/campaigns/:id/status', asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+  await adminController.updateCampaignStatus(req, res);
+}));
 
 // Get all referrals
-router.get('/referrals', asyncHandler(adminController.getReferrals));
+router.get('/referrals', asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+  await adminController.getReferrals(req, res);
+}));
 
 // Get referral by ID
-router.get('/referrals/:id', asyncHandler(adminController.getReferral));
+router.get('/referrals/:id', asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+  await adminController.getReferral(req, res);
+}));
 
 // Get dashboard stats
-router.get('/dashboard/stats', asyncHandler(adminController.getDashboardStats));
+router.get('/dashboard/stats', asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+  await adminController.getDashboardStats(req, res);
+}));
 
 // 404 handler for admin routes
 const notFoundHandler = async (req: Request, res: Response): Promise<void> => {
