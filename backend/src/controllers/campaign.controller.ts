@@ -32,43 +32,29 @@ interface CampaignWithBusiness extends mongoose.Document {
 export const campaignController = {
   createCampaign: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { 
-        title, 
-        description, 
-        rewardType, 
-        rewardValue, 
-        rewardDescription,
-        startDate,
-        endDate
-      } = req.body;
-
       if (!req.user?.userId) {
-        res.status(400).json({ message: 'User ID is required' });
-        return;
+        return res.status(401).json({ message: 'User not authenticated' });
       }
 
       const business = await Business.findOne({ userId: req.user.userId });
       if (!business) {
-        res.status(404).json({ message: 'Business not found' });
-        return;
+        return res.status(404).json({ message: 'Business not found' });
       }
 
-      const campaign = await Campaign.create({
-        businessId: business._id,
-        title,
-        description,
-        rewardType,
-        rewardValue,
-        rewardDescription,
-        startDate,
-        endDate,
-        status: 'active'
+      const campaign = new Campaign({
+        ...req.body,
+        businessId: business._id.toString()
       });
 
-      res.status(201).json(campaign);
+      await campaign.save();
+
+      res.status(201).json({
+        message: 'Campaign created successfully',
+        campaign
+      });
     } catch (error) {
-      console.error('Error creating campaign:', error);
-      res.status(500).json({ message: 'Error creating campaign' });
+      console.error('Campaign creation error:', error);
+      res.status(500).json({ message: 'Error creating campaign', error });
     }
   },
 
@@ -114,35 +100,25 @@ export const campaignController = {
 
   updateCampaign: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const { campaignId } = req.params;
-      const { 
-        title, 
-        description, 
-        rewardType, 
-        rewardValue, 
-        rewardDescription,
-        startDate,
-        endDate,
-        status
-      } = req.body;
-
       if (!req.user?.userId) {
-        res.status(400).json({ message: 'User ID is required' });
-        return;
+        return res.status(401).json({ message: 'User not authenticated' });
       }
 
       const business = await Business.findOne({ userId: req.user.userId });
       if (!business) {
-        res.status(404).json({ message: 'Business not found' });
-        return;
+        return res.status(404).json({ message: 'Business not found' });
       }
 
-      const campaign = await Campaign.findById(campaignId);
+      const campaign = await Campaign.findOne({
+        _id: req.params.id,
+        businessId: business._id.toString()
+      });
+
       if (!campaign) {
-        res.status(404).json({ message: 'Campaign not found' });
-        return;
+        return res.status(404).json({ message: 'Campaign not found' });
       }
 
+      Object.assign(campaign, req.body);
       // Verify ownership
       if (campaign.businessId.toString() !== business._id.toString()) {
         res.status(403).json({ message: 'Not authorized to update this campaign' });

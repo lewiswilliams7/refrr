@@ -504,8 +504,7 @@ export const referralController = {
         .populate('businessId', 'businessName');
 
       if (!referral) {
-        res.status(404).json({ message: 'Referral not found' });
-        return;
+        return res.status(404).json({ message: 'Referral not found' });
       }
 
       // Update tracking data
@@ -528,7 +527,7 @@ export const referralController = {
       });
     } catch (error) {
       console.error('Error tracking referral:', error);
-      res.status(500).json({ message: 'Error tracking referral' });
+      res.status(500).json({ message: 'Error tracking referral', error });
     }
   },
 

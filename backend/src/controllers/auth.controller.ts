@@ -30,14 +30,13 @@ export const authController = {
     try {
       const { email, password, firstName, lastName, role } = req.body;
 
-      // Check if user exists
+      // Check if user already exists
       const existingUser = await User.findOne({ email });
       if (existingUser) {
-        res.status(400).json({ message: 'User already exists' });
-        return;
+        return res.status(400).json({ message: 'User already exists' });
       }
 
-      // Create user
+      // Create new user
       const user = new User({
         email,
         password,
@@ -46,11 +45,16 @@ export const authController = {
         role: role || 'customer'
       });
 
+      // Save user
       const savedUser = await user.save();
 
-      // Generate token
+      // Generate JWT token
       const token = jwt.sign(
-        { userId: savedUser._id.toString() },
+        { 
+          userId: savedUser._id.toString(),
+          email: savedUser.email,
+          role: savedUser.role
+        },
         process.env.JWT_SECRET || 'your-secret-key',
         { expiresIn: '24h' }
       );
@@ -68,7 +72,7 @@ export const authController = {
       });
     } catch (error) {
       console.error('Registration error:', error);
-      res.status(500).json({ message: 'Error registering user' });
+      res.status(500).json({ message: 'Error registering user', error });
     }
   },
 
@@ -213,27 +217,31 @@ export const authController = {
   }),
 
   // Get current user
-  getCurrentUser: asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const user = await User.findById(req.user?.userId);
-    if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
-    }
-
-    res.json({
-      user: {
-        id: user._id.toString(),
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        businessName: user.businessName,
-        businessType: user.businessType,
-        location: user.location,
-        businessDescription: user.businessDescription
+  getCurrentUser: async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      if (!req.user?.userId) {
+        return res.status(401).json({ message: 'User not authenticated' });
       }
-    });
-  }),
+
+      const user = await User.findById(req.user.userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      res.json({
+        user: {
+          _id: user._id.toString(),
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role
+        }
+      });
+    } catch (error) {
+      console.error('Get current user error:', error);
+      res.status(500).json({ message: 'Error getting current user', error });
+    }
+  },
 
   forgotPassword: async (req: AuthRequest, res: Response): Promise<void> => {
     // ... existing code ...
