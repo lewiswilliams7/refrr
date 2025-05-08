@@ -129,7 +129,7 @@ export default function CampaignList() {
       <Grid container spacing={3} key="campaigns-grid">
         {campaigns.map((campaign, index) => {
           console.log('Rendering campaign:', campaign);
-          const campaignId = campaign._id || campaign.id || `temp-${index}`;
+          const campaignId = campaign._id || `temp-${index}`;
           if (!campaignId) {
             console.error('Campaign missing ID:', campaign);
             return null;
