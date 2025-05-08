@@ -30,9 +30,18 @@ app.use(express.json());
 setupSecurity(app);
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/refrr')
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI) {
+  console.error('MONGODB_URI is not defined in environment variables');
+  process.exit(1);
+}
+
+mongoose.connect(MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+  .catch((err) => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+  });
 
 // Routes
 app.use('/api/health', healthRoutes);
@@ -43,6 +52,11 @@ app.use('/api/customer', customerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/referrals', referralRoutes);
+
+// Root route handler
+app.get('/', (req, res) => {
+  res.json({ message: 'Welcome to Refrr API' });
+});
 
 // Error handling middleware
 app.use(errorHandler);
