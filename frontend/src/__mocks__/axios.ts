@@ -7,6 +7,11 @@ interface MockAxiosInstance extends AxiosInstance {
   put: jest.Mock;
   delete: jest.Mock;
   patch: jest.Mock;
+  head: jest.Mock;
+  options: jest.Mock;
+  postForm: jest.Mock;
+  putForm: jest.Mock;
+  patchForm: jest.Mock;
 }
 
 const mockAxios: MockAxiosInstance = {
@@ -16,6 +21,11 @@ const mockAxios: MockAxiosInstance = {
   put: jest.fn(),
   delete: jest.fn(),
   patch: jest.fn(),
+  head: jest.fn(),
+  options: jest.fn(),
+  postForm: jest.fn(),
+  putForm: jest.fn(),
+  patchForm: jest.fn(),
   defaults: { headers: { common: {} } },
   interceptors: {
     request: { use: jest.fn(), eject: jest.fn() },
