@@ -4,10 +4,10 @@ import { authenticateToken } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { AuthRequest } from '../types/auth.types';
 import { Response } from 'express';
-import { Referral } from '../models/referral';
-import { Customer } from '../models/customer';
-import { Campaign } from '../models/campaign';
-import { sendReferralEmail } from '../services/emailService';
+import { Referral } from '../models/referral.model';
+import { Customer } from '../models/customer.model';
+import { Campaign } from '../models/campaign.model';
+import { sendEmail } from '../services/email.service';
 import { ReferralStatus } from '../types/referral.types';
 
 const router = express.Router();

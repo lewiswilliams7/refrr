@@ -71,7 +71,7 @@ const campaignSchema = new mongoose.Schema({
   },
   rewardDescription: {
     type: String,
-    default: function() {
+    default: function(this: any) {
       return `${this.rewardValue}${this.rewardType === 'percentage' ? '% discount' : ' points reward'}`;
     }
   },
@@ -126,9 +126,13 @@ const campaignSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Update analytics before saving
-campaignSchema.pre('save', function(next) {
-  const totalReferrals = this.analytics.totalReferrals || 0;
-  const successfulReferrals = this.analytics.successfulReferrals || 0;
+campaignSchema.pre('save', function(this: any, next) {
+  const totalReferrals = this.analytics?.totalReferrals || 0;
+  const successfulReferrals = this.analytics?.successfulReferrals || 0;
+  
+  if (!this.analytics) {
+    this.analytics = {};
+  }
   
   this.analytics.conversionRate = totalReferrals > 0 
     ? (successfulReferrals / totalReferrals) * 100 
