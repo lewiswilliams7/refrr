@@ -19,7 +19,7 @@
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
-    "prepare": "husky install"
+    "prepare": "node -e \"if (process.env.NODE_ENV !== 'production') require('husky').install()\""
   },
   "keywords": [],
   "author": "",
