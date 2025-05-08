@@ -2,42 +2,35 @@ services:
   - type: web
     name: refrr-frontend
     env: node
-    plan: standard
-    buildCommand: |
-      cd frontend
-      npm install --production=false --no-optional
-      NODE_OPTIONS="--max-old-space-size=256" npm run build:prod
-    startCommand: |
-      cd frontend
-      node server.js
+    buildCommand: npm run build
+    startCommand: npm start
     envVars:
-      - key: REACT_APP_API_URL
-        value: https://refrr.onrender.com
       - key: NODE_ENV
         value: production
-      - key: NODE_VERSION
-        value: 18.x
-      - key: PORT
-        value: 10000
       - key: NODE_OPTIONS
-        value: --max-old-space-size=256
+        value: --max-old-space-size=256 --max-semi-space-size=64
       - key: CI
         value: "true"
       - key: DISABLE_ESLINT_PLUGIN
         value: "true"
+      - key: GENERATE_SOURCEMAP
+        value: "false"
+      - key: SKIP_PREFLIGHT_CHECK
+        value: "true"
     healthCheckPath: /
     autoDeploy: true
+    plan: free
 
   - type: web
     name: refrr-backend
     env: node
-    rootDir: backend
     buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10000
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=256
     healthCheckPath: /api/health
-    autoDeploy: true 
+    autoDeploy: true
+    plan: free 
