@@ -1,9 +1,8 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { referralController } from '../controllers/referral.controller';
 import { authenticateToken } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { AuthRequest } from '../types/auth.types';
-import { Response } from 'express';
 import { Referral } from '../models/referral.model';
 import { Customer } from '../models/customer.model';
 import { Campaign } from '../models/campaign.model';
@@ -13,7 +12,7 @@ import { ReferralStatus } from '../types/referral.types';
 const router = express.Router();
 
 // Debug logging middleware
-router.use((req, res, next) => {
+router.use((req: Request, res: Response, next: NextFunction) => {
   console.log(`[Referral Routes] ${req.method} ${req.url}`);
   next();
 });
@@ -39,7 +38,7 @@ router.get('/:id', asyncHandler(referralController.getReferral));
 router.delete('/:id', asyncHandler(referralController.deleteReferral));
 
 // 404 handler for referral routes
-router.use((req, res) => {
+router.use((req: Request, res: Response) => {
   console.log(`[Referral Routes] 404: ${req.method} ${req.url}`);
   res.status(404).json({ message: 'Referral route not found' });
 });

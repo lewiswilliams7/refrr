@@ -197,7 +197,7 @@ export const dashboardController = {
           });
 
           const performance: ICampaignPerformance = {
-            campaignId: campaign._id,
+            campaignId: campaign._id as mongoose.Types.ObjectId,
             title: campaign.title,
             totalReferrals: campaignReferrals,
             successfulReferrals: campaignSuccessful,

@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { authenticateToken } from '../middleware/auth';
 import { authController } from '../controllers/auth.controller';
 import { asyncHandler } from '../middleware/asyncHandler';

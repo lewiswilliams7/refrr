@@ -155,13 +155,15 @@ export const adminController = {
       business.status = status;
       await business.save();
 
+      const businessData = business.toObject();
+
       res.json({
         message: 'Business status updated successfully',
         business: {
-          _id: business._id,
-          name: business.businessName,
-          type: business.businessType,
-          status: business.status
+          _id: businessData._id,
+          name: businessData.businessName,
+          type: businessData.businessType,
+          status: businessData.status
         }
       });
     } catch (error) {
