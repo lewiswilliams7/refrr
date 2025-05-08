@@ -7,7 +7,7 @@
   },
   "scripts": {
     "start": "cd frontend && node server.js",
-    "build": "cd frontend && npm install --production=false --no-optional --no-audit --no-fund && NODE_OPTIONS='--max-old-space-size=256 --max-semi-space-size=64' npm run build:prod",
-    "install": "cd frontend && npm install --production=false --no-optional --no-audit --no-fund"
+    "build": "cd frontend && npm install --production=false --no-optional --no-audit --no-fund --no-package-lock && NODE_OPTIONS='--max-old-space-size=256 --max-semi-space-size=64 --optimize-for-size' npm run build:prod",
+    "install": "cd frontend && npm install --production=false --no-optional --no-audit --no-fund --no-package-lock"
   }
 }
