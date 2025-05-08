@@ -5,6 +5,24 @@ import { Campaign } from '../models/campaign.model';
 import { asyncHandler } from '../middleware/asyncHandler';
 import mongoose from 'mongoose';
 
+interface ICampaign {
+  _id: mongoose.Types.ObjectId;
+  title: string;
+  description: string;
+  rewardType: string;
+  rewardValue: number;
+  status: 'active' | 'inactive' | 'completed';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface IReward {
+  type: string;
+  value: number;
+  description: string;
+  campaignId: string;
+}
+
 export const businessController = {
   // Get public business list
   getPublicBusinesses: async (req: Request, res: Response) => {
@@ -33,10 +51,10 @@ export const businessController = {
 
           const rewards = campaigns.map((campaign: ICampaign) => {
             console.log(`Processing campaign: ${campaign._id}`);
-            const reward = {
+            const reward: IReward = {
               type: campaign.rewardType,
               value: campaign.rewardValue,
-              description: campaign.rewardDescription,
+              description: campaign.rewardDescription || '',
               campaignId: campaign._id.toString()
             };
             console.log('Created reward object:', JSON.stringify(reward, null, 2));
@@ -104,7 +122,7 @@ export const businessController = {
   },
 
   // Process campaigns
-  processCampaigns: async (campaigns: CampaignDocument[]) => {
+  processCampaigns: async (campaigns: ICampaign[]) => {
     try {
       for (const campaign of campaigns) {
         console.log(`Processing campaign: ${campaign._id}`);

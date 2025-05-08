@@ -26,49 +26,51 @@ const generateToken = (user: IUser): string => {
 
 export const authController = {
   // Register new user
-  register: asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { email, password, firstName, lastName, role, businessName, businessType, location, businessDescription } = req.body;
+  register: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { email, password, firstName, lastName, role } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      res.status(400).json({ message: 'User already exists' });
-      return;
-    }
-
-    // Create new user
-    const user = new User({
-      email,
-      password,
-      firstName,
-      lastName,
-      role,
-      businessName,
-      businessType,
-      location,
-      businessDescription
-    });
-
-    await user.save();
-
-    // Generate token
-    const token = generateToken(user);
-
-    res.status(201).json({
-      token,
-      user: {
-        id: user._id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        businessName: user.businessName,
-        businessType: user.businessType,
-        location: user.location,
-        businessDescription: user.businessDescription
+      // Check if user exists
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        res.status(400).json({ message: 'User already exists' });
+        return;
       }
-    });
-  }),
+
+      // Create user
+      const user = new User({
+        email,
+        password,
+        firstName,
+        lastName,
+        role: role || 'customer'
+      });
+
+      const savedUser = await user.save();
+
+      // Generate token
+      const token = jwt.sign(
+        { userId: savedUser._id.toString() },
+        process.env.JWT_SECRET || 'your-secret-key',
+        { expiresIn: '24h' }
+      );
+
+      res.status(201).json({
+        message: 'User registered successfully',
+        token,
+        user: {
+          _id: savedUser._id.toString(),
+          email: savedUser.email,
+          firstName: savedUser.firstName,
+          lastName: savedUser.lastName,
+          role: savedUser.role
+        }
+      });
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(500).json({ message: 'Error registering user' });
+    }
+  },
 
   // Register new customer
   registerCustomer: async (req: Request, res: Response): Promise<void> => {

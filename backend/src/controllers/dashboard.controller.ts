@@ -18,6 +18,14 @@ interface ICampaign {
   updatedAt: Date;
 }
 
+interface ICampaignPerformance {
+  campaignId: mongoose.Types.ObjectId;
+  title: string;
+  totalReferrals: number;
+  successfulReferrals: number;
+  conversionRate: number;
+}
+
 export const dashboardController = {
   getStats: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
@@ -178,7 +186,7 @@ export const dashboardController = {
         .limit(5);
 
       const campaignPerformance = await Promise.all(
-        campaigns.map(async (campaign) => {
+        campaigns.map(async (campaign: ICampaign) => {
           const campaignReferrals = await Referral.countDocuments({
             campaignId: campaign._id
           });
@@ -188,7 +196,7 @@ export const dashboardController = {
             status: 'approved'
           });
 
-          return {
+          const performance: ICampaignPerformance = {
             campaignId: campaign._id,
             title: campaign.title,
             totalReferrals: campaignReferrals,
@@ -197,6 +205,7 @@ export const dashboardController = {
               ? (campaignSuccessful / campaignReferrals) * 100
               : 0
           };
+          return performance;
         })
       );
 

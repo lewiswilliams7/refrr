@@ -27,10 +27,10 @@ router.get('/track/:code', asyncHandler(referralController.trackReferral));
 router.use(authenticateToken);
 
 // Generate referral link
-router.post('/', asyncHandler(referralController.create));
+router.post('/', asyncHandler(referralController.createReferral));
 
 // Get all referrals
-router.get('/', asyncHandler(referralController.getBusinessReferrals));
+router.get('/', asyncHandler(referralController.getReferrals));
 
 // Get referral by ID
 router.get('/:id', asyncHandler(referralController.getReferral));
