@@ -51,6 +51,7 @@ interface Campaign {
   businessName: string;
   businessType: string;
   location: {
+    address?: string;
     city: string;
     postcode: string;
   };
@@ -504,7 +505,7 @@ export default function CustomerCampaigns() {
                               {campaign.businessName} - {campaign.businessType}
                             </Typography>
                             <Typography color="textSecondary" paragraph>
-                              {campaign.location.address}, {campaign.location.city}, {campaign.location.postcode}
+                              {campaign.location.address ? `${campaign.location.address}, ` : ''}{campaign.location.city}, {campaign.location.postcode}
                             </Typography>
                             <Typography paragraph>
                               {campaign.description}
