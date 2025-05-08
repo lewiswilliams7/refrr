@@ -1,4 +1,4 @@
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, AxiosHeaderValue } from 'axios';
 
 interface MockAxiosInstance extends AxiosInstance {
   create: jest.Mock;
@@ -14,6 +14,16 @@ interface MockAxiosInstance extends AxiosInstance {
   patchForm: jest.Mock;
 }
 
+const mockHeaders: HeadersDefaults & { [key: string]: AxiosHeaderValue } = {
+  common: {},
+  delete: {},
+  get: {},
+  head: {},
+  post: {},
+  put: {},
+  patch: {}
+};
+
 const mockAxios: MockAxiosInstance = {
   create: jest.fn(() => mockAxios),
   get: jest.fn(),
@@ -26,7 +36,16 @@ const mockAxios: MockAxiosInstance = {
   postForm: jest.fn(),
   putForm: jest.fn(),
   patchForm: jest.fn(),
-  defaults: { headers: { common: {} } },
+  defaults: {
+    headers: mockHeaders,
+    baseURL: '',
+    timeout: 0,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    validateStatus: (status: number) => status >= 200 && status < 300
+  },
   interceptors: {
     request: { use: jest.fn(), eject: jest.fn() },
     response: { use: jest.fn(), eject: jest.fn() }
