@@ -14,24 +14,24 @@ interface MockAxiosInstance extends AxiosInstance {
   patchForm: jest.Mock;
 }
 
-const mockHeaders: HeadersDefaults & { [key: string]: AxiosHeaderValue } = {
+const mockHeaders = {
   common: {
     Accept: 'application/json',
     'Content-Type': 'application/json'
-  },
-  delete: {},
-  get: {},
-  head: {},
+  } as Record<string, string>,
+  delete: {} as Record<string, string>,
+  get: {} as Record<string, string>,
+  head: {} as Record<string, string>,
   post: {
     'Content-Type': 'application/json'
-  },
+  } as Record<string, string>,
   put: {
     'Content-Type': 'application/json'
-  },
+  } as Record<string, string>,
   patch: {
     'Content-Type': 'application/json'
-  }
-};
+  } as Record<string, string>
+} as HeadersDefaults;
 
 const mockDefaults: AxiosDefaults = {
   headers: mockHeaders,
@@ -64,6 +64,6 @@ const mockAxios: MockAxiosInstance = {
   request: jest.fn(),
   getUri: jest.fn(),
   // Add any other methods you need to mock
-} as MockAxiosInstance;
+} as unknown as MockAxiosInstance;
 
 export default mockAxios; 
