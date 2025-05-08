@@ -15,8 +15,4 @@ router.put('/profile', asyncHandler(customerController.updateProfile));
 // Customer analytics
 router.get('/analytics', asyncHandler(customerController.getAnalytics));
 
-// Customer referral routes
-router.get('/referrals', asyncHandler(customerController.getReferrals));
-router.post('/referrals/:code/complete', asyncHandler(customerController.completeReferral));
-
 export default router; 

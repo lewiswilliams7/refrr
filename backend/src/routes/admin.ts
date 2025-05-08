@@ -19,13 +19,19 @@ router.use(authenticate);
 router.use(isAdmin);
 
 // Get all users
-router.get('/users', asyncHandler(adminController.getAllUsers));
+router.get('/users', asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+  await adminController.getAllUsers(req, res);
+}));
 
 // Get user by ID
-router.get('/users/:id', asyncHandler(adminController.getUser));
+router.get('/users/:id', asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+  await adminController.getUser(req, res);
+}));
 
 // Delete user
-router.delete('/users/:id', asyncHandler(adminController.deleteUser));
+router.delete('/users/:id', asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+  await adminController.deleteUser(req, res);
+}));
 
 // Get all businesses
 router.get('/businesses', asyncHandler(adminController.getAllBusinesses));
