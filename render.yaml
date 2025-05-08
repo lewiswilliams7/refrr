@@ -3,12 +3,14 @@ services:
     name: refrr-frontend
     env: node
     buildCommand: cd frontend && npm install && npm run build
-    startCommand: cd frontend && npm run serve
+    startCommand: cd frontend && chmod +x start.sh && ./start.sh
     envVars:
       - key: REACT_APP_API_URL
         value: https://refrr.onrender.com
       - key: NODE_ENV
         value: production
+      - key: NODE_VERSION
+        value: 18.x
     healthCheckPath: /
     autoDeploy: true
 

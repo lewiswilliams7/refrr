@@ -1,3 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
+set -e
 npm install -g serve
-serve -s build 
+cd build && serve -s . 
