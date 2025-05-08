@@ -27,7 +27,7 @@ services:
         value: "false"
       - key: NPM_CONFIG_FUND
         value: "false"
-    healthCheckPath: /
+    healthCheckPath: /health
     autoDeploy: true
     plan: free
 

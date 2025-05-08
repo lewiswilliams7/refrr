@@ -18,8 +18,15 @@ app.use((err, req, res, next) => {
   res.status(500).send('Something broke!');
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // Serve static files from the build directory
-app.use(express.static(path.join(__dirname, 'build')));
+const buildPath = path.join(__dirname, 'build');
+console.log('Serving static files from:', buildPath);
+app.use(express.static(buildPath));
 
 // Log all requests
 app.use((req, res, next) => {
@@ -30,7 +37,7 @@ app.use((req, res, next) => {
 // Handle all other routes by serving index.html
 app.get('*', (req, res) => {
   console.log('Serving index.html for route:', req.url);
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  res.sendFile(path.join(buildPath, 'index.html'));
 });
 
 const port = process.env.PORT || 3000;
@@ -41,8 +48,10 @@ const server = app.listen(port, '0.0.0.0', (error) => {
     console.error('Failed to start server:', error);
     process.exit(1);
   }
+  const address = server.address();
   console.log(`Server is running on port ${port}`);
-  console.log('Server address:', server.address());
+  console.log('Server address:', address);
+  console.log('Server is listening on:', `http://0.0.0.0:${port}`);
 });
 
 // Handle server errors
