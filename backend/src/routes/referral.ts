@@ -1,7 +1,14 @@
 import express from 'express';
 import { referralController } from '../controllers/referral.controller';
 import { authenticateToken } from '../middleware/auth';
-import asyncHandler from '../middleware/asyncHandler';
+import { asyncHandler } from '../middleware/asyncHandler';
+import { AuthRequest } from '../types/auth.types';
+import { Response } from 'express';
+import { Referral } from '../models/referral';
+import { Customer } from '../models/customer';
+import { Campaign } from '../models/campaign';
+import { sendReferralEmail } from '../services/emailService';
+import { ReferralStatus } from '../types/referral.types';
 
 const router = express.Router();
 
