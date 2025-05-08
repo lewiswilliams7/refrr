@@ -28,8 +28,17 @@ app.get('*', (req, res) => {
 });
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+const server = app.listen(port, '0.0.0.0', () => {
   console.log(`Server is running on port ${port}`);
   console.log('Environment:', process.env.NODE_ENV);
   console.log('API URL:', process.env.REACT_APP_API_URL);
+});
+
+// Handle server errors
+server.on('error', (error) => {
+  console.error('Server error:', error);
+  if (error.code === 'EADDRINUSE') {
+    console.error(`Port ${port} is already in use`);
+    process.exit(1);
+  }
 }); 
