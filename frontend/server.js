@@ -5,12 +5,12 @@ const app = express();
 // Serve static files from the build directory
 app.use(express.static(path.join(__dirname, 'build')));
 
-// Handle React routing, return all requests to React app
+// Handle all other routes by serving index.html
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 10000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 }); 
