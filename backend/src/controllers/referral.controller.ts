@@ -493,13 +493,14 @@ export const referralController = {
       }
 
       // Update tracking data
-      referral.trackingData = {
-        ...referral.trackingData,
+      const trackingData = {
         lastViewed: new Date(),
         viewCount: (referral.trackingData?.viewCount || 0) + 1
       };
 
-      await referral.save();
+      await Referral.findByIdAndUpdate(referral._id, {
+        $set: { trackingData }
+      });
 
       res.json({
         referral: {

@@ -1,10 +1,22 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { User } from '../models/user.model';
-import Campaign from '../models/campaign.model';
+import { Campaign } from '../models/campaign.model';
 import Referral from '../models/referrals';
-import Business from '../models/business';
+import { Business } from '../models/business.model';
 import mongoose from 'mongoose';
+import { asyncHandler } from '../middleware/asyncHandler';
+
+interface ICampaign {
+  _id: mongoose.Types.ObjectId;
+  title: string;
+  description: string;
+  rewardType: string;
+  rewardValue: number;
+  status: 'active' | 'inactive' | 'completed';
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export const dashboardController = {
   getStats: async (req: AuthRequest, res: Response): Promise<void> => {

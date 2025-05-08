@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { User } from '../models/user.model';
-import Campaign, { ICampaign, CampaignDocument } from '../models/campaign.model';
+import { Campaign } from '../models/campaign.model';
+import { asyncHandler } from '../middleware/asyncHandler';
+import mongoose from 'mongoose';
 
 export const businessController = {
   // Get public business list
