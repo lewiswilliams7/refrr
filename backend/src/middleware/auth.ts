@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { User, UserDocument } from '../models/user.model';
+import { User, IUser } from '../models/user.model';
 import mongoose from 'mongoose';
 import { ParsedQs } from 'qs';
 
@@ -23,7 +23,7 @@ const error = (message: string, err: any) => {
 // Simple request interface
 export interface AuthRequest extends Request {
   user?: {
-    userId: string;
+    userId: mongoose.Types.ObjectId;
     email: string;
     role?: string;
   };
@@ -37,8 +37,9 @@ declare global {
   namespace Express {
     interface Request {
       user?: {
-        userId: string;
+        userId: mongoose.Types.ObjectId;
         email: string;
+        role?: string;
       };
     }
   }
@@ -68,7 +69,11 @@ export const authenticateToken = (
       role?: string;
     };
 
-    (req as AuthRequest).user = decoded;
+    (req as AuthRequest).user = {
+      userId: new mongoose.Types.ObjectId(decoded.userId),
+      email: decoded.email,
+      role: decoded.role
+    };
     next();
   } catch (error: unknown) {
     console.error('Error in authenticateToken:', error);

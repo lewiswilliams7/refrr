@@ -1,83 +1,74 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { User, UserDocument } from '../models/user.model';
+import { User, IUser } from '../models/user.model';
 import { AuthRequest } from '../middleware/auth';
 import bcrypt from 'bcryptjs';
 import { sendEmail } from '../utils/email';
 import crypto from 'crypto';
 import mongoose from 'mongoose';
+import { asyncHandler } from '../middleware/asyncHandler';
+import { Types } from 'mongoose';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl';
 
+// Generate JWT token
+const generateToken = (user: IUser): string => {
+  return jwt.sign(
+    {
+      userId: user._id,
+      email: user.email,
+      role: user.role
+    },
+    process.env.JWT_SECRET || 'test-secret',
+    { expiresIn: '24h' }
+  );
+};
+
 export const authController = {
   // Register new user
-  register: async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { email, password, firstName, lastName, businessName, businessType, location } = req.body;
+  register: asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { email, password, firstName, lastName, role, businessName, businessType, location, businessDescription } = req.body;
 
-      // Validate required fields
-      if (!email || !password || !firstName || !lastName || !businessName || !businessType || !location) {
-        res.status(400).json({ message: 'Required fields missing' });
-        return;
-      }
-
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        res.status(400).json({ message: 'Invalid email format' });
-        return;
-      }
-
-      // Validate password length
-      if (password.length < 6) {
-        res.status(400).json({ message: 'Password must be at least 6 characters long' });
-        return;
-      }
-
-      // Check if user exists
-      const existingUser = await User.findOne({ email });
-      if (existingUser) {
-        res.status(400).json({ message: 'User already exists' });
-        return;
-      }
-
-      // Create user
-      const user = await User.create({
-        email,
-        password,
-        firstName,
-        lastName,
-        businessName,
-        businessType,
-        location
-      });
-
-      // Generate token
-      const token = jwt.sign(
-        { userId: user._id.toString(), email: user.email },
-        process.env.JWT_SECRET || 'test-secret'
-      );
-
-      res.status(201).json({
-        token,
-        user: {
-          _id: user._id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          businessName: user.businessName,
-          businessType: user.businessType
-        }
-      });
-    } catch (error: unknown) {
-      console.error('Error in register:', error);
-      if (error instanceof Error) {
-        res.status(500).json({ message: error.message });
-      } else {
-        res.status(500).json({ message: 'An unknown error occurred' });
-      }
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      res.status(400).json({ message: 'User already exists' });
+      return;
     }
-  },
+
+    // Create new user
+    const user = new User({
+      email,
+      password,
+      firstName,
+      lastName,
+      role,
+      businessName,
+      businessType,
+      location,
+      businessDescription
+    });
+
+    await user.save();
+
+    // Generate token
+    const token = generateToken(user);
+
+    res.status(201).json({
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        businessName: user.businessName,
+        businessType: user.businessType,
+        location: user.location,
+        businessDescription: user.businessDescription
+      }
+    });
+  }),
 
   // Register new customer
   registerCustomer: async (req: Request, res: Response): Promise<void> => {
@@ -179,69 +170,68 @@ export const authController = {
   },
 
   // Login user
-  login: async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { email, password } = req.body;
+  login: asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { email, password } = req.body;
 
-      // Find user by email
-      const user = await User.findOne({ email }).select('+password');
-      if (!user) {
-        res.status(401).json({ message: 'Invalid credentials' });
-        return;
-      }
-
-      // Check password
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        res.status(401).json({ message: 'Invalid credentials' });
-        return;
-      }
-
-      // Generate token
-      const token = jwt.sign(
-        { userId: user._id.toString(), email: user.email },
-        process.env.JWT_SECRET || 'test-secret'
-      );
-
-      res.status(200).json({
-        token,
-        user: {
-          _id: user._id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          businessName: user.businessName,
-          businessType: user.businessType
-        }
-      });
-    } catch (error: unknown) {
-      console.error('Login error:', error);
-      res.status(500).json({ message: 'Error logging in' });
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(401).json({ message: 'Invalid credentials' });
+      return;
     }
-  },
 
-  // Get current user
-  getCurrentUser: async (req: AuthRequest, res: Response): Promise<void> => {
-    try {
-      const user = await User.findById(req.user?.userId);
-      if (!user) {
-        res.status(404).json({ message: 'User not found' });
-        return;
-      }
+    // Check password
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      res.status(401).json({ message: 'Invalid credentials' });
+      return;
+    }
 
-      res.status(200).json({
-        _id: user._id,
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
+
+    // Generate token
+    const token = generateToken(user);
+
+    res.json({
+      token,
+      user: {
+        id: user._id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        role: user.role,
         businessName: user.businessName,
-        businessType: user.businessType
-      });
-    } catch (error: unknown) {
-      console.error('Get current user error:', error);
-      res.status(500).json({ message: 'Error getting current user' });
+        businessType: user.businessType,
+        location: user.location,
+        businessDescription: user.businessDescription
+      }
+    });
+  }),
+
+  // Get current user
+  getCurrentUser: asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const user = await User.findById(req.user?.userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
     }
-  },
+
+    res.json({
+      user: {
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        businessName: user.businessName,
+        businessType: user.businessType,
+        location: user.location,
+        businessDescription: user.businessDescription
+      }
+    });
+  }),
 
   forgotPassword: async (req: AuthRequest, res: Response): Promise<void> => {
     // ... existing code ...
