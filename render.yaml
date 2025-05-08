@@ -4,7 +4,6 @@ services:
     env: node
     rootDir: frontend
     buildCommand: npm install && npm run build
-    startCommand: cd frontend && NODE_ENV=production node server.js
     envVars:
       - key: REACT_APP_API_URL
         value: https://refrr.onrender.com
