@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { asyncHandler } from '../middleware/async';
+import { asyncHandler } from '../middleware/asyncHandler';
 import { referralController } from '../controllers/referral.controller';
 import { authenticate } from '../middleware/auth';
 
@@ -20,7 +20,7 @@ router.get('/track/:code', asyncHandler(referralController.trackReferral));
 // Protected routes
 router.post('/', authenticate, asyncHandler(referralController.createReferral));
 router.get('/business', authenticate, asyncHandler(referralController.getBusinessReferrals));
-router.put('/:id', authenticate, asyncHandler(referralController.updateReferral));
+router.put('/:id', authenticate, asyncHandler(referralController.updateReferralStatus));
 router.delete('/:id', authenticate, asyncHandler(referralController.deleteReferral));
 
 // 404 handler for undefined routes

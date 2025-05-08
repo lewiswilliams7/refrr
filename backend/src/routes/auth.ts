@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { asyncHandler } from '../middleware/async';
+import { asyncHandler } from '../middleware/asyncHandler';
 import { authController } from '../controllers/auth.controller';
 import { authenticate } from '../middleware/auth';
 
@@ -19,7 +19,7 @@ router.post('/register', asyncHandler(authController.register));
 router.post('/login', asyncHandler(authController.login));
 
 // Protected routes
-router.get('/me', authenticate, asyncHandler(authController.getMe));
+router.get('/me', authenticate, asyncHandler(authController.getCurrentUser));
 router.post('/logout', authenticate, asyncHandler(authController.logout));
 
 // 404 handler for undefined routes
