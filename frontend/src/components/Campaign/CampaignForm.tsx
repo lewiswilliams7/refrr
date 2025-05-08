@@ -92,7 +92,7 @@ export default function CampaignForm({ open, onClose, campaign, onSubmit }: Prop
         requireBookingConfirmation,
         expirationDate: expirationDate || undefined,
         maxReferrals: maxReferrals ? Number(maxReferrals) : undefined,
-        status: 'draft',
+        status: 'draft' as const,
         analytics: {
           totalReferrals: 0,
           successfulReferrals: 0,
