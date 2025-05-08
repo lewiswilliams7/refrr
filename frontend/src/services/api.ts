@@ -124,7 +124,7 @@ export const authApi = {
 };
 
 export const campaignApi = {
-  create: async (data: Campaign) => {
+  create: async (data: Partial<Campaign>) => {
     const response = await api.post('/campaigns', data);
     return response.data;
   },
