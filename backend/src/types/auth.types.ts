@@ -1,9 +1,10 @@
 import { Request } from 'express';
 import { ParsedQs } from 'qs';
+import { Types } from 'mongoose';
 
 export interface AuthRequest extends Omit<Request, 'query'> {
   user?: {
-    userId: string;
+    userId: Types.ObjectId;
     email: string;
     role?: string;
   };

@@ -9,6 +9,7 @@ import { User } from '../models/user.model';
 import { sendEmail } from '../utils/email';
 import mongoose from 'mongoose';
 import Business from '../models/business';
+import { asyncHandler } from '../middleware/asyncHandler';
 
 export const referralController = {
   // Create new referral
@@ -489,122 +490,128 @@ export const referralController = {
   },
 
   // Create referral
-  createReferral: async (req: AuthRequest, res: Response): Promise<void> => {
-    try {
-      const { campaignId, referrerEmail, referredEmail } = req.body;
+  createReferral: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+    const { campaignId, referredEmail } = req.body;
+    const referrerId = req.user?.userId;
 
-      if (!req.user?.userId) {
-        res.status(400).json({ message: 'User ID is required' });
-        return;
-      }
-
-      const business = await Business.findOne({ userId: req.user.userId });
-      if (!business) {
-        res.status(404).json({ message: 'Business not found' });
-        return;
-      }
-
-      // Generate unique code
-      const code = await generateReferralCode();
-
-      // Create referral
-      const referral = await Referral.create({
-        businessId: business._id,
-        campaignId,
-        referrerEmail,
-        referredEmail,
-        code,
-        status: 'pending'
-      });
-
-      res.status(201).json(referral);
-    } catch (error) {
-      console.error('Error creating referral:', error);
-      res.status(500).json({ message: 'Error creating referral' });
+    if (!referrerId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
     }
-  },
+
+    if (!campaignId || !referredEmail) {
+      res.status(400).json({ message: 'Missing required fields: campaignId, referredEmail' });
+      return;
+    }
+
+    if (!validateEmail(referredEmail)) {
+      res.status(400).json({ message: 'Invalid email format' });
+      return;
+    }
+
+    const business = await Business.findOne({ userId: referrerId });
+    if (!business) {
+      res.status(404).json({ message: 'Business not found' });
+      return;
+    }
+
+    const campaign = await Campaign.findOne({
+      _id: campaignId,
+      businessId: business._id
+    });
+
+    if (!campaign) {
+      res.status(404).json({ message: 'Campaign not found' });
+      return;
+    }
+
+    const code = await generateReferralCode();
+
+    const referral = await Referral.create({
+      businessId: business._id,
+      campaignId,
+      referrerEmail: referrerId,
+      referredEmail,
+      code,
+      status: 'pending'
+    });
+
+    res.status(201).json(referral);
+  }),
 
   // Get all referrals
-  getReferrals: async (req: AuthRequest, res: Response): Promise<void> => {
-    try {
-      if (!req.user?.userId) {
-        res.status(400).json({ message: 'User ID is required' });
-        return;
-      }
+  getReferrals: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+    const userId = req.user?.userId;
 
-      const business = await Business.findOne({ userId: req.user.userId });
-      if (!business) {
-        res.status(404).json({ message: 'Business not found' });
-        return;
-      }
-
-      const referrals = await Referral.find({ businessId: business._id });
-      res.json(referrals);
-    } catch (error) {
-      console.error('Error getting referrals:', error);
-      res.status(500).json({ message: 'Error getting referrals' });
+    if (!userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
     }
-  },
+
+    const business = await Business.findOne({ userId: userId });
+    if (!business) {
+      res.status(404).json({ message: 'Business not found' });
+      return;
+    }
+
+    const referrals = await Referral.find({ businessId: business._id });
+    res.json(referrals);
+  }),
 
   // Get referral by ID
-  getReferralById: async (req: AuthRequest, res: Response): Promise<void> => {
-    try {
-      if (!req.user?.userId) {
-        res.status(400).json({ message: 'User ID is required' });
-        return;
-      }
+  getReferralById: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+    const userId = req.user?.userId;
 
-      const business = await Business.findOne({ userId: req.user.userId });
-      if (!business) {
-        res.status(404).json({ message: 'Business not found' });
-        return;
-      }
-
-      const referral = await Referral.findOne({
-        _id: req.params.id,
-        businessId: business._id
-      });
-
-      if (!referral) {
-        res.status(404).json({ message: 'Referral not found' });
-        return;
-      }
-
-      res.json(referral);
-    } catch (error) {
-      console.error('Error getting referral:', error);
-      res.status(500).json({ message: 'Error getting referral' });
+    if (!userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
     }
-  },
+
+    const business = await Business.findOne({ userId: userId });
+    if (!business) {
+      res.status(404).json({ message: 'Business not found' });
+      return;
+    }
+
+    const referral = await Referral.findOne({
+      _id: req.params.id,
+      businessId: business._id
+    });
+
+    if (!referral) {
+      res.status(404).json({ message: 'Referral not found' });
+      return;
+    }
+
+    res.json(referral);
+  }),
 
   // Delete referral
-  deleteReferral: async (req: AuthRequest, res: Response): Promise<void> => {
-    try {
-      if (!req.user?.userId) {
-        res.status(400).json({ message: 'User ID is required' });
-        return;
-      }
+  deleteReferral: asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+    const userId = req.user?.userId;
+    const { referralId } = req.params;
 
-      const business = await Business.findOne({ userId: req.user.userId });
-      if (!business) {
-        res.status(404).json({ message: 'Business not found' });
-        return;
-      }
-
-      const referral = await Referral.findOneAndDelete({
-        _id: req.params.id,
-        businessId: business._id
-      });
-
-      if (!referral) {
-        res.status(404).json({ message: 'Referral not found' });
-        return;
-      }
-
-      res.json({ message: 'Referral deleted successfully' });
-    } catch (error) {
-      console.error('Error deleting referral:', error);
-      res.status(500).json({ message: 'Error deleting referral' });
+    if (!userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
     }
-  }
+
+    const business = await Business.findOne({ userId: userId });
+    if (!business) {
+      res.status(404).json({ message: 'Business not found' });
+      return;
+    }
+
+    const referral = await Referral.findOneAndDelete({
+      _id: referralId,
+      businessId: business._id
+    });
+
+    if (!referral) {
+      res.status(404).json({ message: 'Referral not found' });
+      return;
+    }
+
+    res.json({ message: 'Referral deleted successfully' });
+  })
 };

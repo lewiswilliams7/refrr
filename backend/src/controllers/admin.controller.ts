@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { User } from '../models/user.model';
-import Business from '../models/business';
-import Campaign, { ICampaign, CampaignDocument } from '../models/campaign.model';
-import Referral from '../models/referrals';
+import { Business } from '../models/business.model';
+import { Campaign } from '../models/campaign.model';
+import { Referral } from '../models/referral.model';
 import mongoose from 'mongoose';
 
 interface IUser {
