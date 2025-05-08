@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { ParsedQs } from 'qs';
 
-export interface AuthRequest extends Request {
+export interface AuthRequest extends Omit<Request, 'query'> {
   user?: {
     userId: string;
     email: string;
