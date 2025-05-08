@@ -20,7 +20,7 @@ interface PopulatedBusiness extends IBusiness {
 }
 
 // Define the type for campaign with populated business
-interface CampaignWithBusiness extends Omit<ICampaign, 'businessId'> {
+interface CampaignWithBusiness {
   _id: Types.ObjectId;
   businessId: Types.ObjectId;
   title: string;
@@ -36,6 +36,8 @@ interface CampaignWithBusiness extends Omit<ICampaign, 'businessId'> {
     businessName: string;
     businessType: string;
   };
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const campaignController = {
