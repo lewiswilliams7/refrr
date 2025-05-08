@@ -136,7 +136,7 @@ export const authController = {
 
       // Generate JWT token
       const token = jwt.sign(
-        { _id: savedUser._id.toString(), email: savedUser.email, role: savedUser.role },
+        { userId: savedUser._id.toString(), email: savedUser.email, role: savedUser.role },
         JWT_SECRET,
         { expiresIn: '24h' }
       );
@@ -145,7 +145,7 @@ export const authController = {
         message: 'Customer registered successfully',
         token,
         user: {
-          _id: savedUser._id,
+          id: savedUser._id,
           email: savedUser.email,
           firstName: savedUser.firstName,
           lastName: savedUser.lastName,

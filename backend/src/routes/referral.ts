@@ -19,31 +19,21 @@ router.use((req, res, next) => {
 });
 
 // Public routes
+router.get('/code/:code', asyncHandler(referralController.getReferralByCode));
+router.post('/code/:code/complete', asyncHandler(referralController.completeReferral));
 router.get('/track/:code', asyncHandler(referralController.trackReferral));
 
 // Protected routes
 router.use(authenticateToken);
 
 // Generate referral link
-router.post('/generate/:campaignId', asyncHandler(referralController.generateReferralLink));
-
-// Submit referral
-router.post('/submit/:code', asyncHandler(referralController.submitReferral));
-
-// Approve referral
-router.post('/:id/approve', asyncHandler(referralController.approveReferral));
-
-// Reject referral
-router.post('/:id/reject', asyncHandler(referralController.rejectReferral));
-
-// Create referral
-router.post('/', asyncHandler(referralController.createReferral));
+router.post('/', asyncHandler(referralController.create));
 
 // Get all referrals
-router.get('/', asyncHandler(referralController.getReferrals));
+router.get('/', asyncHandler(referralController.getBusinessReferrals));
 
 // Get referral by ID
-router.get('/:id', asyncHandler(referralController.getReferralById));
+router.get('/:id', asyncHandler(referralController.getReferral));
 
 // Delete referral
 router.delete('/:id', asyncHandler(referralController.deleteReferral));

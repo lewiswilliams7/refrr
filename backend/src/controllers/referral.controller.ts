@@ -17,6 +17,12 @@ export const referralController = {
     try {
       console.log('Received referral creation request:', req.body); // Debug log
       const { campaignId, referrerEmail } = req.body;
+      const userId = req.user?.userId;
+      
+      if (!userId) {
+        res.status(401).json({ message: 'User not authenticated' });
+        return;
+      }
       
       // Validate required fields
       if (!campaignId || !referrerEmail) {
@@ -38,7 +44,7 @@ export const referralController = {
       // Check if campaign exists and belongs to the business
       const campaign = await Campaign.findOne({ 
         _id: campaignId,
-        businessId: req.user?._id
+        businessId: userId
       });
 
       if (!campaign) {
@@ -53,7 +59,7 @@ export const referralController = {
 
       const referral = new Referral({
         campaignId,
-        businessId: req.user?._id,
+        businessId: userId,
         referrerEmail,
         code,
         status: 'pending'
@@ -78,8 +84,15 @@ export const referralController = {
   // Get all referrals for a business
   getBusinessReferrals: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+      const userId = req.user?.userId;
+      
+      if (!userId) {
+        res.status(401).json({ message: 'User not authenticated' });
+        return;
+      }
+
       const referrals = await Referral.find({ 
-        businessId: req.user?._id 
+        businessId: userId 
       })
       .populate('campaignId', 'title')
       .sort({ createdAt: -1 });
@@ -94,6 +107,13 @@ export const referralController = {
   // Get single referral
   getReferral: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+      const userId = req.user?.userId;
+      
+      if (!userId) {
+        res.status(401).json({ message: 'User not authenticated' });
+        return;
+      }
+
       const referral = await Referral.findById(req.params.id)
         .populate('campaignId', 'title rewardType rewardValue');
       
@@ -103,7 +123,7 @@ export const referralController = {
       }
 
       // Check if user owns this referral
-      if (referral.businessId.toString() !== req.user?._id.toString()) {
+      if (referral.businessId.toString() !== userId.toString()) {
         res.status(403).json({ message: 'Not authorized to view this referral' });
         return;
       }
@@ -118,7 +138,13 @@ export const referralController = {
   // Update referral status
   updateStatus: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+      const userId = req.user?.userId;
       const { status } = req.body;
+      
+      if (!userId) {
+        res.status(401).json({ message: 'User not authenticated' });
+        return;
+      }
       
       if (!['pending', 'approved', 'rejected'].includes(status)) {
         res.status(400).json({ 
@@ -135,7 +161,7 @@ export const referralController = {
       }
 
       // Check if user owns this referral
-      if (referral.businessId.toString() !== req.user?._id.toString()) {
+      if (referral.businessId.toString() !== userId.toString()) {
         res.status(403).json({ message: 'Not authorized to update this referral' });
         return;
       }
