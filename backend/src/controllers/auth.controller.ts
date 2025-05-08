@@ -5,74 +5,76 @@ import { AuthRequest } from '../middleware/auth';
 import bcrypt from 'bcryptjs';
 import { sendEmail } from '../utils/email';
 import crypto from 'crypto';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { asyncHandler } from '../middleware/asyncHandler';
-import { Types } from 'mongoose';
+import { Business } from '../models/business.model';
+import { validateEmail } from '../utils/validators';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl';
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 // Generate JWT token
-const generateToken = (user: IUser): string => {
-  return jwt.sign(
-    {
-      userId: user._id.toString(),
-      email: user.email,
-      role: user.role
-    },
-    process.env.JWT_SECRET || 'test-secret',
-    { expiresIn: '24h' }
-  );
+const generateToken = (userId: Types.ObjectId): string => {
+  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '24h' });
 };
 
 export const authController = {
   // Register new user
   register: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { email, password, firstName, lastName, role } = req.body;
+      const { email, password, firstName, lastName, businessName, businessType } = req.body;
+
+      // Validate email format
+      if (!validateEmail(email)) {
+        res.status(400).json({ message: 'Invalid email format' });
+        return;
+      }
 
       // Check if user already exists
       const existingUser = await User.findOne({ email });
       if (existingUser) {
-        return res.status(400).json({ message: 'User already exists' });
+        res.status(400).json({ message: 'User already exists' });
+        return;
       }
 
       // Create new user
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
       const user = new User({
         email,
-        password,
+        password: hashedPassword,
         firstName,
         lastName,
-        role: role || 'customer'
+        role: 'business'
       });
 
       // Save user
       const savedUser = await user.save();
 
+      // Create business profile
+      const business = new Business({
+        userId: savedUser._id as Types.ObjectId,
+        businessName,
+        businessType,
+        status: 'pending'
+      });
+
+      await business.save();
+
       // Generate JWT token
-      const token = jwt.sign(
-        { 
-          userId: savedUser._id.toString(),
-          email: savedUser.email,
-          role: savedUser.role
-        },
-        process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '24h' }
-      );
+      const token = generateToken(savedUser._id as Types.ObjectId);
 
       res.status(201).json({
-        message: 'User registered successfully',
         token,
-        user: {
-          _id: savedUser._id.toString(),
-          email: savedUser.email,
-          firstName: savedUser.firstName,
-          lastName: savedUser.lastName,
-          role: savedUser.role
+        user: { ...savedUser.toObject(), password: undefined },
+        business: {
+          businessName,
+          businessType,
+          status: 'pending'
         }
       });
     } catch (error) {
       console.error('Registration error:', error);
-      res.status(500).json({ message: 'Error registering user', error });
+      res.status(500).json({ message: 'Server error' });
     }
   },
 
@@ -128,9 +130,10 @@ export const authController = {
       }
 
       // Create new customer user with explicit role
+      const hashedPassword = await bcrypt.hash(password, 10);
       const user = new User({
         email,
-        password,
+        password: hashedPassword,
         firstName,
         lastName,
         role: 'customer' // Explicitly set role as customer
@@ -141,22 +144,12 @@ export const authController = {
       console.log('Customer user saved:', savedUser);
 
       // Generate JWT token
-      const token = jwt.sign(
-        { userId: savedUser._id.toString(), email: savedUser.email, role: savedUser.role },
-        JWT_SECRET,
-        { expiresIn: '24h' }
-      );
+      const token = generateToken(savedUser._id as Types.ObjectId);
 
       res.status(201).json({
         message: 'Customer registered successfully',
         token,
-        user: {
-          id: savedUser._id.toString(),
-          email: savedUser.email,
-          firstName: savedUser.firstName,
-          lastName: savedUser.lastName,
-          role: savedUser.role
-        },
+        user: { ...savedUser.toObject(), password: undefined },
       });
     } catch (error: unknown) {
       console.error('Customer registration error:', error);
@@ -176,70 +169,76 @@ export const authController = {
   },
 
   // Login user
-  login: asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { email, password } = req.body;
+  login: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { email, password } = req.body;
 
-    // Find user
-    const user = await User.findOne({ email });
-    if (!user) {
-      res.status(401).json({ message: 'Invalid credentials' });
-      return;
-    }
-
-    // Check password
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      res.status(401).json({ message: 'Invalid credentials' });
-      return;
-    }
-
-    // Update last login
-    user.lastLogin = new Date();
-    await user.save();
-
-    // Generate token
-    const token = generateToken(user);
-
-    res.json({
-      token,
-      user: {
-        id: user._id.toString(),
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        businessName: user.businessName,
-        businessType: user.businessType,
-        location: user.location,
-        businessDescription: user.businessDescription
+      // Validate email format
+      if (!validateEmail(email)) {
+        res.status(400).json({ message: 'Invalid email format' });
+        return;
       }
-    });
-  }),
+
+      // Find user by email
+      const user = await User.findOne({ email });
+      if (!user) {
+        res.status(401).json({ message: 'Invalid credentials' });
+        return;
+      }
+
+      // Check password
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        res.status(401).json({ message: 'Invalid credentials' });
+        return;
+      }
+
+      // Generate JWT token
+      const token = generateToken(user._id as Types.ObjectId);
+
+      res.json({
+        token,
+        user: { ...user.toObject(), password: undefined }
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  },
 
   // Get current user
   getCurrentUser: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       if (!req.user?.userId) {
-        return res.status(401).json({ message: 'User not authenticated' });
+        res.status(401).json({ message: 'Not authenticated' });
+        return;
       }
 
-      const user = await User.findById(req.user.userId);
+      const user = await User.findById(req.user.userId).select('-password');
       if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+        res.status(404).json({ message: 'User not found' });
+        return;
+      }
+
+      // If user is a business, get business details
+      let businessDetails = null;
+      if (user.role === 'business') {
+        businessDetails = await Business.findOne({ userId: user._id });
       }
 
       res.json({
         user: {
-          _id: user._id.toString(),
+          _id: user._id,
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
           role: user.role
-        }
+        },
+        business: businessDetails
       });
     } catch (error) {
       console.error('Get current user error:', error);
-      res.status(500).json({ message: 'Error getting current user', error });
+      res.status(500).json({ message: 'Error fetching user data' });
     }
   },
 
@@ -292,6 +291,114 @@ export const authController = {
       console.log('Admin account created successfully');
     } catch (error: unknown) {
       console.error('Error initializing admin account:', error);
+    }
+  },
+
+  // Register new business
+  registerBusiness: async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { email, password, firstName, lastName, businessName, businessType, industry } = req.body;
+
+      // Validate email format
+      if (!validateEmail(email)) {
+        res.status(400).json({ message: 'Invalid email format' });
+        return;
+      }
+
+      // Check if user already exists
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        res.status(400).json({ message: 'User already exists' });
+        return;
+      }
+
+      // Create new user with business role
+      const user = new User({
+        email,
+        password,
+        firstName,
+        lastName,
+        role: 'business'
+      });
+
+      // Save user
+      const savedUser = await user.save();
+
+      // Create business profile
+      const business = new Business({
+        userId: savedUser._id as Types.ObjectId,
+        businessName,
+        businessType,
+        industry
+      });
+
+      // Save business
+      await business.save();
+
+      // Generate JWT token
+      const token = generateToken(savedUser._id as Types.ObjectId);
+
+      res.status(201).json({
+        token,
+        user: { ...savedUser.toObject(), password: undefined },
+        business: {
+          businessName,
+          businessType,
+          industry
+        }
+      });
+    } catch (error) {
+      console.error('Business registration error:', error);
+      res.status(500).json({ message: 'Error registering business' });
+    }
+  },
+
+  // Update user profile
+  updateProfile: async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      if (!req.user?.userId) {
+        res.status(401).json({ message: 'Not authenticated' });
+        return;
+      }
+
+      const { firstName, lastName, email } = req.body;
+
+      const user = await User.findById(req.user.userId);
+      if (!user) {
+        res.status(404).json({ message: 'User not found' });
+        return;
+      }
+
+      // Update user fields
+      if (firstName) user.firstName = firstName;
+      if (lastName) user.lastName = lastName;
+      if (email) {
+        // Validate new email format
+        if (!validateEmail(email)) {
+          res.status(400).json({ message: 'Invalid email format' });
+          return;
+        }
+        user.email = email;
+      }
+
+      await user.save();
+
+      res.json({
+        message: 'Profile updated successfully',
+        user: { ...user.toObject(), password: undefined }
+      });
+    } catch (error) {
+      console.error('Profile update error:', error);
+      res.status(500).json({ message: 'Error updating profile' });
+    }
+  },
+
+  logout: async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      res.json({ message: 'Logged out successfully' });
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({ message: 'Server error' });
     }
   }
 };

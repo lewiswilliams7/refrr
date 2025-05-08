@@ -1,43 +1,48 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import { authenticateToken } from '../middleware/auth';
 import { adminController } from '../controllers/admin.controller';
-import { AuthRequest } from '../middleware/auth';
+import { asyncHandler } from '../middleware/asyncHandler';
 
 const router = express.Router();
 
-// Protected routes (require authentication)
-router.use(async (req: AuthRequest, res: Response, next: NextFunction) => {
-  await authenticateToken(req, res, next);
-});
+// Debug logging middleware
+const loggerMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction): Promise<void> => {
+  console.log(`[Admin Routes] ${req.method} ${req.url}`);
+  next();
+};
 
-// Campaign routes
-router.get('/campaigns', adminController.getCampaigns);
-router.get('/campaigns/:id', async (req: AuthRequest, res: Response) => {
-  await adminController.getCampaign(req, res);
-});
+router.use(loggerMiddleware);
 
-router.patch('/campaigns/:id/status', async (req: AuthRequest, res: Response) => {
-  await adminController.updateCampaignStatus(req, res);
-});
+// Protected routes
+router.use(authenticateToken);
 
-// Business routes
-router.get('/businesses', adminController.getBusinesses);
-router.get('/businesses/:id', async (req: AuthRequest, res: Response) => {
-  await adminController.getBusiness(req, res);
-});
+// Get all users
+router.get('/users', asyncHandler(adminController.getAllUsers));
 
-router.patch('/businesses/:id/status', async (req: AuthRequest, res: Response) => {
-  await adminController.updateBusinessStatus(req, res);
-});
+// Get user by ID
+router.get('/users/:id', asyncHandler(adminController.getUser));
 
-// User routes
-router.get('/users', adminController.getUsers);
-router.get('/users/:id', async (req: AuthRequest, res: Response) => {
-  await adminController.getUser(req, res);
-});
+// Delete user
+router.delete('/users/:id', asyncHandler(adminController.deleteUser));
 
-router.patch('/users/:id/status', async (req: AuthRequest, res: Response) => {
-  await adminController.updateUserStatus(req, res);
-});
+// Get all businesses
+router.get('/businesses', asyncHandler(adminController.getAllBusinesses));
+
+// Get business by ID
+router.get('/businesses/:id', asyncHandler(adminController.getBusiness));
+
+// Update business status
+router.patch('/businesses/:id/status', asyncHandler(adminController.updateBusinessStatus));
+
+// Delete business
+router.delete('/businesses/:id', asyncHandler(adminController.deleteBusiness));
+
+// 404 handler for admin routes
+const notFoundHandler = async (req: express.Request, res: express.Response): Promise<void> => {
+  console.log(`[Admin Routes] 404: ${req.method} ${req.url}`);
+  res.status(404).json({ message: 'Admin route not found' });
+};
+
+router.use(notFoundHandler);
 
 export default router; 

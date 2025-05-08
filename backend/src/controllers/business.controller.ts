@@ -1,21 +1,10 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { User } from '../models/user.model';
-import { Campaign } from '../models/campaign.model';
+import { Campaign, ICampaign } from '../models/campaign.model';
+import { Business, IBusiness } from '../models/business.model';
 import { asyncHandler } from '../middleware/asyncHandler';
 import mongoose from 'mongoose';
-
-interface ICampaign {
-  _id: mongoose.Types.ObjectId;
-  title: string;
-  description: string;
-  rewardType: string;
-  rewardValue: number;
-  rewardDescription?: string;
-  status: 'active' | 'inactive' | 'completed';
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 interface IReward {
   type: string;
@@ -29,13 +18,11 @@ export const businessController = {
   getPublicBusinesses: async (req: Request, res: Response) => {
     try {
       console.log('Fetching public businesses...');
-      const businesses = await User.find(
+      const businesses = await Business.find(
         { 
-          businessName: { $exists: true },
-          'location.city': { $exists: true } // Only get businesses with location data
-        },
-        'businessName businessType location businessDescription'
-      );
+          status: 'active'
+        }
+      ).populate('userId', 'email firstName lastName');
 
       console.log(`Found ${businesses.length} businesses`);
 
@@ -45,8 +32,8 @@ export const businessController = {
           console.log(`Fetching campaigns for business: ${business.businessName}`);
           const campaigns = await Campaign.find({
             businessId: business._id,
-            isActive: true
-          });
+            status: 'active'
+          }).lean();
 
           console.log(`Found ${campaigns.length} active campaigns for ${business.businessName}`);
 
@@ -55,7 +42,7 @@ export const businessController = {
             const reward: IReward = {
               type: campaign.rewardType,
               value: campaign.rewardValue,
-              description: campaign.rewardDescription || '',
+              description: campaign.rewardDescription,
               campaignId: campaign._id.toString()
             };
             console.log('Created reward object:', JSON.stringify(reward, null, 2));
@@ -66,8 +53,8 @@ export const businessController = {
             _id: business._id,
             businessName: business.businessName,
             businessType: business.businessType,
-            location: business.location || { city: 'Location not specified' },
-            businessDescription: business.businessDescription,
+            address: business.address,
+            description: business.description,
             activeCampaigns: {
               count: campaigns.length,
               rewards: rewards.map(reward => ({
@@ -92,8 +79,13 @@ export const businessController = {
   // Get all campaigns for a business
   getCampaigns: async (req: AuthRequest, res: Response) => {
     try {
+      const business = await Business.findOne({ userId: req.user?.userId });
+      if (!business) {
+        return res.status(404).json({ message: 'Business not found' });
+      }
+
       const campaigns = await Campaign.find({
-        businessId: req.user?.userId
+        businessId: business._id
       }).sort({ createdAt: -1 });
 
       res.json(campaigns);
@@ -106,9 +98,14 @@ export const businessController = {
   // Get single campaign
   getCampaign: async (req: AuthRequest, res: Response) => {
     try {
+      const business = await Business.findOne({ userId: req.user?.userId });
+      if (!business) {
+        return res.status(404).json({ message: 'Business not found' });
+      }
+
       const campaign = await Campaign.findOne({
         _id: req.params.id,
-        businessId: req.user?.userId
+        businessId: business._id
       });
 
       if (!campaign) {
@@ -136,6 +133,102 @@ export const businessController = {
     } catch (error) {
       console.error('Error processing campaigns:', error);
       throw error;
+    }
+  },
+
+  // Get business profile
+  getBusinessProfile: async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      if (!req.user?.userId) {
+        res.status(401).json({ message: 'Not authenticated' });
+        return;
+      }
+
+      const business = await Business.findOne({ userId: req.user.userId });
+      if (!business) {
+        res.status(404).json({ message: 'Business not found' });
+        return;
+      }
+
+      res.json({
+        _id: business._id,
+        businessName: business.businessName,
+        businessType: business.businessType,
+        industry: business.industry,
+        website: business.website,
+        description: business.description,
+        logo: business.logo,
+        address: business.address,
+        contactInfo: business.contactInfo,
+        socialMedia: business.socialMedia,
+        settings: business.settings
+      });
+    } catch (error) {
+      console.error('Get business profile error:', error);
+      res.status(500).json({ message: 'Error fetching business profile' });
+    }
+  },
+
+  // Update business profile
+  updateBusinessProfile: async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      if (!req.user?.userId) {
+        res.status(401).json({ message: 'Not authenticated' });
+        return;
+      }
+
+      const business = await Business.findOne({ userId: req.user.userId });
+      if (!business) {
+        res.status(404).json({ message: 'Business not found' });
+        return;
+      }
+
+      const {
+        businessName,
+        businessType,
+        industry,
+        website,
+        description,
+        logo,
+        address,
+        contactInfo,
+        socialMedia,
+        settings
+      } = req.body;
+
+      // Update business fields
+      if (businessName) business.businessName = businessName;
+      if (businessType) business.businessType = businessType;
+      if (industry) business.industry = industry;
+      if (website) business.website = website;
+      if (description) business.description = description;
+      if (logo) business.logo = logo;
+      if (address) business.address = address;
+      if (contactInfo) business.contactInfo = contactInfo;
+      if (socialMedia) business.socialMedia = socialMedia;
+      if (settings) business.settings = settings;
+
+      await business.save();
+
+      res.json({
+        message: 'Business profile updated successfully',
+        business: {
+          _id: business._id,
+          businessName: business.businessName,
+          businessType: business.businessType,
+          industry: business.industry,
+          website: business.website,
+          description: business.description,
+          logo: business.logo,
+          address: business.address,
+          contactInfo: business.contactInfo,
+          socialMedia: business.socialMedia,
+          settings: business.settings
+        }
+      });
+    } catch (error) {
+      console.error('Update business profile error:', error);
+      res.status(500).json({ message: 'Error updating business profile' });
     }
   }
 };

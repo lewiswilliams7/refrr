@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { User } from '../models/user.model';
-import { Business } from '../models/business.model';
+import { Business, IBusiness } from '../models/business.model';
 import { Campaign } from '../models/campaign.model';
 import { Referral } from '../models/referral.model';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 interface IUser {
-  _id: mongoose.Types.ObjectId;
+  _id: Types.ObjectId;
   email: string;
   firstName: string;
   lastName: string;
@@ -17,55 +17,79 @@ interface IUser {
   updatedAt: Date;
 }
 
-interface IBusiness {
-  _id: mongoose.Types.ObjectId;
-  userId: mongoose.Types.ObjectId;
-  businessName: string;
-  businessType: string;
-  status: 'active' | 'inactive' | 'suspended';
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 interface IReferral {
-  _id: mongoose.Types.ObjectId;
-  campaignId: mongoose.Types.ObjectId;
-  businessId: mongoose.Types.ObjectId;
+  _id: Types.ObjectId;
+  campaignId: Types.ObjectId;
+  businessId: Types.ObjectId;
   status: 'pending' | 'approved' | 'rejected' | 'completed';
   createdAt: Date;
   updatedAt: Date;
   completedAt?: Date;
 }
 
+interface PopulatedBusiness extends IBusiness {
+  _id: Types.ObjectId;
+  businessName: string;
+  businessType: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
+  status: 'active' | 'inactive';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export const adminController = {
   // Get all users
-  getUsers: async (req: AuthRequest, res: Response) => {
+  getAllUsers: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const users = await User.find()
-        .select('-password')
-        .sort({ createdAt: -1 });
-      
+      if (!req.user?.userId) {
+        res.status(401).json({ message: 'Not authenticated' });
+        return;
+      }
+
+      const admin = await User.findById(req.user.userId);
+      if (!admin || admin.role !== 'admin') {
+        res.status(403).json({ message: 'Not authorized' });
+        return;
+      }
+
+      const users = await User.find().select('-password');
       res.json(users);
     } catch (error) {
-      console.error('Users fetch error:', error);
-      res.status(500).json({ message: 'Error fetching users', error });
+      console.error('Get all users error:', error);
+      res.status(500).json({ message: 'Error fetching users' });
     }
   },
 
-  // Get single user
-  getUser: async (req: AuthRequest, res: Response) => {
+  // Get user by ID
+  getUser: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const user = await User.findById(req.params.id)
-        .select('-password');
-      
+      if (!req.user?.userId) {
+        res.status(401).json({ message: 'Not authenticated' });
+        return;
+      }
+
+      const admin = await User.findById(req.user.userId);
+      if (!admin || admin.role !== 'admin') {
+        res.status(403).json({ message: 'Not authorized' });
+        return;
+      }
+
+      const user = await User.findById(req.params.id).select('-password');
       if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+        res.status(404).json({ message: 'User not found' });
+        return;
       }
 
       res.json(user);
     } catch (error) {
-      console.error('User fetch error:', error);
-      res.status(500).json({ message: 'Error fetching user', error });
+      console.error('Get user error:', error);
+      res.status(500).json({ message: 'Error fetching user' });
     }
   },
 
@@ -106,69 +130,56 @@ export const adminController = {
   },
 
   // Get all businesses
-  getBusinesses: async (req: AuthRequest, res: Response) => {
+  getAllBusinesses: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const businesses = await Business.find()
-        .populate('userId', 'email firstName lastName')
-        .sort({ createdAt: -1 });
-      
+        .populate<{ businessName: string; businessType: string }>('businessName businessType')
+        .lean();
       res.json(businesses);
     } catch (error) {
-      console.error('Businesses fetch error:', error);
-      res.status(500).json({ message: 'Error fetching businesses', error });
+      console.error('Get all businesses error:', error);
+      res.status(500).json({ message: 'Error fetching businesses' });
     }
   },
 
-  // Get single business
-  getBusiness: async (req: AuthRequest, res: Response) => {
+  // Get business by ID
+  getBusiness: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const business = await Business.findById(req.params.id)
-        .populate('userId', 'email firstName lastName');
-      
+        .populate<{ businessName: string; businessType: string }>('businessName businessType')
+        .lean();
+
       if (!business) {
-        return res.status(404).json({ message: 'Business not found' });
+        res.status(404).json({ message: 'Business not found' });
+        return;
       }
 
       res.json(business);
     } catch (error) {
-      console.error('Business fetch error:', error);
-      res.status(500).json({ message: 'Error fetching business', error });
+      console.error('Get business error:', error);
+      res.status(500).json({ message: 'Error fetching business' });
     }
   },
 
   // Update business status
-  updateBusinessStatus: async (req: AuthRequest, res: Response) => {
+  updateBusinessStatus: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { status } = req.body;
+      const business = await Business.findByIdAndUpdate(
+        req.params.id,
+        { status },
+        { new: true }
+      );
 
-      if (!['active', 'inactive', 'suspended'].includes(status)) {
-        return res.status(400).json({ 
-          message: 'Invalid status. Must be active, inactive, or suspended' 
-        });
-      }
-
-      const business = await Business.findById(req.params.id);
       if (!business) {
-        return res.status(404).json({ message: 'Business not found' });
+        res.status(404).json({ message: 'Business not found' });
+        return;
       }
 
-      business.status = status;
-      await business.save();
-
-      const businessData = business.toObject();
-
-      res.json({
-        message: 'Business status updated successfully',
-        business: {
-          _id: businessData._id,
-          name: businessData.businessName,
-          type: businessData.businessType,
-          status: businessData.status
-        }
-      });
+      res.json(business);
     } catch (error) {
-      console.error('Business status update error:', error);
-      res.status(500).json({ message: 'Error updating business status', error });
+      console.error('Update business status error:', error);
+      res.status(500).json({ message: 'Error updating business status' });
     }
   },
 
@@ -176,7 +187,7 @@ export const adminController = {
   getCampaigns: async (req: AuthRequest, res: Response) => {
     try {
       const campaigns = await Campaign.find()
-        .populate('businessId', 'businessName businessType')
+        .populate<{ businessId: PopulatedBusiness }>('businessId', 'businessName businessType')
         .sort({ createdAt: -1 });
       
       res.json(campaigns);
@@ -190,7 +201,7 @@ export const adminController = {
   getCampaign: async (req: AuthRequest, res: Response) => {
     try {
       const campaign = await Campaign.findById(req.params.id)
-        .populate('businessId', 'businessName businessType');
+        .populate<{ businessId: PopulatedBusiness }>('businessId', 'businessName businessType');
       
       if (!campaign) {
         return res.status(404).json({ message: 'Campaign not found' });
@@ -313,6 +324,60 @@ export const adminController = {
     } catch (error) {
       console.error('Dashboard stats fetch error:', error);
       res.status(500).json({ message: 'Error fetching dashboard statistics', error });
+    }
+  },
+
+  // Delete user
+  deleteUser: async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      if (!req.user?.userId) {
+        res.status(401).json({ message: 'Not authenticated' });
+        return;
+      }
+
+      const admin = await User.findById(req.user.userId);
+      if (!admin || admin.role !== 'admin') {
+        res.status(403).json({ message: 'Not authorized' });
+        return;
+      }
+
+      const { userId } = req.params;
+
+      const user = await User.findById(userId);
+      if (!user) {
+        res.status(404).json({ message: 'User not found' });
+        return;
+      }
+
+      // Don't allow deleting admin users
+      if (user.role === 'admin') {
+        res.status(403).json({ message: 'Cannot delete admin users' });
+        return;
+      }
+
+      await user.deleteOne();
+
+      res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+      console.error('Delete user error:', error);
+      res.status(500).json({ message: 'Error deleting user' });
+    }
+  },
+
+  // Delete business
+  deleteBusiness: async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const business = await Business.findByIdAndDelete(req.params.id);
+
+      if (!business) {
+        res.status(404).json({ message: 'Business not found' });
+        return;
+      }
+
+      res.json({ message: 'Business deleted successfully' });
+    } catch (error) {
+      console.error('Delete business error:', error);
+      res.status(500).json({ message: 'Error deleting business' });
     }
   }
 }; 

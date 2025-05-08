@@ -45,11 +45,11 @@ declare global {
   }
 }
 
-export const authenticateToken = (
+export const authenticateToken = async (
   req: Request,
   res: Response,
   next: NextFunction
-): void => {
+): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -85,7 +85,7 @@ export const authenticateToken = (
   }
 };
 
-export const isAdmin = (req: AuthRequest, res: Response, next: NextFunction): void => {
+export const isAdmin = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   if (req.user?.role !== 'admin') {
     res.status(403).json({ message: 'Access denied' });
     return;

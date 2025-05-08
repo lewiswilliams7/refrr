@@ -2,12 +2,13 @@ import mongoose, { Document, Schema, Types } from 'mongoose';
 import { IBusiness } from './business.model';
 
 export interface ICampaign extends Document {
+  _id: Types.ObjectId;
   title: string;
   description: string;
   businessId: Types.ObjectId;
   business?: IBusiness;
   status: 'active' | 'inactive' | 'completed' | 'paused';
-  rewardType: string;
+  rewardType: 'percentage' | 'fixed';
   rewardValue: number;
   rewardDescription: string;
   showRewardDisclaimer: boolean;
@@ -21,6 +22,8 @@ export interface ICampaign extends Document {
     conversionRate: number;
   };
   expirationDate?: Date;
+  startDate: Date;
+  endDate: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,7 +34,7 @@ const campaignSchema = new Schema<ICampaign>(
     description: { type: String, required: true },
     businessId: { type: Schema.Types.ObjectId, ref: 'Business', required: true },
     status: { type: String, enum: ['active', 'inactive', 'completed', 'paused'], default: 'active' },
-    rewardType: { type: String, required: true },
+    rewardType: { type: String, enum: ['percentage', 'fixed'], required: true },
     rewardValue: { type: Number, required: true },
     rewardDescription: { type: String, required: true },
     showRewardDisclaimer: { type: Boolean, default: false },
@@ -44,7 +47,9 @@ const campaignSchema = new Schema<ICampaign>(
       totalReferrals: { type: Number, default: 0 },
       conversionRate: { type: Number, default: 0 }
     },
-    expirationDate: { type: Date }
+    expirationDate: { type: Date },
+    startDate: { type: Date, required: true },
+    endDate: { type: Date, required: true }
   },
   { timestamps: true }
 );

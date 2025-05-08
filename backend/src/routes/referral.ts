@@ -1,46 +1,34 @@
-import express, { Request, Response, NextFunction } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
+import { asyncHandler } from '../middleware/async';
 import { referralController } from '../controllers/referral.controller';
-import { authenticateToken } from '../middleware/auth';
-import { asyncHandler } from '../middleware/asyncHandler';
-import { AuthRequest } from '../types/auth.types';
-import { Referral } from '../models/referral.model';
-import { Customer } from '../models/customer.model';
-import { Campaign } from '../models/campaign.model';
-import { sendEmail } from '../services/email.service';
-import { ReferralStatus } from '../types/referral.types';
+import { authenticate } from '../middleware/auth';
 
-const router = express.Router();
+const router = Router();
 
-// Debug logging middleware
-router.use((req: Request, res: Response, next: NextFunction) => {
-  console.log(`[Referral Routes] ${req.method} ${req.url}`);
+// Logger middleware
+const loggerMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  console.log(`${req.method} ${req.url}`);
   next();
-});
+};
+
+// Apply logger middleware to all routes
+router.use(loggerMiddleware);
 
 // Public routes
-router.get('/code/:code', asyncHandler(referralController.getReferralByCode));
-router.post('/code/:code/complete', asyncHandler(referralController.completeReferral));
 router.get('/track/:code', asyncHandler(referralController.trackReferral));
 
 // Protected routes
-router.use(authenticateToken);
+router.post('/', authenticate, asyncHandler(referralController.createReferral));
+router.get('/business', authenticate, asyncHandler(referralController.getBusinessReferrals));
+router.put('/:id', authenticate, asyncHandler(referralController.updateReferral));
+router.delete('/:id', authenticate, asyncHandler(referralController.deleteReferral));
 
-// Generate referral link
-router.post('/', asyncHandler(referralController.createReferral));
-
-// Get all referrals
-router.get('/', asyncHandler(referralController.getReferrals));
-
-// Get referral by ID
-router.get('/:id', asyncHandler(referralController.getReferral));
-
-// Delete referral
-router.delete('/:id', asyncHandler(referralController.deleteReferral));
-
-// 404 handler for referral routes
-router.use((req: Request, res: Response) => {
-  console.log(`[Referral Routes] 404: ${req.method} ${req.url}`);
+// 404 handler for undefined routes
+const notFoundHandler = async (req: Request, res: Response): Promise<void> => {
+  console.log(`404 - Route not found: ${req.method} ${req.url}`);
   res.status(404).json({ message: 'Referral route not found' });
-});
+};
+
+router.use(notFoundHandler);
 
 export default router;
