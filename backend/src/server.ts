@@ -26,6 +26,16 @@ app.use(morgan('dev'));
 // Setup security
 setupSecurity(app);
 
+// Root route
+app.get('/', (req: express.Request, res: express.Response) => {
+  res.json({
+    message: 'Welcome to Refrr API',
+    version: '1.0.0',
+    status: 'operational',
+    documentation: '/api/docs'
+  });
+});
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/refrr')
   .then(() => console.log('Connected to MongoDB'))
