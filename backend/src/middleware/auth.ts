@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { User, UserDocument } from '../models/user.model';
 import mongoose from 'mongoose';
+import { ParsedQs } from 'qs';
 
 // Debug logging utility
 const debug = (message: string, data?: any) => {
@@ -20,7 +21,7 @@ const error = (message: string, err: any) => {
 };
 
 // Simple request interface
-export interface AuthRequest extends Request {
+export interface AuthRequest extends Omit<Request, 'query'> {
   user?: {
     userId: string;
     email: string;
@@ -34,7 +35,7 @@ export interface AuthRequest extends Request {
     [key: string]: string | string[] | undefined;
   };
   query: {
-    [key: string]: string | string[] | undefined;
+    [key: string]: string | string[] | ParsedQs | ParsedQs[] | undefined;
   };
   cookies: {
     [key: string]: string;
