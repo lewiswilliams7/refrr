@@ -1,12 +1,13 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { authenticate, isAdmin } from '../middleware/auth';
 import { adminController } from '../controllers/admin.controller';
 import { asyncHandler } from '../middleware/asyncHandler';
+import { AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
 // Debug logging middleware
-const loggerMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction): Promise<void> => {
+const loggerMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   console.log(`[Admin Routes] ${req.method} ${req.url}`);
   next();
 };
@@ -57,7 +58,7 @@ router.get('/referrals/:id', asyncHandler(adminController.getReferral));
 router.get('/dashboard/stats', asyncHandler(adminController.getDashboardStats));
 
 // 404 handler for admin routes
-const notFoundHandler = async (req: express.Request, res: express.Response): Promise<void> => {
+const notFoundHandler = async (req: Request, res: Response): Promise<void> => {
   console.log(`[Admin Routes] 404: ${req.method} ${req.url}`);
   res.status(404).json({ message: 'Admin route not found' });
 };

@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { authenticate } from '../middleware/auth';
 import { campaignController } from '../controllers/campaign.controller';
 import { asyncHandler } from '../middleware/asyncHandler';
@@ -6,7 +6,7 @@ import { asyncHandler } from '../middleware/asyncHandler';
 const router = Router();
 
 // Debug logging middleware
-const loggerMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction): Promise<void> => {
+const loggerMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   console.log(`[Campaign Routes] ${req.method} ${req.url}`);
   next();
 };
@@ -39,7 +39,7 @@ router.delete('/:id', asyncHandler(campaignController.deleteCampaign));
 router.put('/:id/toggle', asyncHandler(campaignController.toggleActive));
 
 // 404 handler for campaign routes
-const notFoundHandler = async (req: express.Request, res: express.Response): Promise<void> => {
+const notFoundHandler = async (req: Request, res: Response): Promise<void> => {
   console.log(`[Campaign Routes] 404: ${req.method} ${req.url}`);
   res.status(404).json({ message: 'Campaign route not found' });
 };
