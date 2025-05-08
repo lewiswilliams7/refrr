@@ -17,17 +17,19 @@ const BUSINESS_TYPES = [
   'Other'
 ] as const;
 
-export interface IUser {
+export interface IUser extends Document {
   email: string;
   password: string;
   firstName: string;
   lastName: string;
   role: 'admin' | 'business' | 'customer';
-  status: 'active' | 'inactive' | 'suspended';
-  resetToken?: string;
-  resetTokenExpires?: Date;
+  status: 'active' | 'inactive';
+  lastLogin?: Date;
   createdAt: Date;
   updatedAt: Date;
+  comparePassword(candidatePassword: string): Promise<boolean>;
+  resetToken?: string;
+  resetTokenExpires?: Date;
   businessName?: string;
   businessType?: string;
   location?: {
@@ -41,7 +43,6 @@ export interface IUser {
 
 export interface UserDocument extends IUser, Document {
   _id: Types.ObjectId;
-  comparePassword(candidatePassword: string): Promise<boolean>;
   toObject(): IUser & { _id: Types.ObjectId };
 }
 
@@ -73,12 +74,15 @@ const userSchema = new Schema<UserDocument>({
   role: {
     type: String,
     enum: ['admin', 'business', 'customer'],
-    default: 'business',
+    required: true,
   },
   status: {
     type: String,
-    enum: ['active', 'inactive', 'suspended'],
+    enum: ['active', 'inactive'],
     default: 'active',
+  },
+  lastLogin: {
+    type: Date,
   },
   resetToken: String,
   resetTokenExpires: Date,
@@ -119,17 +123,13 @@ userSchema.pre('save', async function (next) {
     this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error: any) {
-    next(error);
+    next(error as Error);
   }
 });
 
 // Method to compare password for login
 userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
-  try {
-    return await bcrypt.compare(candidatePassword, this.password);
-  } catch (error) {
-    return false;
-  }
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 export const User = mongoose.model<UserDocument>('User', userSchema);
