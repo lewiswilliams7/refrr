@@ -1,8 +1,8 @@
 import { Document } from 'mongoose';
-import { ICampaign } from './campaign.types';
+import { Campaign } from './campaign.types';
 
 export interface IPopulatedReferral extends Document {
-  campaignId: ICampaign & {
+  campaignId: Campaign & {
     title: string;
     description: string;
     rewardType: 'percentage' | 'fixed';
