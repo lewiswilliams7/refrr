@@ -69,13 +69,13 @@ export const authController = {
           businessType: user.businessType
         }
       });
-    } catch (error) {
-      console.error('Registration error:', error);
-      if (error.name === 'ValidationError') {
-        res.status(400).json({ message: 'Validation error', errors: error.errors });
-        return;
+    } catch (error: unknown) {
+      console.error('Error in register:', error);
+      if (error instanceof Error) {
+        res.status(500).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'An unknown error occurred' });
       }
-      res.status(500).json({ message: 'Error registering user' });
     }
   },
 
@@ -161,7 +161,7 @@ export const authController = {
           role: savedUser.role
         },
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Customer registration error:', error);
       // Log the full error for debugging
       if (error instanceof Error) {
@@ -214,7 +214,7 @@ export const authController = {
           businessType: user.businessType
         }
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
       res.status(500).json({ message: 'Error logging in' });
     }
@@ -237,7 +237,7 @@ export const authController = {
         businessName: user.businessName,
         businessType: user.businessType
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Get current user error:', error);
       res.status(500).json({ message: 'Error getting current user' });
     }
@@ -290,7 +290,7 @@ export const authController = {
 
       await admin.save();
       console.log('Admin account created successfully');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error initializing admin account:', error);
     }
   }

@@ -1,90 +1,27 @@
-import mongoose, { Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
+import { Business } from './business.model';
 
-export interface ICustomer {
-  _id: mongoose.Types.ObjectId;
+export interface ICustomer extends Document {
   businessId: mongoose.Types.ObjectId;
+  business?: Business;
   email: string;
-  firstName?: string;
-  lastName?: string;
+  firstName: string;
+  lastName: string;
   phone?: string;
-  address?: {
-    street?: string;
-    city?: string;
-    state?: string;
-    postcode?: string;
-    country?: string;
-  };
-  preferences?: {
-    emailNotifications: boolean;
-    smsNotifications: boolean;
-    marketingConsent: boolean;
-  };
-  referralStats: {
-    totalReferrals: number;
-    successfulReferrals: number;
-    rewardsEarned: number;
-    lastReferralDate?: Date;
-  };
+  status: 'active' | 'inactive';
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface CustomerDocument extends Omit<ICustomer, '_id'>, Document {
-  _id: mongoose.Types.ObjectId;
-}
-
-const customerSchema = new mongoose.Schema({
-  businessId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Business',
-    required: true
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  firstName: String,
-  lastName: String,
+const customerSchema = new Schema<ICustomer>({
+  businessId: { type: Schema.Types.ObjectId, ref: 'Business', required: true },
+  email: { type: String, required: true, unique: true },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
   phone: String,
-  address: {
-    street: String,
-    city: String,
-    state: String,
-    postcode: String,
-    country: String
-  },
-  preferences: {
-    emailNotifications: {
-      type: Boolean,
-      default: true
-    },
-    smsNotifications: {
-      type: Boolean,
-      default: false
-    },
-    marketingConsent: {
-      type: Boolean,
-      default: false
-    }
-  },
-  referralStats: {
-    totalReferrals: {
-      type: Number,
-      default: 0
-    },
-    successfulReferrals: {
-      type: Number,
-      default: 0
-    },
-    rewardsEarned: {
-      type: Number,
-      default: 0
-    },
-    lastReferralDate: Date
-  }
-}, { timestamps: true });
+  status: { type: String, enum: ['active', 'inactive'], default: 'active' }
+}, {
+  timestamps: true
+});
 
-const Customer = mongoose.models.Customer || mongoose.model<CustomerDocument>('Customer', customerSchema);
-
-export default Customer; 
+export const Customer = mongoose.model<ICustomer>('Customer', customerSchema); 

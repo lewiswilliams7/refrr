@@ -1,13 +1,16 @@
-import mongoose, { Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
+import { Business } from './business.model';
+import { Campaign } from './campaign.model';
 
-export interface IReferral {
-  _id: mongoose.Types.ObjectId;
+export interface IReferral extends Document {
   businessId: mongoose.Types.ObjectId;
+  business?: Business;
   campaignId: mongoose.Types.ObjectId;
+  campaign?: Campaign;
   referrerEmail: string;
   referredEmail?: string;
-  code: string;
   status: 'pending' | 'approved' | 'rejected';
+  code: string;
   trackingData?: {
     ipAddress?: string;
     userAgent?: string;
@@ -18,47 +21,21 @@ export interface IReferral {
   updatedAt: Date;
 }
 
-export interface ReferralDocument extends Omit<IReferral, '_id'>, Document {
-  _id: mongoose.Types.ObjectId;
-}
-
-const referralSchema = new mongoose.Schema({
-  businessId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Business',
-    required: true
-  },
-  campaignId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Campaign',
-    required: true
-  },
-  referrerEmail: {
-    type: String,
-    required: true
-  },
-  referredEmail: String,
-  code: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  status: {
-    type: String,
-    enum: ['pending', 'approved', 'rejected'],
-    default: 'pending'
-  },
+const referralSchema = new Schema<IReferral>({
+  businessId: { type: Schema.Types.ObjectId, ref: 'Business', required: true },
+  campaignId: { type: Schema.Types.ObjectId, ref: 'Campaign', required: true },
+  referrerEmail: { type: String, required: true },
+  referredEmail: { type: String },
+  status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+  code: { type: String, required: true, unique: true },
   trackingData: {
     ipAddress: String,
     userAgent: String,
     referrer: String,
-    timestamp: {
-      type: Date,
-      default: Date.now
-    }
+    timestamp: { type: Date, default: Date.now }
   }
-}, { timestamps: true });
+}, {
+  timestamps: true
+});
 
-const Referral = mongoose.models.Referral || mongoose.model<ReferralDocument>('Referral', referralSchema);
-
-export default Referral; 
+export const Referral = mongoose.model<IReferral>('Referral', referralSchema); 

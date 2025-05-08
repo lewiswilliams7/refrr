@@ -82,13 +82,13 @@ export const authenticateToken = (
 
     (req as AuthRequest).user = decoded;
     next();
-  } catch (error) {
-    console.error('Authentication error:', error);
-    if (error.name === 'JsonWebTokenError') {
-      res.status(403).json({ message: 'Invalid token' });
-      return;
+  } catch (error: unknown) {
+    console.error('Error in authenticateToken:', error);
+    if (error instanceof Error) {
+      res.status(401).json({ message: error.message });
+    } else {
+      res.status(401).json({ message: 'Invalid token' });
     }
-    res.status(401).json({ message: 'Authentication failed' });
   }
 };
 
