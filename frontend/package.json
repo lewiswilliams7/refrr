@@ -2,7 +2,7 @@
   "name": "refrr-frontend",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://lewiswilliams7.github.io/refrr",
+  "homepage": "https://refrr-frontend.onrender.com",
   "engines": {
     "node": "18.x"
   },

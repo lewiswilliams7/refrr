@@ -26,6 +26,13 @@ app.get('/health', (req, res) => {
 // Serve static files from the build directory
 const buildPath = path.join(__dirname, 'build');
 console.log('Serving static files from:', buildPath);
+
+// Ensure the build directory exists
+if (!require('fs').existsSync(buildPath)) {
+  console.error('Build directory does not exist! Please run npm run build first.');
+  process.exit(1);
+}
+
 app.use(express.static(buildPath));
 
 // Log all requests
@@ -43,6 +50,7 @@ app.get('*', (req, res) => {
 const port = process.env.PORT || 3000;
 console.log(`Attempting to start server on port ${port}`);
 
+// Start the server
 const server = app.listen(port, '0.0.0.0', (error) => {
   if (error) {
     console.error('Failed to start server:', error);
