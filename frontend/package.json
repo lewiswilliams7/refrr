@@ -30,7 +30,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "npx serve -s build",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "test:watch": "jest --watch",
