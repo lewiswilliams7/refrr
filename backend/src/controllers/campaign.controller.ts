@@ -20,7 +20,7 @@ interface PopulatedBusiness extends IBusiness {
 }
 
 // Define the type for campaign with populated business
-interface CampaignWithBusiness extends ICampaign {
+interface CampaignWithBusiness extends Omit<ICampaign, 'businessId'> {
   _id: Types.ObjectId;
   businessId: Types.ObjectId;
   title: string;

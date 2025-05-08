@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { User, IUser } from '../models/user.model';
-import mongoose from 'mongoose';
-import { ParsedQs } from 'qs';
+import { User } from '../models/user.model';
+import { Types } from 'mongoose';
 
 // Debug logging utility
 const debug = (message: string, data?: any) => {
@@ -20,24 +19,22 @@ const error = (message: string, err: any) => {
   });
 };
 
-// Simple request interface
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+debug('Using JWT secret:', { hasEnvSecret: !!process.env.JWT_SECRET });
+
 export interface AuthRequest extends Request {
   user?: {
-    userId: mongoose.Types.ObjectId;
+    userId: Types.ObjectId;
     email: string;
     role?: string;
   };
 }
 
-// JWT secret with fallback
-const JWT_SECRET = process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl';
-debug('Using JWT secret:', { hasEnvSecret: !!process.env.JWT_SECRET });
-
 declare global {
   namespace Express {
     interface Request {
       user?: {
-        userId: mongoose.Types.ObjectId;
+        userId: Types.ObjectId;
         email: string;
         role?: string;
       };
@@ -45,43 +42,33 @@ declare global {
   }
 }
 
-export const authenticateToken = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      res.status(401).json({ message: 'No token provided' });
-      return;
-    }
+    const token = req.header('Authorization')?.replace('Bearer ', '');
 
-    const token = authHeader.split(' ')[1];
     if (!token) {
-      res.status(401).json({ message: 'Invalid token format' });
+      res.status(401).json({ message: 'No authentication token, access denied' });
       return;
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'test-secret') as {
-      userId: string;
-      email: string;
-      role?: string;
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+    const user = await User.findById(decoded.userId).select('-password');
+
+    if (!user) {
+      res.status(401).json({ message: 'Token is invalid' });
+      return;
+    }
+
+    req.user = {
+      userId: user._id,
+      email: user.email,
+      role: user.role
     };
 
-    (req as AuthRequest).user = {
-      userId: new mongoose.Types.ObjectId(decoded.userId),
-      email: decoded.email,
-      role: decoded.role
-    };
     next();
-  } catch (error: unknown) {
-    console.error('Error in authenticateToken:', error);
-    if (error instanceof Error) {
-      res.status(401).json({ message: error.message });
-    } else {
-      res.status(401).json({ message: 'Invalid token' });
-    }
+  } catch (error) {
+    console.error('Authentication error:', error);
+    res.status(401).json({ message: 'Token is invalid' });
   }
 };
 
