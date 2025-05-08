@@ -14,6 +14,7 @@ import dashboardRoutes from './routes/dashboard';
 import healthRoutes from './routes/health';
 import referralRoutes from './routes/referral';
 import { setupSecurity } from './config/security';
+import { Request, Response } from 'express';
 
 // Load environment variables
 dotenv.config();
@@ -53,9 +54,22 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/referrals', referralRoutes);
 
-// Root route handler
-app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to Refrr API' });
+// Root route
+app.get('/', (req: Request, res: Response) => {
+  res.json({
+    message: 'Welcome to Refrr API',
+    version: '1.0.0',
+    status: 'operational',
+    documentation: '/api/docs'
+  });
+});
+
+// 404 handler
+app.use((req: Request, res: Response) => {
+  res.status(404).json({
+    message: 'Not Found',
+    documentation: '/api/docs'
+  });
 });
 
 // Error handling middleware
