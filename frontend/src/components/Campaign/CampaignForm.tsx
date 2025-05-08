@@ -91,7 +91,17 @@ export default function CampaignForm({ open, onClose, campaign, onSubmit }: Prop
         rewardDisclaimerText,
         requireBookingConfirmation,
         expirationDate: expirationDate || undefined,
-        maxReferrals: maxReferrals ? Number(maxReferrals) : undefined
+        maxReferrals: maxReferrals ? Number(maxReferrals) : undefined,
+        status: 'draft',
+        analytics: {
+          totalReferrals: 0,
+          successfulReferrals: 0,
+          conversionRate: 0,
+          rewardRedemptions: 0,
+          lastUpdated: new Date().toISOString()
+        },
+        startDate: new Date().toISOString(),
+        tags: []
       };
 
       if (campaign?._id) {
