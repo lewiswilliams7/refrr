@@ -15,3 +15,27 @@ export interface IPopulatedReferral extends Document {
   status: 'pending' | 'approved' | 'rejected';
   code: string;
 }
+
+export type ReferralStatus = 'pending' | 'approved' | 'rejected';
+
+export interface ReferralTrackingData {
+  ipAddress?: string;
+  userAgent?: string;
+  referrer?: string;
+  timestamp: Date;
+}
+
+export interface ReferralCreateInput {
+  businessId: string;
+  campaignId: string;
+  referrerEmail: string;
+  referredEmail?: string;
+  code: string;
+  trackingData?: ReferralTrackingData;
+}
+
+export interface ReferralUpdateInput {
+  status?: ReferralStatus;
+  referredEmail?: string;
+  trackingData?: ReferralTrackingData;
+}

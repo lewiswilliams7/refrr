@@ -145,8 +145,4 @@ campaignSchema.pre('save', function(this: any, next) {
 // Create and export the model
 const Campaign = mongoose.models.Campaign || mongoose.model<CampaignDocument>('Campaign', campaignSchema);
 
-// Export types
-export type { ICampaign, CampaignDocument, IBusiness };
-
-// Export the model
-export { Campaign };
+export default Campaign;
