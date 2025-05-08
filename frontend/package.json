@@ -31,7 +31,7 @@
   },
   "scripts": {
     "start": "npx http-server build -p $PORT",
-    "build": "react-scripts build",
+    "build": "GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
