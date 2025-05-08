@@ -11,6 +11,22 @@ import mongoose from 'mongoose';
 import Business from '../models/business';
 import { asyncHandler } from '../middleware/asyncHandler';
 
+interface IReferral {
+  _id: mongoose.Types.ObjectId;
+  campaignId: mongoose.Types.ObjectId;
+  businessId: mongoose.Types.ObjectId;
+  referrerEmail: string;
+  referredEmail?: string;
+  code: string;
+  status: 'pending' | 'approved' | 'rejected';
+  trackingData?: {
+    lastViewed: Date;
+    viewCount: number;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export const referralController = {
   // Create new referral
   create: async (req: AuthRequest, res: Response): Promise<void> => {

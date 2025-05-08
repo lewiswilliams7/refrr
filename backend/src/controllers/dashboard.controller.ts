@@ -186,7 +186,7 @@ export const dashboardController = {
         .limit(5);
 
       const campaignPerformance = await Promise.all(
-        campaigns.map(async (campaign: ICampaign) => {
+        campaigns.map(async (campaign) => {
           const campaignReferrals = await Referral.countDocuments({
             campaignId: campaign._id
           });

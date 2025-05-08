@@ -15,7 +15,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl';
 const generateToken = (user: IUser): string => {
   return jwt.sign(
     {
-      userId: user._id,
+      userId: user._id.toString(),
       email: user.email,
       role: user.role
     },
@@ -147,7 +147,7 @@ export const authController = {
         message: 'Customer registered successfully',
         token,
         user: {
-          id: savedUser._id,
+          id: savedUser._id.toString(),
           email: savedUser.email,
           firstName: savedUser.firstName,
           lastName: savedUser.lastName,
@@ -199,7 +199,7 @@ export const authController = {
     res.json({
       token,
       user: {
-        id: user._id,
+        id: user._id.toString(),
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -222,7 +222,7 @@ export const authController = {
 
     res.json({
       user: {
-        id: user._id,
+        id: user._id.toString(),
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,

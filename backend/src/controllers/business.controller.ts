@@ -11,6 +11,7 @@ interface ICampaign {
   description: string;
   rewardType: string;
   rewardValue: number;
+  rewardDescription?: string;
   status: 'active' | 'inactive' | 'completed';
   createdAt: Date;
   updatedAt: Date;
@@ -49,7 +50,7 @@ export const businessController = {
 
           console.log(`Found ${campaigns.length} active campaigns for ${business.businessName}`);
 
-          const rewards = campaigns.map((campaign: ICampaign) => {
+          const rewards = campaigns.map((campaign) => {
             console.log(`Processing campaign: ${campaign._id}`);
             const reward: IReward = {
               type: campaign.rewardType,
