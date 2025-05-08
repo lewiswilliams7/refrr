@@ -30,6 +30,16 @@ app.use(express.json());
 // Setup security
 setupSecurity(app);
 
+// Root route
+app.get('/', (req: Request, res: Response) => {
+  res.json({
+    message: 'Welcome to Refrr API',
+    version: '1.0.0',
+    status: 'operational',
+    documentation: '/api/docs'
+  });
+});
+
 // Connect to MongoDB
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) {
@@ -53,16 +63,6 @@ app.use('/api/customer', customerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/referrals', referralRoutes);
-
-// Root route
-app.get('/', (req: Request, res: Response) => {
-  res.json({
-    message: 'Welcome to Refrr API',
-    version: '1.0.0',
-    status: 'operational',
-    documentation: '/api/docs'
-  });
-});
 
 // 404 handler
 app.use((req: Request, res: Response) => {
