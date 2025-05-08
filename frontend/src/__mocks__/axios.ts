@@ -1,4 +1,4 @@
-import { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, AxiosHeaderValue } from 'axios';
+import { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, AxiosHeaderValue, RawAxiosHeaders } from 'axios';
 
 interface MockAxiosInstance extends AxiosInstance {
   create: jest.Mock;
@@ -14,14 +14,23 @@ interface MockAxiosInstance extends AxiosInstance {
   patchForm: jest.Mock;
 }
 
-const mockHeaders: HeadersDefaults & { [key: string]: AxiosHeaderValue } = {
-  common: null,
-  delete: null,
-  get: null,
-  head: null,
-  post: null,
-  put: null,
-  patch: null
+const mockHeaders: HeadersDefaults = {
+  common: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json'
+  },
+  delete: {},
+  get: {},
+  head: {},
+  post: {
+    'Content-Type': 'application/json'
+  },
+  put: {
+    'Content-Type': 'application/json'
+  },
+  patch: {
+    'Content-Type': 'application/json'
+  }
 };
 
 const mockAxios: MockAxiosInstance = {
