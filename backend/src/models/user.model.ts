@@ -17,39 +17,37 @@ const BUSINESS_TYPES = [
   'Other'
 ] as const;
 
-export interface IUser extends Document {
-  _id: Types.ObjectId;
+export interface IUser {
   email: string;
   password: string;
-  businessName?: string;
   firstName: string;
   lastName: string;
-  businessType?: typeof BUSINESS_TYPES[number];
-  location?: {
-    address: string;
-    city: string;
-    postcode: string;
-    coordinates?: {
-      lat: number;
-      lng: number;
-    }
-  };
-  businessDescription?: string;
   role: 'admin' | 'business' | 'customer';
   status: 'active' | 'inactive' | 'suspended';
   resetToken?: string;
   resetTokenExpires?: Date;
   createdAt: Date;
   updatedAt: Date;
-  comparePassword(candidatePassword: string): Promise<boolean>;
+  businessName?: string;
+  businessType?: string;
+  location?: {
+    address: string;
+    city: string;
+    postcode: string;
+  };
+  businessDescription?: string;
+  avatar?: string;
 }
 
-export interface UserDocument extends IUser {
+export interface UserDocument extends IUser, Document {
   _id: Types.ObjectId;
   comparePassword(candidatePassword: string): Promise<boolean>;
+  toObject(): IUser & { _id: Types.ObjectId };
 }
 
-const userSchema = new Schema<IUser>({
+const DEFAULT_AVATAR = 'https://ui-avatars.com/api/';
+
+const userSchema = new Schema<UserDocument>({
   email: {
     type: String,
     required: true,
@@ -62,11 +60,6 @@ const userSchema = new Schema<IUser>({
     required: true,
     minlength: 6,
   },
-  businessName: {
-    type: String,
-    required: function() { return this.role === 'business'; },
-    trim: true,
-  },
   firstName: {
     type: String,
     required: true,
@@ -76,24 +69,6 @@ const userSchema = new Schema<IUser>({
     type: String,
     required: true,
     trim: true,
-  },
-  businessType: {
-    type: String,
-    enum: BUSINESS_TYPES,
-    required: function() { return this.role === 'business'; },
-  },
-  location: {
-    address: { type: String, required: function() { return this.role === 'business'; } },
-    city: { type: String, required: function() { return this.role === 'business'; } },
-    postcode: { type: String, required: function() { return this.role === 'business'; } },
-    coordinates: {
-      lat: Number,
-      lng: Number
-    }
-  },
-  businessDescription: {
-    type: String,
-    required: false
   },
   role: {
     type: String,
@@ -105,13 +80,33 @@ const userSchema = new Schema<IUser>({
     enum: ['active', 'inactive', 'suspended'],
     default: 'active',
   },
-  resetToken: {
+  resetToken: String,
+  resetTokenExpires: Date,
+  businessName: {
     type: String,
-    required: false,
+    required: function() { return this.role === 'business'; },
+    trim: true,
   },
-  resetTokenExpires: {
-    type: Date,
-    required: false,
+  businessType: {
+    type: String,
+    enum: BUSINESS_TYPES,
+    required: function() { return this.role === 'business'; },
+  },
+  location: {
+    address: { type: String, required: function() { return this.role === 'business'; } },
+    city: { type: String, required: function() { return this.role === 'business'; } },
+    postcode: { type: String, required: function() { return this.role === 'business'; } },
+  },
+  businessDescription: {
+    type: String,
+    required: false
+  },
+  avatar: {
+    type: String,
+    default: function() {
+      const name = encodeURIComponent(`${this.firstName || ''} ${this.lastName || ''}`.trim());
+      return `${DEFAULT_AVATAR}?name=${name}&background=random&size=128`;
+    }
   }
 }, { timestamps: true });
 
@@ -137,5 +132,5 @@ userSchema.methods.comparePassword = async function(candidatePassword: string): 
   }
 };
 
-export const User = mongoose.model<IUser>('User', userSchema);
+export const User = mongoose.model<UserDocument>('User', userSchema);
 export { BUSINESS_TYPES };

@@ -1,7 +1,6 @@
-import rateLimit from 'express-rate-limit';
-import helmet from 'helmet';
 import cors from 'cors';
-import { Request, Response, NextFunction } from 'express';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 // CORS Configuration
 export const corsOptions = {
@@ -11,16 +10,12 @@ export const corsOptions = {
   credentials: true,
 };
 
-// Rate Limiting Middleware Factory
-export const createRateLimiter = () => {
-  return rateLimit({
-    windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-    max: Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
-    message: 'Too many requests from this IP, please try again later.',
-    standardHeaders: true,
-    legacyHeaders: false,
-  });
-};
+// Rate Limiting
+export const limiter = rateLimit({
+  windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+  max: Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+});
 
 // Security Headers
 export const helmetConfig = helmet({
@@ -44,4 +39,24 @@ export const helmetConfig = helmet({
   noSniff: true,
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
   xssFilter: true,
-}); 
+});
+
+export const setupSecurity = (app: any) => {
+  // CORS configuration
+  app.use(cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true
+  }));
+
+  // Helmet for security headers
+  app.use(helmet());
+
+  // Rate limiting
+  const limiter = rateLimit({
+    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
+    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100') // limit each IP to 100 requests per windowMs
+  });
+
+  // Apply rate limiting to all routes
+  app.use(limiter);
+}; 

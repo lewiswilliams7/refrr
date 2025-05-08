@@ -1,24 +1,15 @@
-name: Basic Test
+name: Simple Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, staging ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        
-      - name: Debug Repository
-        run: |
-          echo "Current directory: $(pwd)"
-          echo "Directory contents:"
-          ls -la
-          echo "Frontend directory contents:"
-          ls -la frontend || echo "Frontend directory not found"
-          
+      - uses: actions/checkout@v3
+      
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -26,16 +17,45 @@ jobs:
           
       - name: Install dependencies
         run: |
-          if [ -d "frontend" ]; then
-            cd frontend
-            echo "Installing dependencies..."
-            npm install || echo "npm install failed"
-            echo "npm version:"
-            npm --version
-          else
-            echo "Error: frontend directory not found"
-            exit 1
-          fi
+          cd frontend
+          npm install
+          npm install --save-dev jest@29.6.3 jest-environment-jsdom@29.6.3 babel-jest@29.6.3 @babel/core@7.23.3 @babel/preset-env@7.23.3 @babel/preset-react@7.23.3 @babel/preset-typescript@7.23.3
+          
+      - name: Configure Jest
+        run: |
+          cd frontend
+          echo 'module.exports = {
+            testEnvironment: "jsdom",
+            transform: {
+              "^.+\\.(js|jsx|mjs|cjs|ts|tsx)$": ["babel-jest", {
+                presets: [
+                  ["@babel/preset-env", { targets: { node: "current" }, modules: "commonjs" }],
+                  "@babel/preset-react",
+                  "@babel/preset-typescript"
+                ],
+                plugins: ["@babel/plugin-transform-modules-commonjs"]
+              }]
+            },
+            transformIgnorePatterns: ["node_modules/(?!(axios|@mui|@emotion|@babel)/)"],
+            moduleNameMapper: {
+              "\\.(css|less|scss|sass)$": "identity-obj-proxy",
+              "^axios$": "<rootDir>/node_modules/axios/dist/axios.min.js"
+            },
+            setupFilesAfterEnv: ["<rootDir>/src/setupTests.ts"]
+          };' > jest.config.js
+          
+      - name: Run tests
+        run: |
+          cd frontend
+          npx jest --config=jest.config.js --no-cache
+          
+      - name: Debug Repository
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+          echo "Frontend directory contents:"
+          ls -la frontend || echo "Frontend directory not found"
           
       - name: Build
         run: |

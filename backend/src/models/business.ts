@@ -1,12 +1,9 @@
-import mongoose, { Document, Types } from 'mongoose';
-import bcrypt from 'bcryptjs';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IBusiness extends Document {
-  _id: Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
   businessName: string;
   businessType: string;
-  email: string;
-  password: string;
   description: string;
   location: {
     address: string;
@@ -19,7 +16,6 @@ export interface IBusiness extends Document {
     website?: string;
   };
   status: 'active' | 'inactive' | 'suspended';
-  userId: Types.ObjectId;
   analytics: {
     totalCampaigns: number;
     activeCampaigns: number;
@@ -28,7 +24,12 @@ export interface IBusiness extends Document {
   };
 }
 
-const businessSchema = new mongoose.Schema({
+const businessSchema = new Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   businessName: {
     type: String,
     required: true
@@ -37,15 +38,6 @@ const businessSchema = new mongoose.Schema({
     type: String,
     required: true,
     enum: ['barber', 'sunbed', 'salon', 'spa', 'other']
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  password: {
-    type: String,
-    required: true
   },
   description: {
     type: String,
@@ -84,11 +76,6 @@ const businessSchema = new mongoose.Schema({
     enum: ['active', 'inactive', 'suspended'],
     default: 'active'
   },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
   analytics: {
     totalCampaigns: {
       type: Number,
@@ -109,11 +96,4 @@ const businessSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-businessSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-});
-
-const Business = mongoose.model<IBusiness>('Business', businessSchema);
-export default Business;
+export default mongoose.model<IBusiness>('Business', businessSchema);

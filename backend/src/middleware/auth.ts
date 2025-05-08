@@ -21,63 +21,81 @@ const error = (message: string, err: any) => {
 
 // Simple request interface
 export interface AuthRequest extends Request {
-  user?: UserDocument;
+  user?: {
+    userId: string;
+    email: string;
+    role?: string;
+  };
+  body: any;
+  params: {
+    [key: string]: string;
+  };
+  headers: {
+    [key: string]: string | string[] | undefined;
+  };
+  query: {
+    [key: string]: string | string[] | undefined;
+  };
+  cookies: {
+    [key: string]: string;
+  };
 }
 
 // JWT secret with fallback
 const JWT_SECRET = process.env.JWT_SECRET || 'YS9XaEpwNtaGJ5rl';
 debug('Using JWT secret:', { hasEnvSecret: !!process.env.JWT_SECRET });
 
-export const authenticateToken = async (req: AuthRequest, res: Response, next: NextFunction) => {
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        userId: string;
+        email: string;
+      };
+    }
+  }
+}
+
+export const authenticateToken = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
   try {
     const authHeader = req.headers.authorization;
-    
     if (!authHeader) {
-      return res.status(401).json({ message: 'Access token is required' });
+      res.status(401).json({ message: 'No token provided' });
+      return;
     }
 
-    // Get the authorization header as a string
-    let authToken: string;
-    if (typeof authHeader === 'string') {
-      authToken = authHeader;
-    } else if (Array.isArray(authHeader)) {
-      authToken = authHeader[0] || '';
-    } else {
-      return res.status(401).json({ message: 'Invalid authorization header' });
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+      res.status(401).json({ message: 'Invalid token format' });
+      return;
     }
 
-    if (!authToken) {
-      return res.status(401).json({ message: 'Access token is required' });
-    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'test-secret') as {
+      userId: string;
+      email: string;
+      role?: string;
+    };
 
-    // Split the token and validate format
-    const [bearer, token] = authToken.split(' ');
-    if (bearer !== 'Bearer' || !token) {
-      return res.status(401).json({ message: 'Invalid token format' });
-    }
-
-    const decoded = jwt.verify(token, JWT_SECRET) as jwt.JwtPayload;
-    
-    if (!decoded._id) {
-      return res.status(401).json({ message: 'Invalid token' });
-    }
-
-    const user = await User.findById(decoded._id).select('-password');
-    if (!user) {
-      return res.status(401).json({ message: 'User not found' });
-    }
-
-    req.user = user;
+    (req as AuthRequest).user = decoded;
     next();
   } catch (error) {
     console.error('Authentication error:', error);
-    res.status(401).json({ message: 'Invalid token' });
+    if (error.name === 'JsonWebTokenError') {
+      res.status(403).json({ message: 'Invalid token' });
+      return;
+    }
+    res.status(401).json({ message: 'Authentication failed' });
   }
 };
 
-export const isAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const isAdmin = (req: AuthRequest, res: Response, next: NextFunction): void => {
   if (req.user?.role !== 'admin') {
-    return res.status(403).json({ message: 'Access denied' });
+    res.status(403).json({ message: 'Access denied' });
+    return;
   }
   next();
 };

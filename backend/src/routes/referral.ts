@@ -1,8 +1,9 @@
-import express, { Router, Request, Response, NextFunction } from 'express';
+import express from 'express';
 import { referralController } from '../controllers/referral.controller';
 import { authenticateToken } from '../middleware/auth';
+import asyncHandler from '../middleware/asyncHandler';
 
-const router: Router = express.Router();
+const router = express.Router();
 
 // Debug logging middleware
 router.use((req, res, next) => {
@@ -10,19 +11,35 @@ router.use((req, res, next) => {
   next();
 });
 
-// Public routes (no authentication required)
-router.get('/code/:code', referralController.getReferralByCode as express.RequestHandler);
-router.post('/complete/:code', referralController.completeReferral as express.RequestHandler);
+// Public routes
+router.get('/track/:code', asyncHandler(referralController.trackReferral));
 
-// Protected routes (require authentication)
-router.use(authenticateToken as express.RequestHandler); // Authentication middleware for routes below this line
+// Protected routes
+router.use(authenticateToken);
 
-// These routes require authentication
-router.post('/', referralController.create as express.RequestHandler);
-router.get('/', referralController.getBusinessReferrals as express.RequestHandler);
-router.post('/generate/:campaignId', referralController.generateReferralLink as express.RequestHandler);
-router.get('/:id', referralController.getReferral as express.RequestHandler);
-router.patch('/:id/status', referralController.updateStatus as express.RequestHandler);
+// Generate referral link
+router.post('/generate/:campaignId', asyncHandler(referralController.generateReferralLink));
+
+// Submit referral
+router.post('/submit/:code', asyncHandler(referralController.submitReferral));
+
+// Approve referral
+router.post('/:id/approve', asyncHandler(referralController.approveReferral));
+
+// Reject referral
+router.post('/:id/reject', asyncHandler(referralController.rejectReferral));
+
+// Create referral
+router.post('/', asyncHandler(referralController.createReferral));
+
+// Get all referrals
+router.get('/', asyncHandler(referralController.getReferrals));
+
+// Get referral by ID
+router.get('/:id', asyncHandler(referralController.getReferralById));
+
+// Delete referral
+router.delete('/:id', asyncHandler(referralController.deleteReferral));
 
 // 404 handler for referral routes
 router.use((req, res) => {

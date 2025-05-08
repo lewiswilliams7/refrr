@@ -1,27 +1,43 @@
-import express, { RequestHandler } from 'express';
-import { authenticateToken, isAdmin } from '../middleware/auth';
+import express, { Request, Response, NextFunction } from 'express';
+import { authenticateToken } from '../middleware/auth';
 import { adminController } from '../controllers/admin.controller';
+import { AuthRequest } from '../middleware/auth';
 
 const router = express.Router();
 
-// Apply authentication and admin check to all admin routes
-router.use((req, res, next) => {
-  authenticateToken(req, res, () => {
-    isAdmin(req, res, next);
-  });
+// Protected routes (require authentication)
+router.use(async (req: AuthRequest, res: Response, next: NextFunction) => {
+  await authenticateToken(req, res, next);
 });
 
-// Admin routes
-router.get('/campaigns', adminController.getCampaigns as RequestHandler);
-router.get('/campaigns/:id', adminController.getCampaign as RequestHandler);
-router.patch('/campaigns/:id/status', adminController.updateCampaignStatus as RequestHandler);
+// Campaign routes
+router.get('/campaigns', adminController.getCampaigns);
+router.get('/campaigns/:id', async (req: AuthRequest, res: Response) => {
+  await adminController.getCampaign(req, res);
+});
 
-router.get('/businesses', adminController.getBusinesses as RequestHandler);
-router.get('/businesses/:id', adminController.getBusiness as RequestHandler);
-router.patch('/businesses/:id/status', adminController.updateBusinessStatus as RequestHandler);
+router.patch('/campaigns/:id/status', async (req: AuthRequest, res: Response) => {
+  await adminController.updateCampaignStatus(req, res);
+});
 
-router.get('/users', adminController.getUsers as RequestHandler);
-router.get('/users/:id', adminController.getUser as RequestHandler);
-router.patch('/users/:id/status', adminController.updateUserStatus as RequestHandler);
+// Business routes
+router.get('/businesses', adminController.getBusinesses);
+router.get('/businesses/:id', async (req: AuthRequest, res: Response) => {
+  await adminController.getBusiness(req, res);
+});
+
+router.patch('/businesses/:id/status', async (req: AuthRequest, res: Response) => {
+  await adminController.updateBusinessStatus(req, res);
+});
+
+// User routes
+router.get('/users', adminController.getUsers);
+router.get('/users/:id', async (req: AuthRequest, res: Response) => {
+  await adminController.getUser(req, res);
+});
+
+router.patch('/users/:id/status', async (req: AuthRequest, res: Response) => {
+  await adminController.updateUserStatus(req, res);
+});
 
 export default router; 

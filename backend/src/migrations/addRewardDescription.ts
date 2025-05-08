@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Campaign, ICampaign } from '../models/campaign';
+import Campaign, { ICampaign } from '../models/campaign.model';
 import dotenv from 'dotenv';
 
 dotenv.config();

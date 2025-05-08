@@ -1,51 +1,51 @@
 import request from 'supertest';
-import { app } from '../server';
-import mongoose, { HydratedDocument } from 'mongoose';
-import { User, IUser } from '../models/user.model';
-import { Campaign, ICampaign } from '../models/campaign';
+import app from '../server';
+import Campaign, { CampaignDocument } from '../models/campaign.model';
+import { User, UserDocument } from '../models/user.model';
 import Referral from '../models/referrals';
 import jwt from 'jsonwebtoken';
-import { expect } from 'chai';
-
-const MONGODB_URI = 'mongodb+srv://lewiswilliams077:YS9XaEpwNtaGJ5rl@cluster0.pxooejq.mongodb.net/refrr_test?retryWrites=true&w=majority';
+import './jest.setup';
 
 describe('Referral Endpoints', () => {
-  let token: string;
   let userId: string;
+  let token: string;
   let campaignId: string;
+
+  const testUser = {
+    email: 'test@example.com',
+    password: 'password123',
+    businessName: 'Test Business',
+    firstName: 'John',
+    lastName: 'Doe',
+    businessType: 'Other',
+    location: {
+      address: '123 Test St',
+      city: 'Test City',
+      postcode: '12345'
+    }
+  };
 
   beforeAll(async () => {
     try {
-      await mongoose.connect(MONGODB_URI);
-      
-      // Create test user
-      const userDoc: HydratedDocument<IUser> = await User.create({
-        email: 'business@test.com',
-        password: 'password123',
-        businessName: 'Test Business',
-        firstName: 'John',
-        lastName: 'Doe'
-      });
-
-      userId = userDoc._id.toString();
+      const userDoc = await User.create(testUser);
+      const user = userDoc as UserDocument;
+      userId = user._id.toString();
       token = jwt.sign(
-        { userId: userDoc._id, email: userDoc.email },
-        process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '24h' }
+        { userId: user._id, email: user.email },
+        process.env.JWT_SECRET || 'test-secret'
       );
 
-      // Create test campaign
       const campaign = await Campaign.create({
-        businessId: userId,
+        businessId: user._id,
         title: 'Test Campaign',
         description: 'Test Description',
         rewardType: 'percentage',
-        rewardValue: 10
+        rewardValue: 10,
+        rewardDescription: 'Test Reward'
       });
-
       campaignId = campaign._id.toString();
     } catch (error) {
-      console.error('Test setup error:', error);
+      console.error('Setup error:', error);
       throw error;
     }
   });
@@ -54,7 +54,6 @@ describe('Referral Endpoints', () => {
     await Referral.deleteMany({});
     await Campaign.deleteMany({});
     await User.deleteMany({});
-    await mongoose.connection.close();
   });
 
   beforeEach(async () => {

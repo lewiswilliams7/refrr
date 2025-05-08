@@ -1,22 +1,19 @@
 import express from 'express';
-import { campaignController } from '../controllers/campaign.controller';
 import { authenticateToken } from '../middleware/auth';
-import { RequestHandler } from 'express';
+import { campaignController } from '../controllers/campaign.controller';
+import { asyncHandler } from '../utils/asyncHandler';
 
 const router = express.Router();
 
-// Protected routes (require authentication)
-router.use(authenticateToken as RequestHandler);
+// Protected routes
+router.post('/', authenticateToken, asyncHandler(campaignController.createCampaign));
+router.get('/', authenticateToken, asyncHandler(campaignController.getCampaigns));
+router.get('/:id', authenticateToken, asyncHandler(campaignController.getCampaignById));
+router.put('/:id', authenticateToken, asyncHandler(campaignController.updateCampaign));
+router.delete('/:id', authenticateToken, asyncHandler(campaignController.deleteCampaign));
 
-// Campaign routes
-router.post('/', campaignController.createCampaign as RequestHandler);
-router.get('/', campaignController.getCampaigns as RequestHandler);
-router.get('/:id', campaignController.getCampaignById as RequestHandler);
-router.patch('/:id', campaignController.updateCampaign as RequestHandler);
-router.delete('/:id', campaignController.deleteCampaign as RequestHandler);
-
-// Public routes (no authentication required)
-router.get('/public', campaignController.getPublicCampaigns as RequestHandler);
-router.get('/public/:id', campaignController.getPublicCampaign as RequestHandler);
+// Public routes
+router.get('/public/:id', asyncHandler(campaignController.getPublicCampaign));
+router.get('/public', asyncHandler(campaignController.getPublicCampaigns));
 
 export default router;

@@ -1,37 +1,29 @@
 // backend/src/__tests__/auth.test.ts
 import request from 'supertest';
-import { app } from '../server';
-import { User } from '../models/user.model';
 import mongoose from 'mongoose';
+import app from '../server';
+import { User } from '../models/user.model';
 import dotenv from 'dotenv';
+import './jest.setup';
 
 dotenv.config();
-
-const MONGODB_URI = 'mongodb+srv://lewiswilliams077:YS9XaEpwNtaGJ5rl@cluster0.pxooejq.mongodb.net/refrr_test?retryWrites=true&w=majority';
 
 jest.setTimeout(60000);
 
 describe('Auth Endpoints', () => {
-  beforeAll(async () => {
-    try {
-      console.log('Connecting to MongoDB Atlas...');
-      await mongoose.connect(MONGODB_URI);
-      console.log('Connected to MongoDB Atlas');
-    } catch (error) {
-      console.error('MongoDB Atlas connection error:', error);
-      throw error;
+  const testUser = {
+    email: 'test@example.com',
+    password: 'password123',
+    firstName: 'John',
+    lastName: 'Doe',
+    businessName: 'Test Business',
+    businessType: 'Other',
+    location: {
+      address: '123 Test St',
+      city: 'Test City',
+      postcode: '12345'
     }
-  });
-
-  afterAll(async () => {
-    try {
-      await mongoose.connection.dropDatabase();
-      await mongoose.connection.close();
-    } catch (error) {
-      console.error('Cleanup error:', error);
-      throw error;
-    }
-  });
+  };
 
   beforeEach(async () => {
     try {

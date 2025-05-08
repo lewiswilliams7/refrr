@@ -59,20 +59,38 @@ export interface RegisterCustomerData {
 }
 
 export interface Campaign {
-  _id?: string;
-  id?: string;
+  _id: string;
+  businessId: string;
   title: string;
   description?: string;
   rewardType: 'percentage' | 'fixed';
   rewardValue: number;
   rewardDescription: string;
-  status?: 'draft' | 'active' | 'paused' | 'completed';
-  isActive?: boolean;
-  showRewardDisclaimer?: boolean;
-  rewardDisclaimerText?: string;
-  requireBookingConfirmation?: boolean;
+  status: 'draft' | 'active' | 'paused' | 'completed';
+  showRewardDisclaimer: boolean;
+  rewardDisclaimerText: string;
+  requireBookingConfirmation: boolean;
   expirationDate?: string;
+  startDate?: string;
   maxReferrals?: number;
+  category?: string;
+  tags?: string[];
+  imageUrl?: string;
+  termsAndConditions?: string;
+  targetAudience?: {
+    ageRange?: [number, number];
+    gender?: string[];
+    location?: string[];
+  };
+  analytics: {
+    totalReferrals: number;
+    successfulReferrals: number;
+    conversionRate: number;
+    rewardRedemptions: number;
+    lastUpdated: string;
+  };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export const authApi = {

@@ -1,15 +1,25 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend API server for Refrr referral management system",
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
-    "build": "CI=false tsc",
-    "test": "jest --detectOpenHandles --forceExit --verbose --testTimeout=60000",
+    "build": "tsc",
+    "test": "jest --detectOpenHandles --forceExit --verbose --testTimeout=60000 --runInBand",
     "test:watch": "jest --watch",
-    "migrate": "ts-node src/migrations/addRewardDescription.ts"
+    "test:coverage": "jest --coverage",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "migrate": "ts-node src/migrations/addRewardDescription.ts",
+    "migrate:up": "ts-node src/db/migrations/up.ts",
+    "migrate:down": "ts-node src/db/migrations/down.ts",
+    "migrate:create": "ts-node src/db/migrations/create.ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": "",
@@ -33,20 +43,25 @@
     "@types/mongoose": "^5.11.96",
     "@types/node": "^20.0.0",
     "@types/supertest": "^6.0.3",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
     "dotenv": "^16.5.0",
+    "eslint": "^8.0.0",
+    "husky": "^8.0.0",
     "jest": "^29.7.0",
+    "lint-staged": "^13.0.0",
     "nodemon": "^3.1.10",
+    "rimraf": "^5.0.0",
     "supertest": "^7.1.0",
     "ts-jest": "^29.3.2",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "mongodb-memory-server": "^9.1.6"
   },
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node",
-    "setupFiles": [
-      "dotenv/config"
-    ],
-    "testTimeout": 60000
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }

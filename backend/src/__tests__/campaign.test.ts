@@ -1,40 +1,40 @@
 import request from 'supertest';
-import { app } from '../server';
-import { Campaign, ICampaign } from '../models/campaign';
-import { User, IUser } from '../models/user.model';
-import mongoose, { Types } from 'mongoose';
+import app from '../server';
+import Campaign, { ICampaign, CampaignDocument } from '../models/campaign.model';
+import { User, UserDocument } from '../models/user.model';
+import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
-import { expect } from 'chai';
-
-const MONGODB_URI = 'mongodb+srv://lewiswilliams077:YS9XaEpwNtaGJ5rl@cluster0.pxooejq.mongodb.net/refrr_test?retryWrites=true&w=majority';
+import './jest.setup';
 
 describe('Campaign Endpoints', () => {
-  let token: string;
   let userId: string;
+  let token: string;
+
+  const testUser = {
+    email: 'test@example.com',
+    password: 'password123',
+    businessName: 'Test Business',
+    firstName: 'John',
+    lastName: 'Doe',
+    businessType: 'Other',
+    location: {
+      address: '123 Test St',
+      city: 'Test City',
+      postcode: '12345'
+    }
+  };
 
   beforeAll(async () => {
     try {
-      await mongoose.connect(MONGODB_URI);
-      
-      // Create a test user with explicit typing
-      const userDoc = await User.create({
-        email: 'test@example.com',
-        password: 'password123',
-        businessName: 'Test Business',
-        firstName: 'John',
-        lastName: 'Doe'
-      });
-
-      // Cast to IUser to access properties safely
-      const user = userDoc as unknown as IUser;
+      const userDoc = await User.create(testUser);
+      const user = userDoc as UserDocument;
       userId = user._id.toString();
       token = jwt.sign(
         { userId: user._id, email: user.email },
-        process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '24h' }
+        process.env.JWT_SECRET || 'test-secret'
       );
     } catch (error) {
-      console.error('Test setup error:', error);
+      console.error('Setup error:', error);
       throw error;
     }
   });
@@ -43,7 +43,6 @@ describe('Campaign Endpoints', () => {
     try {
       await Campaign.deleteMany({});
       await User.deleteMany({});
-      await mongoose.connection.close();
     } catch (error) {
       console.error('Test cleanup error:', error);
       throw error;

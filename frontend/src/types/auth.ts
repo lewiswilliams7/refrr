@@ -25,9 +25,11 @@ export interface AuthResponse {
   user: {
     _id: string;
     email: string;
-    businessName?: string;
     firstName: string;
     lastName: string;
+    role: 'admin' | 'business' | 'customer';
+    status: 'active' | 'inactive' | 'suspended';
+    businessName?: string;
     businessType?: string;
     location?: {
       address: string;

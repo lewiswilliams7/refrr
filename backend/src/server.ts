@@ -1,74 +1,54 @@
-import express, { Request, Response, NextFunction } from 'express';
-import mongoose from 'mongoose';
+import express from 'express';
 import cors from 'cors';
+import morgan from 'morgan';
 import dotenv from 'dotenv';
-import rateLimit from 'express-rate-limit';
+import mongoose from 'mongoose';
+import { errorHandler } from './middleware/error';
 import authRoutes from './routes/auth';
-import campaignRoutes from './routes/campaign';
-import referralRoutes from './routes/referral';
-import dashboardRoutes from './routes/dashboard';
 import businessRoutes from './routes/business';
+import campaignRoutes from './routes/campaign';
 import customerRoutes from './routes/customer';
-import adminRoutes from './routes/admin';
+import dashboardRoutes from './routes/dashboard';
 import healthRoutes from './routes/health';
-import { corsOptions, helmetConfig } from './config/security';
+import referralRoutes from './routes/referral';
+import { setupSecurity } from './config/security';
 
 // Load environment variables
 dotenv.config();
 
-// Check if we have a MongoDB URI
-if (!process.env.MONGODB_URI) {
-  console.error('MONGODB_URI is not defined in environment variables');
-  process.exit(1);
-}
-
-export const app = express();
+const app = express();
 
 // Middleware
-app.use(helmetConfig);
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
+app.use(morgan('dev'));
 
-// Rate limiting configuration
-const apiLimiter = rateLimit({
-  windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-  max: Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-}) as unknown as express.RequestHandler;
+// Setup security
+setupSecurity(app);
 
-// Create API router with rate limiting
-const apiRouter = express.Router();
-apiRouter.use(apiLimiter);
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/refrr')
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
-// Apply routes to API router
-apiRouter.use('/auth', authRoutes);
-apiRouter.use('/campaigns', campaignRoutes);
-apiRouter.use('/referrals', referralRoutes);
-apiRouter.use('/dashboard', dashboardRoutes);
-apiRouter.use('/businesses', businessRoutes);
-apiRouter.use('/customer', customerRoutes);
-apiRouter.use('/admin', adminRoutes);
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/business', businessRoutes);
+app.use('/api/campaigns', campaignRoutes);
+app.use('/api/customer', customerRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/health', healthRoutes);
+app.use('/api/referrals', referralRoutes);
 
-// Mount API router and health routes
-app.use('/api', apiRouter);
-app.use('/api', healthRoutes);
+// Error handling middleware
+app.use(errorHandler);
 
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log('Connected to MongoDB Atlas');
-  })
-  .catch(err => {
-    console.error('MongoDB connection error:', err);
-    process.exit(1);
+// Only start the server if this file is run directly
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
   });
-
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+}
 
 export default app;

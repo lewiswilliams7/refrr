@@ -1,8 +1,10 @@
-name: Basic Test
+name: Frontend Test and Deploy
 
 on:
   push:
-    branches: [ main, staging ]
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   test:
@@ -14,11 +16,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
           
       - name: Install dependencies
         run: |
           cd frontend
-          npm install
+          npm ci
           npm install --save-dev jest@29.6.3 jest-environment-jsdom@29.6.3 babel-jest@29.6.3 @babel/core@7.23.3 @babel/preset-env@7.23.3 @babel/preset-react@7.23.3 @babel/preset-typescript@7.23.3
           
       - name: Configure Jest
@@ -49,40 +53,36 @@ jobs:
           cd frontend
           npx jest --config=jest.config.js --no-cache
           
-      - name: Debug Repository
+      - name: Build
         run: |
-          echo "Current directory: $(pwd)"
-          echo "Directory contents:"
-          ls -la
-          echo "Frontend directory contents:"
-          ls -la frontend || echo "Frontend directory not found"
+          cd frontend
+          npm run build
+          
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
           
       - name: Build
         run: |
-          if [ -d "frontend" ]; then
-            cd frontend
-            echo "Building application..."
-            npm run build || echo "Build failed"
-            echo "Build directory contents:"
-            ls -la build || echo "Build directory not found"
-          else
-            echo "Error: frontend directory not found"
-            exit 1
-          fi
+          cd frontend
+          npm run build
           
-      - name: List Build Files
-        run: |
-          echo "Build directory contents:"
-          ls -la frontend/build
-        
-      - name: Print Hello
-        run: echo "Hello World"
-        
-      - name: List Files
-        run: ls -la
-        
-      - name: Deploy
-        if: github.ref == 'refs/heads/main'
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

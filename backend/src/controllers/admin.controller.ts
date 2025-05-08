@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { User } from '../models/user.model';
 import Business from '../models/business';
-import { Campaign, ICampaign } from '../models/campaign';
-import { Referral } from '../models/referrals';
+import Campaign, { ICampaign, CampaignDocument } from '../models/campaign.model';
+import Referral from '../models/referrals';
 import mongoose from 'mongoose';
 
 interface IUser {
@@ -11,7 +11,7 @@ interface IUser {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'user' | 'admin';
+  role: 'admin' | 'business' | 'customer';
   status: 'active' | 'inactive' | 'suspended';
   createdAt: Date;
   updatedAt: Date;
@@ -23,15 +23,6 @@ interface IBusiness {
   businessName: string;
   businessType: string;
   status: 'active' | 'inactive' | 'suspended';
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface ICampaign {
-  _id: mongoose.Types.ObjectId;
-  businessId: mongoose.Types.ObjectId;
-  title: string;
-  status: 'active' | 'inactive' | 'completed';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -100,7 +91,7 @@ export const adminController = {
       res.json({
         message: 'User status updated successfully',
         user: {
-          id: user._id,
+          _id: user._id,
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
@@ -167,7 +158,7 @@ export const adminController = {
       res.json({
         message: 'Business status updated successfully',
         business: {
-          id: business._id,
+          _id: business._id,
           name: business.businessName,
           type: business.businessType,
           status: business.status
@@ -232,7 +223,7 @@ export const adminController = {
       res.json({
         message: 'Campaign status updated successfully',
         campaign: {
-          id: campaign._id,
+          _id: campaign._id,
           title: campaign.title,
           status: campaign.status
         }

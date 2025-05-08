@@ -71,9 +71,19 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
-  role: string;
-  status: string;
+  role: 'admin' | 'business' | 'customer';
+  status: 'active' | 'inactive' | 'suspended';
+  businessName?: string;
+  businessType?: string;
+  location?: {
+    address: string;
+    city: string;
+    postcode: string;
+  };
+  businessDescription?: string;
+  avatar?: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 const AdminDashboard = () => {
