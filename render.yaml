@@ -2,8 +2,13 @@ services:
   - type: web
     name: refrr-frontend
     env: node
-    buildCommand: npm run build
-    startCommand: npm start
+    buildCommand: |
+      cd frontend
+      npm install
+      npm run build
+    startCommand: |
+      cd frontend
+      node server.js
     envVars:
       - key: REACT_APP_API_URL
         value: https://refrr.onrender.com
