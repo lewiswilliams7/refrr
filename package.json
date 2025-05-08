@@ -7,7 +7,7 @@
   },
   "scripts": {
     "start": "cd frontend && node server.js",
-    "build": "cd frontend && npm install && npm run build",
-    "install": "cd frontend && npm install"
+    "build": "cd frontend && npm install --production=false --no-optional && NODE_OPTIONS='--max-old-space-size=256 --max-semi-space-size=64' npm run build:prod",
+    "install": "cd frontend && npm install --production=false --no-optional"
   }
 }
