@@ -15,13 +15,13 @@ interface MockAxiosInstance extends AxiosInstance {
 }
 
 const mockHeaders: HeadersDefaults & { [key: string]: AxiosHeaderValue } = {
-  common: {},
-  delete: {},
-  get: {},
-  head: {},
-  post: {},
-  put: {},
-  patch: {}
+  common: null,
+  delete: null,
+  get: null,
+  head: null,
+  post: null,
+  put: null,
+  patch: null
 };
 
 const mockAxios: MockAxiosInstance = {
