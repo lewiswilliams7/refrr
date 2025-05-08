@@ -29,7 +29,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "npx serve -s build",
+    "start": "node ./node_modules/serve/bin/serve.js -s build",
     "build": "react-scripts build",
     "test": "jest",
     "test:watch": "jest --watch",
