@@ -8,7 +8,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: NODE_OPTIONS
-        value: --max-old-space-size=256 --max-semi-space-size=64
+        value: --max-old-space-size=256 --max-semi-space-size=64 --optimize-for-size
       - key: CI
         value: "true"
       - key: DISABLE_ESLINT_PLUGIN
@@ -21,6 +21,12 @@ services:
         value: "10000"
       - key: REACT_APP_API_URL
         value: "https://refrr.onrender.com"
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
+      - key: NPM_CONFIG_AUDIT
+        value: "false"
+      - key: NPM_CONFIG_FUND
+        value: "false"
     healthCheckPath: /
     autoDeploy: true
     plan: free
@@ -34,9 +40,15 @@ services:
       - key: NODE_ENV
         value: production
       - key: NODE_OPTIONS
-        value: --max-old-space-size=256
+        value: --max-old-space-size=256 --optimize-for-size
       - key: PORT
         value: "10000"
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
+      - key: NPM_CONFIG_AUDIT
+        value: "false"
+      - key: NPM_CONFIG_FUND
+        value: "false"
     healthCheckPath: /api/health
     autoDeploy: true
     plan: free 

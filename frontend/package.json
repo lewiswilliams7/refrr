@@ -30,9 +30,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "npx http-server build -p $PORT",
-    "build": "react-scripts build",
-    "build:prod": "node scripts/monitor-memory.js && GENERATE_SOURCEMAP=false CI=false DISABLE_ESLINT_PLUGIN=true react-scripts build",
+    "start": "react-scripts start",
+    "build": "GENERATE_SOURCEMAP=false CI=false DISABLE_ESLINT_PLUGIN=true react-scripts build",
+    "build:prod": "GENERATE_SOURCEMAP=false CI=false DISABLE_ESLINT_PLUGIN=true NODE_ENV=production react-scripts build",
     "test": "react-scripts test",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
