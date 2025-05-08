@@ -18,6 +18,8 @@ import {
 } from '@mui/material';
 import {
   Check as CheckIcon,
+  Business as BusinessIcon,
+  Diamond as DiamondIcon,
 } from '@mui/icons-material';
 import PublicLayout from '../components/Layout/PublicLayout';
 

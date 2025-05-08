@@ -31,6 +31,9 @@ import {
   Share as ShareIcon,
   Bookmark as BookmarkIcon,
   BookmarkBorder as BookmarkBorderIcon,
+  People as PeopleIcon,
+  TrendingUp as TrendingUpIcon,
+  AccessTime as AccessTimeIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
