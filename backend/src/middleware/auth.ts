@@ -21,24 +21,11 @@ const error = (message: string, err: any) => {
 };
 
 // Simple request interface
-export interface AuthRequest extends Omit<Request, 'query'> {
+export interface AuthRequest extends Request {
   user?: {
     userId: string;
     email: string;
     role?: string;
-  };
-  body: any;
-  params: {
-    [key: string]: string;
-  };
-  headers: {
-    [key: string]: string | string[] | undefined;
-  };
-  query: {
-    [key: string]: string | string[] | ParsedQs | ParsedQs[] | undefined;
-  };
-  cookies: {
-    [key: string]: string;
   };
 }
 
