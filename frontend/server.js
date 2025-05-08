@@ -2,6 +2,12 @@ const express = require('express');
 const path = require('path');
 const app = express();
 
+// Log environment variables
+console.log('Environment variables:');
+console.log('PORT:', process.env.PORT);
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
+
 console.log('Starting server...');
 console.log('Current directory:', __dirname);
 console.log('Build path:', path.join(__dirname, 'build'));
@@ -28,10 +34,15 @@ app.get('*', (req, res) => {
 });
 
 const port = process.env.PORT || 3000;
-const server = app.listen(port, '0.0.0.0', () => {
+console.log(`Attempting to start server on port ${port}`);
+
+const server = app.listen(port, '0.0.0.0', (error) => {
+  if (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
   console.log(`Server is running on port ${port}`);
-  console.log('Environment:', process.env.NODE_ENV);
-  console.log('API URL:', process.env.REACT_APP_API_URL);
+  console.log('Server address:', server.address());
 });
 
 // Handle server errors
