@@ -58,6 +58,7 @@
     "@types/react-dom": "^18.2.19",
     "@types/recharts": "^1.8.29",
     "gh-pages": "^6.1.1",
+    "jest-mock": "^29.7.0",
     "web-vitals": "^2.1.4"
   }
 }

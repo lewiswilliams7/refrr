@@ -1,17 +1,18 @@
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, AxiosHeaderValue, AxiosHeaders, AxiosDefaults } from 'axios';
+import type { Mock } from 'jest-mock';
 
 interface MockAxiosInstance extends AxiosInstance {
-  create: jest.Mock;
-  get: jest.Mock;
-  post: jest.Mock;
-  put: jest.Mock;
-  delete: jest.Mock;
-  patch: jest.Mock;
-  head: jest.Mock;
-  options: jest.Mock;
-  postForm: jest.Mock;
-  putForm: jest.Mock;
-  patchForm: jest.Mock;
+  create: Mock;
+  get: Mock;
+  post: Mock;
+  put: Mock;
+  delete: Mock;
+  patch: Mock;
+  head: Mock;
+  options: Mock;
+  postForm: Mock;
+  putForm: Mock;
+  patchForm: Mock;
 }
 
 const mockHeaders = {
