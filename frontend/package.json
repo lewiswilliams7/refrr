@@ -2,7 +2,7 @@
   "name": "refrr-frontend",
   "version": "0.1.0",
   "private": true,
-  "homepage": "/",
+  "homepage": "https://refrr.onrender.com",
   "engines": {
     "node": "18.x"
   },

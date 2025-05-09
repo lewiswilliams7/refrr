@@ -56,7 +56,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
-        <Router basename={process.env.PUBLIC_URL}>
+        <Router>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/features" element={<Features />} />
