@@ -10,6 +10,21 @@ interface User {
   lastName: string;
   role: string;
   businessId?: string;
+  businessName?: string;
+  businessType?: string;
+  businessLocation?: {
+    city: string;
+    state: string;
+    country: string;
+  };
+  activeCampaigns?: {
+    count: number;
+    rewards: Array<{
+      type: 'percentage' | 'fixed';
+      value: number;
+      description: string;
+    }>;
+  };
 }
 
 interface AuthContextType {
