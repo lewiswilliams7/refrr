@@ -126,13 +126,16 @@ export default function Home() {
   }
 
   const handleNavigation = () => {
-    if (!user) return '/register/customer';
-    return user?.businessName ? '/dashboard' : '/customer/campaigns';
+    if (!user) {
+      navigate('/register/customer');
+    } else {
+      navigate(user.businessName ? '/dashboard' : '/customer/campaigns');
+    }
   };
 
   const getNavigationText = () => {
     if (!user) return 'Register as Customer';
-    return user?.businessName ? 'Dashboard' : 'My Campaigns';
+    return user.businessName ? 'Dashboard' : 'My Campaigns';
   };
 
   return (
@@ -200,137 +203,40 @@ export default function Home() {
               left: 0,
               right: 0,
               bottom: 0,
-              background: 'url("/pattern.svg")',
+              background: 'url(/pattern.svg)',
               opacity: 0.1,
+              zIndex: 0
             }
           }}
         >
-          <Container maxWidth="lg">
-            <Grid container spacing={4} alignItems="center">
-              <Grid item xs={12} md={6}>
-                <Typography 
-                  variant="h2" 
-                  gutterBottom
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: { xs: '2.5rem', md: '3.5rem' },
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {user ? 'Welcome Back!' : 'Earn Rewards Through Referrals'}
-                </Typography>
-                <Typography 
-                  variant="h5" 
-                  sx={{ 
-                    mb: 4,
-                    opacity: 0.9,
-                    fontSize: { xs: '1.2rem', md: '1.5rem' }
-                  }}
-                >
-                  {user 
-                    ? `Start referring your friends to earn rewards, ${user?.firstName || 'there'}!`
-                    : 'Discover local businesses and earn rewards by referring your friends'
-                  }
-                </Typography>
-                <Typography 
-                  variant="body1" 
-                  sx={{ 
-                    mb: 4, 
-                    maxWidth: '600px',
-                    opacity: 0.8,
-                    fontSize: { xs: '1rem', md: '1.1rem' }
-                  }}
-                >
-                  {user
-                    ? 'Browse businesses below to find ones you want to refer. Click on a business to view their campaigns and generate your referral link.'
-                    : 'Register as a customer to start referring your friends to local businesses. Earn rewards for every successful referral you make. It\'s completely free to sign up!'
-                  }
-                </Typography>
-                <Stack 
-                  direction={{ xs: 'column', sm: 'row' }} 
-                  spacing={2}
-                  sx={{ mb: 4 }}
-                >
-                  <Button
-                    variant="contained"
-                    size="large"
-                    endIcon={<ArrowForwardIcon />}
-                    sx={{
-                      minWidth: '250px',
-                      py: 1.5,
-                      fontSize: '1.1rem',
-                      bgcolor: 'white',
-                      color: 'primary.main',
-                      '&:hover': {
-                        bgcolor: 'grey.100',
-                      },
-                    }}
-                    onClick={() => navigate(handleNavigation())}
-                  >
-                    {getNavigationText()}
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="large"
-                    sx={{
-                      minWidth: '250px',
-                      py: 1.5,
-                      fontSize: '1.1rem',
-                      borderColor: 'white',
-                      color: 'white',
-                      '&:hover': {
-                        borderColor: 'grey.100',
-                        bgcolor: 'rgba(255, 255, 255, 0.1)',
-                      },
-                    }}
-                    onClick={() => navigate('/register')}
-                  >
-                    Register Your Business
-                  </Button>
-                </Stack>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Paper 
-                  elevation={0}
-                  sx={{
-                    p: 4,
-                    bgcolor: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: 4,
-                  }}
-                >
-                  <Stack spacing={3}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <TrendingUpIcon sx={{ fontSize: 40 }} />
-                      <Box>
-                        <Typography variant="h6">Grow Your Business</Typography>
-                        <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                          Increase customer acquisition through referrals
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <PeopleIcon sx={{ fontSize: 40 }} />
-                      <Box>
-                        <Typography variant="h6">Build Your Network</Typography>
-                        <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                          Connect with local businesses and customers
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <LocalOfferIcon sx={{ fontSize: 40 }} />
-                      <Box>
-                        <Typography variant="h6">Earn Rewards</Typography>
-                        <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                          Get discounts and points for successful referrals
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Stack>
-                </Paper>
-              </Grid>
-            </Grid>
+          <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+            <Typography variant="h2" component="h1" gutterBottom>
+              Referral Marketing Made Simple
+            </Typography>
+            <Typography variant="h5" sx={{ mb: 4, opacity: 0.9 }}>
+              Grow your business through word-of-mouth marketing. Create, manage, and track your referral campaigns in one place.
+            </Typography>
+            <Button
+              variant="contained"
+              color="secondary"
+              size="large"
+              onClick={handleNavigation}
+              endIcon={<ArrowForwardIcon />}
+              sx={{ 
+                px: 4,
+                py: 1.5,
+                fontSize: '1.1rem',
+                textTransform: 'none',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
+                  transition: 'all 0.3s ease'
+                }
+              }}
+            >
+              {getNavigationText()}
+            </Button>
           </Container>
         </Box>
 
