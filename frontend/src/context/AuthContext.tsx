@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
+import config from '../config';
 
 interface AuthContextType {
   token: string | null;
@@ -45,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          await axios.get('http://localhost:5000/api/auth/me', {
+          await axios.get(`${config.apiUrl}/api/auth/me`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           setIsAuthenticated(true);

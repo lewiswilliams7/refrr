@@ -32,6 +32,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import PublicLayout from '../components/Layout/PublicLayout';
 import axios from 'axios';
+import config from '../config';
 import { BUSINESS_TYPES, Business, BusinessType } from '../types/business';
 import { useAuth } from '../context/AuthContext';
 
@@ -66,7 +67,7 @@ export default function Home() {
 
   const fetchBusinesses = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/businesses/public');
+      const response = await axios.get(`${config.apiUrl}/api/businesses/public`);
       console.log('Fetched businesses:', response.data);
       setBusinesses(response.data);
     } catch (error) {

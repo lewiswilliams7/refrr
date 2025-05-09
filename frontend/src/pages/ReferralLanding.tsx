@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import config from '../config';
 import PublicLayout from '../components/Layout/PublicLayout';
 import {
   Search as SearchIcon,
@@ -57,7 +58,7 @@ export default function ReferralLanding() {
     try {
       setLoading(true);
       setError('');
-      const response = await axios.get(`http://localhost:5000/api/referrals/code/${code}`);
+      const response = await axios.get(`${config.apiUrl}/api/referrals/code/${code}`);
       setCampaignDetails(response.data.campaignDetails);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Invalid or expired referral link');
@@ -77,7 +78,7 @@ export default function ReferralLanding() {
     setLoading(true);
 
     try {
-      const response = await axios.post(`http://localhost:5000/api/referrals/complete/${code}`, {
+      const response = await axios.post(`${config.apiUrl}/api/referrals/complete/${code}`, {
         referredEmail: email,
         referredName: name,
         referredPhone: phone
