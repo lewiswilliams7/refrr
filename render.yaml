@@ -3,12 +3,14 @@ services:
     name: refrr-frontend
     env: node
     buildCommand: cd frontend && npm install && npm run build
-    startCommand: cd frontend && NODE_ENV=production node server.js
+    startCommand: cd frontend && npm start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: NODE_OPTIONS
-        value: --max-old-space-size=512 --max-semi-space-size=128 --optimize-for-size
+      - key: PORT
+        value: "3000"
+      - key: REACT_APP_API_URL
+        value: "https://refrr-backend.onrender.com"
       - key: CI
         value: "true"
       - key: DISABLE_ESLINT_PLUGIN
@@ -17,16 +19,6 @@ services:
         value: "false"
       - key: SKIP_PREFLIGHT_CHECK
         value: "true"
-      - key: PORT
-        value: "3000"
-      - key: REACT_APP_API_URL
-        value: "https://refrr-backend.onrender.com"
-      - key: NPM_CONFIG_PRODUCTION
-        value: "false"
-      - key: NPM_CONFIG_AUDIT
-        value: "false"
-      - key: NPM_CONFIG_FUND
-        value: "false"
     healthCheckPath: /health
     autoDeploy: true
     plan: free
@@ -39,8 +31,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: NODE_OPTIONS
-        value: --max-old-space-size=512 --max-semi-space-size=128 --optimize-for-size
       - key: PORT
         value: "10000"
       - key: NPM_CONFIG_PRODUCTION
