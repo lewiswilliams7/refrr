@@ -8,15 +8,17 @@ interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: string;
-  businessId?: string;
+  role: 'admin' | 'business' | 'customer';
+  status: 'active' | 'inactive' | 'suspended';
   businessName?: string;
   businessType?: string;
-  businessLocation?: {
+  location?: {
+    address: string;
     city: string;
-    state: string;
-    country: string;
+    postcode: string;
   };
+  businessDescription?: string;
+  avatar?: string;
   activeCampaigns?: {
     count: number;
     rewards: Array<{
@@ -25,7 +27,6 @@ interface User {
       description: string;
     }>;
   };
-  avatar?: string;
 }
 
 interface AuthContextType {
