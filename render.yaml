@@ -3,7 +3,7 @@ services:
     name: refrr-frontend
     env: node
     buildCommand: cd frontend && npm install && TSC_COMPILE_ON_ERROR=true npm run build
-    startCommand: cd frontend && NODE_ENV=production node server.js
+    startCommand: cd frontend && NODE_ENV=production PORT=3000 node server.js
     envVars:
       - key: NODE_ENV
         value: production
