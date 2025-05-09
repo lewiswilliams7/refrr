@@ -47,13 +47,20 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(buildPath, 'index.html'));
 });
 
+// Enhanced port handling
 const port = process.env.PORT || 3000;
 console.log(`Attempting to start server on port ${port}`);
+console.log('Process environment:', process.env);
 
-// Start the server
+// Start the server with enhanced error handling
 const server = app.listen(port, '0.0.0.0', (error) => {
   if (error) {
     console.error('Failed to start server:', error);
+    console.error('Error details:', {
+      code: error.code,
+      message: error.message,
+      stack: error.stack
+    });
     process.exit(1);
   }
   const address = server.address();
@@ -62,11 +69,17 @@ const server = app.listen(port, '0.0.0.0', (error) => {
   console.log('Server is listening on:', `http://0.0.0.0:${port}`);
 });
 
-// Handle server errors
+// Handle server errors with more detailed logging
 server.on('error', (error) => {
   console.error('Server error:', error);
+  console.error('Error details:', {
+    code: error.code,
+    message: error.message,
+    stack: error.stack
+  });
   if (error.code === 'EADDRINUSE') {
     console.error(`Port ${port} is already in use`);
+    console.error('Current process:', process.pid);
     process.exit(1);
   }
 });
