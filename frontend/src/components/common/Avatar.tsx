@@ -51,34 +51,14 @@ const Avatar: React.FC<AvatarProps> = ({
 
   const getFallbackAvatar = () => {
     if (firstName && lastName) {
-      return `https://ui-avatars.com/api/?name=${encodeURIComponent(firstName + ' ' + lastName)}&background=random&size=200&bold=true&format=svg`;
+      const name = encodeURIComponent(`${firstName} ${lastName}`.trim());
+      return `https://ui-avatars.com/api/?name=${name}&background=random&size=200&bold=true&format=svg`;
     }
     return null;
   };
 
-  // Check if the URL is from the problematic S3 bucket
-  const isS3Url = src?.includes('render-prod-avatars.s3.us-west-2.amazonaws.com');
-  
-  // If it's an S3 URL or there's an error, try the fallback avatar
-  if (error || !src || isS3Url) {
-    const fallbackSrc = getFallbackAvatar();
-    if (fallbackSrc && !fallbackError) {
-      return (
-        <MuiAvatar
-          src={fallbackSrc}
-          alt={alt}
-          sx={{
-            width: getSize(),
-            height: getSize(),
-            ...sx
-          }}
-          className={className}
-          onError={handleFallbackError}
-        />
-      );
-    }
-    
-    // If fallback also fails, show initials
+  // If there's no src, error, or fallback error, show initials
+  if (!src || error || fallbackError) {
     return (
       <MuiAvatar
         sx={{
@@ -96,6 +76,7 @@ const Avatar: React.FC<AvatarProps> = ({
     );
   }
 
+  // Try to load the provided avatar URL
   return (
     <MuiAvatar
       src={src}
