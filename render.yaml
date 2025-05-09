@@ -11,6 +11,14 @@ services:
         value: "3000"
       - key: REACT_APP_API_URL
         value: "https://refrr-backend.onrender.com"
+      - key: GENERATE_SOURCEMAP
+        value: "false"
+      - key: CI
+        value: "false"
+      - key: DISABLE_ESLINT_PLUGIN
+        value: "true"
+      - key: TSC_COMPILE_ON_ERROR
+        value: "true"
     healthCheckPath: /
     autoDeploy: true
     plan: free
