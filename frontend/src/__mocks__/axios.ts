@@ -1,18 +1,21 @@
 import { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, AxiosHeaderValue, AxiosHeaders, AxiosDefaults } from 'axios';
-import type { Mock } from 'jest-mock';
+
+// Only import jest types in test environment
+const isTest = process.env.NODE_ENV === 'test';
+const Mock = isTest ? require('jest-mock').Mock : Function;
 
 interface MockAxiosInstance extends AxiosInstance {
-  create: Mock;
-  get: Mock;
-  post: Mock;
-  put: Mock;
-  delete: Mock;
-  patch: Mock;
-  head: Mock;
-  options: Mock;
-  postForm: Mock;
-  putForm: Mock;
-  patchForm: Mock;
+  create: typeof Mock;
+  get: typeof Mock;
+  post: typeof Mock;
+  put: typeof Mock;
+  delete: typeof Mock;
+  patch: typeof Mock;
+  head: typeof Mock;
+  options: typeof Mock;
+  postForm: typeof Mock;
+  putForm: typeof Mock;
+  patchForm: typeof Mock;
 }
 
 const mockHeaders = {
@@ -45,26 +48,28 @@ const mockDefaults: AxiosDefaults = {
   validateStatus: (status: number) => status >= 200 && status < 300
 };
 
+// Only use jest.fn in test environment
+const createMockFn = () => isTest ? jest.fn() : () => {};
+
 const mockAxios: MockAxiosInstance = {
-  create: jest.fn(() => mockAxios),
-  get: jest.fn(),
-  post: jest.fn(),
-  put: jest.fn(),
-  delete: jest.fn(),
-  patch: jest.fn(),
-  head: jest.fn(),
-  options: jest.fn(),
-  postForm: jest.fn(),
-  putForm: jest.fn(),
-  patchForm: jest.fn(),
+  create: createMockFn(),
+  get: createMockFn(),
+  post: createMockFn(),
+  put: createMockFn(),
+  delete: createMockFn(),
+  patch: createMockFn(),
+  head: createMockFn(),
+  options: createMockFn(),
+  postForm: createMockFn(),
+  putForm: createMockFn(),
+  patchForm: createMockFn(),
   defaults: mockDefaults,
   interceptors: {
-    request: { use: jest.fn(), eject: jest.fn() },
-    response: { use: jest.fn(), eject: jest.fn() }
+    request: { use: createMockFn(), eject: createMockFn() },
+    response: { use: createMockFn(), eject: createMockFn() }
   },
-  request: jest.fn(),
-  getUri: jest.fn(),
-  // Add any other methods you need to mock
+  request: createMockFn(),
+  getUri: createMockFn(),
 } as unknown as MockAxiosInstance;
 
 export default mockAxios; 
