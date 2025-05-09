@@ -3,7 +3,7 @@ services:
     name: refrr-frontend
     env: node
     buildCommand: cd frontend && npm install && npm run build
-    startCommand: cd frontend && serve -s build -l $PORT
+    startCommand: cd frontend && npm install -g serve && serve -s build -l $PORT
     envVars:
       - key: NODE_ENV
         value: production
