@@ -7,8 +7,10 @@ const api = axios.create({
   baseURL: config.apiUrl,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
   },
   timeout: 10000, // 10 second timeout
+  withCredentials: true, // Enable sending cookies
 });
 
 // Add request interceptor for debugging
@@ -19,6 +21,7 @@ api.interceptors.request.use(
       url: config.url,
       method: config.method,
       baseURL: config.baseURL,
+      headers: config.headers,
     });
 
     // Add auth token if available
@@ -41,6 +44,7 @@ api.interceptors.response.use(
     console.log('API Response:', {
       status: response.status,
       url: response.config.url,
+      headers: response.headers,
     });
     return response;
   },
@@ -52,7 +56,19 @@ api.interceptors.response.use(
       message: error.message,
       url: error.config?.url,
       baseURL: error.config?.baseURL,
+      headers: error.config?.headers,
+      responseHeaders: error.response?.headers,
     });
+
+    // Handle CORS errors
+    if (error.message.includes('CORS') || error.message.includes('Network Error')) {
+      console.error('CORS Error Details:', {
+        origin: window.location.origin,
+        target: error.config?.baseURL,
+        headers: error.config?.headers,
+      });
+      return Promise.reject(new Error('CORS error - please check API configuration'));
+    }
 
     // Handle authentication errors
     if (error.response?.status === 401 || error.response?.status === 403) {

@@ -20,9 +20,13 @@ const getApiUrl = () => {
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       return 'http://localhost:5000';
     }
+    // If we're on the frontend domain, use the backend domain
+    if (hostname === 'refrr-frontend.onrender.com') {
+      return 'https://refrr-backend.onrender.com';
+    }
   }
 
-  // Always use the production API URL in production
+  // Default to backend URL
   return 'https://refrr-backend.onrender.com';
 };
 
@@ -32,14 +36,12 @@ const config: Config = {
   isDevelopment,
 };
 
-// Log configuration in development
-if (isDevelopment) {
-  console.log('API Configuration:', {
-    apiUrl: config.apiUrl,
-    environment: config.environment,
-    env: process.env.REACT_APP_API_URL,
-    hostname: typeof window !== 'undefined' ? window.location.hostname : 'server',
-  });
-}
+// Log configuration in both development and production
+console.log('API Configuration:', {
+  apiUrl: config.apiUrl,
+  environment: config.environment,
+  env: process.env.REACT_APP_API_URL,
+  hostname: typeof window !== 'undefined' ? window.location.hostname : 'server',
+});
 
 export default config; 
