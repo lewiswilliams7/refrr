@@ -13,12 +13,16 @@ const api = axios.create({
 // Add request interceptor for debugging
 api.interceptors.request.use(
   (config) => {
+    // Log request details
     console.log('API Request:', {
       url: config.url,
       method: config.method,
       data: config.data,
       headers: config.headers,
+      baseURL: config.baseURL,
     });
+
+    // Add auth token if available
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -34,13 +38,16 @@ api.interceptors.request.use(
 // Add response interceptor for debugging and error handling
 api.interceptors.response.use(
   (response) => {
+    // Log successful response
     console.log('API Response:', {
       status: response.status,
       data: response.data,
+      headers: response.headers,
     });
     return response;
   },
   (error) => {
+    // Log detailed error information
     console.error('API Error:', {
       status: error.response?.status,
       data: error.response?.data,
@@ -48,14 +55,17 @@ api.interceptors.response.use(
       config: {
         url: error.config?.url,
         method: error.config?.method,
+        baseURL: error.config?.baseURL,
+        headers: error.config?.headers,
       }
     });
 
+    // Handle authentication errors
     if (error.response?.status === 401 || error.response?.status === 403) {
-      // Handle authentication errors
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
+      return Promise.reject(new Error('Authentication failed - please login again'));
     }
 
     // Handle network errors
@@ -74,7 +84,9 @@ api.interceptors.response.use(
       return Promise.reject(new Error(message));
     }
 
-    return Promise.reject(error);
+    // Handle other errors
+    const message = error.response.data?.message || error.message || 'An unexpected error occurred';
+    return Promise.reject(new Error(message));
   }
 );
 
