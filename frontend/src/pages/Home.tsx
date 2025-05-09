@@ -20,6 +20,9 @@ import {
   alpha,
   Alert,
   CircularProgress,
+  ListItem,
+  ListItemButton,
+  ListItemText,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -121,6 +124,16 @@ export default function Home() {
       </PublicLayout>
     );
   }
+
+  const handleNavigation = () => {
+    if (!user) return '/register/customer';
+    return user.businessName ? '/dashboard' : '/customer/campaigns';
+  };
+
+  const getNavigationText = () => {
+    if (!user) return 'Register as Customer';
+    return user.businessName ? 'Dashboard' : 'My Campaigns';
+  };
 
   return (
     <PublicLayout>
@@ -252,9 +265,9 @@ export default function Home() {
                         bgcolor: 'grey.100',
                       },
                     }}
-                    onClick={() => navigate('/register/customer')}
+                    onClick={() => navigate(handleNavigation())}
                   >
-                    Register as Customer
+                    {getNavigationText()}
                   </Button>
                   <Button
                     variant="outlined"
@@ -354,33 +367,19 @@ export default function Home() {
                 />
               </Grid>
               <Grid item xs={12} md={6}>
-                <Box sx={{ display: 'flex', gap: 2 }}>
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
                   <Button
                     variant="outlined"
                     startIcon={<FilterIcon />}
                     onClick={() => setShowFilters(!showFilters)}
                     sx={{ borderRadius: 2 }}
                   >
-                    Filters
+                    {showFilters ? 'Hide Filters' : 'Show Filters'}
                   </Button>
-                  <FormControl sx={{ minWidth: 120 }}>
-                    <InputLabel>Sort By</InputLabel>
-                    <Select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                      label="Sort By"
-                      sx={{ borderRadius: 2 }}
-                    >
-                      <MenuItem value="name">Name</MenuItem>
-                      <MenuItem value="rewards">Most Rewards</MenuItem>
-                      <MenuItem value="location">Location</MenuItem>
-                    </Select>
-                  </FormControl>
                 </Box>
               </Grid>
             </Grid>
 
-            {/* Filter Panel */}
             {showFilters && (
               <Box 
                 sx={{ 
