@@ -20,6 +20,7 @@ import {
   Speed as SpeedIcon,
 } from '@mui/icons-material';
 import PublicLayout from '../components/Layout/PublicLayout';
+import { Link } from 'react-router-dom';
 
 export default function Features() {
   const theme = useTheme();
@@ -172,10 +173,9 @@ export default function Features() {
               Join thousands of businesses already using Refrr to grow their customer base through referrals.
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
-              <Box
-                component="a"
-                href="/register"
-                sx={{
+              <Link
+                to="/register"
+                style={{
                   textDecoration: 'none',
                 }}
               >
@@ -195,11 +195,10 @@ export default function Features() {
                 >
                   Register Your Business
                 </Paper>
-              </Box>
-              <Box
-                component="a"
-                href="/register/customer"
-                sx={{
+              </Link>
+              <Link
+                to="/register/customer"
+                style={{
                   textDecoration: 'none',
                 }}
               >
@@ -220,7 +219,7 @@ export default function Features() {
                 >
                   Register as Customer
                 </Paper>
-              </Box>
+              </Link>
             </Stack>
           </Paper>
         </Container>
