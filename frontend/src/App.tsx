@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { AuthProvider } from './context/AuthContext';
@@ -50,23 +50,13 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
-// ScrollToTop component to handle scroll restoration
-const ScrollToTop = () => {
-  const { pathname } = useLocation();
-  React.useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-  return null;
-};
-
 function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <AuthProvider>
-          <Router basename={process.env.PUBLIC_URL}>
-            <ScrollToTop />
+          <Router>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/features" element={<Features />} />
