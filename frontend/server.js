@@ -22,6 +22,7 @@ if (!require('fs').existsSync(buildPath)) {
   process.exit(1);
 }
 
+// Serve static files
 app.use(express.static(buildPath));
 
 // Health check endpoint
@@ -52,6 +53,9 @@ const server = app.listen(port, '0.0.0.0', () => {
     port: address.port,
     family: address.family
   });
+  
+  // Log that we're ready to accept connections
+  console.log('Server is ready to accept connections');
 });
 
 // Handle server errors with more detailed logging
