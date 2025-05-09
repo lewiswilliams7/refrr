@@ -25,6 +25,7 @@ interface User {
       description: string;
     }>;
   };
+  avatar?: string;
 }
 
 interface AuthContextType {
