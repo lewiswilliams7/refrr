@@ -53,20 +53,11 @@ console.log(`Attempting to start server on port ${port}`);
 console.log('Process environment:', process.env);
 
 // Start the server with enhanced error handling
-const server = app.listen(port, '0.0.0.0', (error) => {
-  if (error) {
-    console.error('Failed to start server:', error);
-    console.error('Error details:', {
-      code: error.code,
-      message: error.message,
-      stack: error.stack
-    });
-    process.exit(1);
-  }
+const server = app.listen(port, () => {
   const address = server.address();
   console.log(`Server is running on port ${port}`);
   console.log('Server address:', address);
-  console.log('Server is listening on:', `http://0.0.0.0:${port}`);
+  console.log('Server is listening on:', `http://localhost:${port}`);
 });
 
 // Handle server errors with more detailed logging
