@@ -18,10 +18,11 @@
     "react-router-dom": "^6.22.0",
     "react-scripts": "5.0.1",
     "recharts": "^2.15.3",
+    "serve": "^14.2.1",
     "typescript": "^4.9.5"
   },
   "scripts": {
-    "start": "NODE_ENV=production node server.js",
+    "start": "serve -s build -l $PORT",
     "dev": "react-scripts start",
     "build": "DISABLE_ESLINT_PLUGIN=true TSC_COMPILE_ON_ERROR=true GENERATE_SOURCEMAP=false CI=false react-scripts build",
     "build:prod": "DISABLE_ESLINT_PLUGIN=true TSC_COMPILE_ON_ERROR=true GENERATE_SOURCEMAP=false CI=false NODE_ENV=production react-scripts build",
