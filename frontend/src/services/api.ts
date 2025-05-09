@@ -8,29 +8,34 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 second timeout
 });
 
 // Add request interceptor for debugging
 api.interceptors.request.use(
   (config) => {
-    // Log request details
-    console.log('API Request:', {
-      url: config.url,
-      method: config.method,
-      data: config.data,
-      headers: config.headers,
-      baseURL: config.baseURL,
-    });
+    // Only log in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('API Request:', {
+        url: config.url,
+        method: config.method,
+        data: config.data,
+        headers: config.headers,
+        baseURL: config.baseURL,
+      });
+    }
 
     // Add auth token if available
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
   (error) => {
-    console.error('API Request Error:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('API Request Error:', error);
+    }
     return Promise.reject(error);
   }
 );
@@ -38,27 +43,31 @@ api.interceptors.request.use(
 // Add response interceptor for debugging and error handling
 api.interceptors.response.use(
   (response) => {
-    // Log successful response
-    console.log('API Response:', {
-      status: response.status,
-      data: response.data,
-      headers: response.headers,
-    });
+    // Only log in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('API Response:', {
+        status: response.status,
+        data: response.data,
+        headers: response.headers,
+      });
+    }
     return response;
   },
   (error) => {
     // Log detailed error information
-    console.error('API Error:', {
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message,
-      config: {
-        url: error.config?.url,
-        method: error.config?.method,
-        baseURL: error.config?.baseURL,
-        headers: error.config?.headers,
-      }
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.error('API Error:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          baseURL: error.config?.baseURL,
+          headers: error.config?.headers,
+        }
+      });
+    }
 
     // Handle authentication errors
     if (error.response?.status === 401 || error.response?.status === 403) {
@@ -70,6 +79,9 @@ api.interceptors.response.use(
 
     // Handle network errors
     if (!error.response) {
+      if (error.code === 'ECONNABORTED') {
+        return Promise.reject(new Error('Request timed out - please try again'));
+      }
       return Promise.reject(new Error('Network error - please check your connection'));
     }
 

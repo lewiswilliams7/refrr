@@ -1,11 +1,35 @@
 export const getToken = (): string | null => {
-  return localStorage.getItem('token');
+  try {
+    return localStorage.getItem('token');
+  } catch (error) {
+    console.error('Error getting token:', error);
+    return null;
+  }
 };
 
 export const setToken = (token: string): void => {
-  localStorage.setItem('token', token);
+  try {
+    localStorage.setItem('token', token);
+  } catch (error) {
+    console.error('Error setting token:', error);
+    throw new Error('Failed to save authentication token');
+  }
 };
 
 export const removeToken = (): void => {
-  localStorage.removeItem('token');
+  try {
+    localStorage.removeItem('token');
+  } catch (error) {
+    console.error('Error removing token:', error);
+    throw new Error('Failed to remove authentication token');
+  }
+};
+
+export const isAuthenticated = (): boolean => {
+  try {
+    return !!getToken();
+  } catch (error) {
+    console.error('Error checking authentication:', error);
+    return false;
+  }
 }; 
