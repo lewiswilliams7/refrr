@@ -197,7 +197,7 @@ const Dashboard = () => {
               Business Dashboard
             </Typography>
             <Typography variant="subtitle1" color="textSecondary">
-              Welcome, {user?.businessName}
+              Welcome, {user?.businessName || 'Business Owner'}
             </Typography>
           </Box>
           <Button

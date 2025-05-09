@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   AppBar,
   Box,
@@ -25,7 +25,7 @@ import Logo from '../common/Logo';
 import Avatar from '../common/Avatar';
 
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const { logout, user } = useAuth();
   const navigate = useNavigate();
 
@@ -73,9 +73,11 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 }
               }}
             />
-            <Typography variant="body1" sx={{ fontWeight: 500 }}>
-              {user?.businessName}
-            </Typography>
+            {user?.businessName && (
+              <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                {user.businessName}
+              </Typography>
+            )}
             <Button 
               color="primary"
               onClick={logout}
@@ -124,6 +126,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           minHeight: '100vh',
         }}
       >
+        <Toolbar />
         <Container>{children}</Container>
       </Box>
     </Box>
