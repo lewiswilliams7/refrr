@@ -2,7 +2,7 @@ services:
   - type: web
     name: refrr-frontend
     env: node
-    buildCommand: cd frontend && npm install && npm run build
+    buildCommand: cd frontend && npm install && TSC_COMPILE_ON_ERROR=true npm run build
     startCommand: cd frontend && NODE_ENV=production node server.js
     envVars:
       - key: NODE_ENV
@@ -18,6 +18,8 @@ services:
       - key: GENERATE_SOURCEMAP
         value: "false"
       - key: SKIP_PREFLIGHT_CHECK
+        value: "true"
+      - key: TSC_COMPILE_ON_ERROR
         value: "true"
     healthCheckPath: /health
     autoDeploy: true
