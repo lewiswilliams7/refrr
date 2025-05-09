@@ -3,7 +3,7 @@ services:
     name: refrr-frontend
     env: node
     buildCommand: cd frontend && npm install && npm run build
-    startCommand: cd frontend && npm install -g serve && serve -s build -l $PORT --single --no-clipboard
+    startCommand: cd frontend && npm install -g serve && serve -s build -l $PORT --single --no-clipboard --cors --no-request-logging
     envVars:
       - key: NODE_ENV
         value: production
@@ -21,6 +21,10 @@ services:
         value: "true"
       - key: PUBLIC_URL
         value: "."
+      - key: BROWSER
+        value: "none"
+      - key: SKIP_PREFLIGHT_CHECK
+        value: "true"
     healthCheckPath: /
     autoDeploy: true
     plan: free

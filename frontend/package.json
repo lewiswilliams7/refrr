@@ -22,7 +22,7 @@
     "typescript": "^4.9.5"
   },
   "scripts": {
-    "start": "serve -s build -l $PORT",
+    "start": "serve -s build -l $PORT --single --no-clipboard --cors --no-request-logging",
     "dev": "GENERATE_SOURCEMAP=true react-scripts start",
     "build": "DISABLE_ESLINT_PLUGIN=true TSC_COMPILE_ON_ERROR=true GENERATE_SOURCEMAP=true CI=false react-scripts build",
     "build:prod": "DISABLE_ESLINT_PLUGIN=true TSC_COMPILE_ON_ERROR=true GENERATE_SOURCEMAP=true CI=false NODE_ENV=production react-scripts build",
