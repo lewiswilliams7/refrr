@@ -31,7 +31,7 @@ api.interceptors.request.use(
   }
 );
 
-// Add response interceptor for debugging
+// Add response interceptor for debugging and error handling
 api.interceptors.response.use(
   (response) => {
     console.log('API Response:', {
@@ -41,12 +41,39 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    console.error('API Error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+      }
+    });
+
     if (error.response?.status === 401 || error.response?.status === 403) {
       // Handle authentication errors
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
+
+    // Handle network errors
+    if (!error.response) {
+      return Promise.reject(new Error('Network error - please check your connection'));
+    }
+
+    // Handle server errors
+    if (error.response.status >= 500) {
+      return Promise.reject(new Error('Server error - please try again later'));
+    }
+
+    // Handle validation errors
+    if (error.response.status === 400) {
+      const message = error.response.data?.message || 'Invalid request';
+      return Promise.reject(new Error(message));
+    }
+
     return Promise.reject(error);
   }
 );

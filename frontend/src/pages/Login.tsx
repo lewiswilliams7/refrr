@@ -14,6 +14,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
+import config from '../config';
 import PublicLayout from '../components/Layout/PublicLayout';
 
 interface TabPanelProps {
@@ -70,7 +71,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+      const response = await axios.post(`${config.apiUrl}/api/auth/login`, formData);
       login(response.data.token, response.data.user);
 
       // Navigate based on user role
