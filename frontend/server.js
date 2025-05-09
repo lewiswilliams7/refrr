@@ -12,17 +12,6 @@ console.log('Starting server...');
 console.log('Current directory:', __dirname);
 console.log('Build path:', path.join(__dirname, 'build'));
 
-// Add error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(500).send('Something broke!');
-});
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).send('OK');
-});
-
 // Serve static files from the build directory
 const buildPath = path.join(__dirname, 'build');
 console.log('Serving static files from:', buildPath);
@@ -35,15 +24,13 @@ if (!require('fs').existsSync(buildPath)) {
 
 app.use(express.static(buildPath));
 
-// Log all requests
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  next();
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
 });
 
 // Handle all other routes by serving index.html
 app.get('*', (req, res) => {
-  console.log('Serving index.html for route:', req.url);
   res.sendFile(path.join(buildPath, 'index.html'));
 });
 
@@ -53,20 +40,11 @@ console.log(`Attempting to start server on port ${port}`);
 console.log('Process environment:', process.env);
 
 // Start the server with enhanced error handling
-const server = app.listen(port, '0.0.0.0', (error) => {
-  if (error) {
-    console.error('Failed to start server:', error);
-    console.error('Error details:', {
-      code: error.code,
-      message: error.message,
-      stack: error.stack
-    });
-    process.exit(1);
-  }
+const server = app.listen(port, () => {
   const address = server.address();
   console.log(`Server is running on port ${port}`);
   console.log('Server address:', address);
-  console.log('Server is listening on:', `http://0.0.0.0:${port}`);
+  console.log('Server is listening on:', `http://localhost:${port}`);
 });
 
 // Handle server errors with more detailed logging

@@ -2,8 +2,8 @@ services:
   - type: web
     name: refrr-frontend
     env: node
-    buildCommand: cd frontend && npm install && TSC_COMPILE_ON_ERROR=true npm run build
-    startCommand: cd frontend && NODE_ENV=production PORT=3000 node server.js
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: cd frontend && node server.js
     envVars:
       - key: NODE_ENV
         value: production
@@ -11,16 +11,6 @@ services:
         value: "3000"
       - key: REACT_APP_API_URL
         value: "https://refrr-backend.onrender.com"
-      - key: CI
-        value: "true"
-      - key: DISABLE_ESLINT_PLUGIN
-        value: "true"
-      - key: GENERATE_SOURCEMAP
-        value: "false"
-      - key: SKIP_PREFLIGHT_CHECK
-        value: "true"
-      - key: TSC_COMPILE_ON_ERROR
-        value: "true"
     healthCheckPath: /health
     autoDeploy: true
     plan: free
