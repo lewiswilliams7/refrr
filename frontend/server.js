@@ -26,7 +26,11 @@ app.use(express.static(buildPath));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).send('OK');
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    port: process.env.PORT || 3000
+  });
 });
 
 // Handle all other routes by serving index.html
@@ -35,16 +39,19 @@ app.get('*', (req, res) => {
 });
 
 // Enhanced port handling
-const port = process.env.PORT || 3000;
+const port = parseInt(process.env.PORT || '3000', 10);
 console.log(`Attempting to start server on port ${port}`);
 console.log('Process environment:', process.env);
 
 // Start the server with enhanced error handling
-const server = app.listen(port, () => {
+const server = app.listen(port, '0.0.0.0', () => {
   const address = server.address();
-  console.log(`Server is running on port ${port}`);
-  console.log('Server address:', address);
-  console.log('Server is listening on:', `http://localhost:${port}`);
+  console.log(`Server is running and bound to ${address.address}:${address.port}`);
+  console.log('Server address details:', {
+    address: address.address,
+    port: address.port,
+    family: address.family
+  });
 });
 
 // Handle server errors with more detailed logging
