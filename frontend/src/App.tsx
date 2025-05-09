@@ -25,29 +25,9 @@ import ResetPassword from './pages/ResetPassword';
 import VerifyEmail from './pages/VerifyEmail';
 import AdminDashboard from './pages/AdminDashboard';
 
-// Protected Route Component
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
-  return <>{children}</>;
-};
-
-// Admin Route Component
-const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  if (user.role !== 'admin') {
-    return <Navigate to="/dashboard" replace />;
-  }
-  
-  return <>{children}</>;
+// Basic route component without any extra logic
+const BasicRoute: React.FC<{ element: React.ReactNode }> = ({ element }) => {
+  return <>{element}</>;
 };
 
 function App() {
@@ -58,51 +38,23 @@ function App() {
         <AuthProvider>
           <Router>
             <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/features" element={<Features />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/why-refrr" element={<WhyRefrr />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/register/customer" element={<RegisterCustomer />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password/:token" element={<ResetPassword />} />
-              <Route path="/verify-email" element={<VerifyEmail />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/campaigns"
-                element={
-                  <ProtectedRoute>
-                    <CampaignPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/referrals"
-                element={
-                  <ProtectedRoute>
-                    <ReferralPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin"
-                element={
-                  <AdminRoute>
-                    <AdminDashboard />
-                  </AdminRoute>
-                }
-              />
-              <Route path="/refer/:code" element={<ReferralLanding />} />
-              <Route path="/campaign/:campaignId" element={<ReferralDetails />} />
-              <Route path="/customer/campaigns" element={<CustomerCampaigns />} />
+              <Route path="/" element={<BasicRoute element={<Home />} />} />
+              <Route path="/features" element={<BasicRoute element={<Features />} />} />
+              <Route path="/pricing" element={<BasicRoute element={<Pricing />} />} />
+              <Route path="/why-refrr" element={<BasicRoute element={<WhyRefrr />} />} />
+              <Route path="/login" element={<BasicRoute element={<Login />} />} />
+              <Route path="/register" element={<BasicRoute element={<Register />} />} />
+              <Route path="/register/customer" element={<BasicRoute element={<RegisterCustomer />} />} />
+              <Route path="/forgot-password" element={<BasicRoute element={<ForgotPassword />} />} />
+              <Route path="/reset-password/:token" element={<BasicRoute element={<ResetPassword />} />} />
+              <Route path="/verify-email" element={<BasicRoute element={<VerifyEmail />} />} />
+              <Route path="/dashboard" element={<BasicRoute element={<Dashboard />} />} />
+              <Route path="/campaigns" element={<BasicRoute element={<CampaignPage />} />} />
+              <Route path="/referrals" element={<BasicRoute element={<ReferralPage />} />} />
+              <Route path="/admin" element={<BasicRoute element={<AdminDashboard />} />} />
+              <Route path="/refer/:code" element={<BasicRoute element={<ReferralLanding />} />} />
+              <Route path="/campaign/:campaignId" element={<BasicRoute element={<ReferralDetails />} />} />
+              <Route path="/customer/campaigns" element={<BasicRoute element={<CustomerCampaigns />} />} />
             </Routes>
           </Router>
         </AuthProvider>

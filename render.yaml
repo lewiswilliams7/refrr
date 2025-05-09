@@ -25,6 +25,12 @@ services:
         value: "none"
       - key: SKIP_PREFLIGHT_CHECK
         value: "true"
+      - key: REACT_APP_BASE_URL
+        value: "."
+      - key: REACT_APP_USE_HASH_ROUTER
+        value: "true"
+      - key: REACT_APP_DISABLE_STRICT_MODE
+        value: "true"
     healthCheckPath: /
     autoDeploy: true
     plan: free
