@@ -127,12 +127,12 @@ export default function Home() {
 
   const handleNavigation = () => {
     if (!user) return '/register/customer';
-    return user.businessName ? '/dashboard' : '/customer/campaigns';
+    return user?.businessName ? '/dashboard' : '/customer/campaigns';
   };
 
   const getNavigationText = () => {
     if (!user) return 'Register as Customer';
-    return user.businessName ? 'Dashboard' : 'My Campaigns';
+    return user?.businessName ? 'Dashboard' : 'My Campaigns';
   };
 
   return (
@@ -228,7 +228,7 @@ export default function Home() {
                   }}
                 >
                   {user 
-                    ? `Start referring your friends to earn rewards, ${user.firstName}!`
+                    ? `Start referring your friends to earn rewards, ${user?.firstName || 'there'}!`
                     : 'Discover local businesses and earn rewards by referring your friends'
                   }
                 </Typography>
