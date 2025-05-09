@@ -20,11 +20,9 @@ const getApiUrl = () => {
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       return 'http://localhost:5000';
     }
-    // If we're on the production domain, use the same domain for API
-    return `https://${hostname.replace('www.', '')}`;
   }
 
-  // Fallback to hardcoded production URL
+  // Always use the production API URL in production
   return 'https://refrr-backend.onrender.com';
 };
 

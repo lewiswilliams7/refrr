@@ -14,16 +14,12 @@ const api = axios.create({
 // Add request interceptor for debugging
 api.interceptors.request.use(
   (config) => {
-    // Only log in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('API Request:', {
-        url: config.url,
-        method: config.method,
-        data: config.data,
-        headers: config.headers,
-        baseURL: config.baseURL,
-      });
-    }
+    // Log in both development and production
+    console.log('API Request:', {
+      url: config.url,
+      method: config.method,
+      baseURL: config.baseURL,
+    });
 
     // Add auth token if available
     const token = getToken();
@@ -33,9 +29,7 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.error('API Request Error:', error);
-    }
+    console.error('API Request Error:', error);
     return Promise.reject(error);
   }
 );
@@ -43,31 +37,22 @@ api.interceptors.request.use(
 // Add response interceptor for debugging and error handling
 api.interceptors.response.use(
   (response) => {
-    // Only log in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('API Response:', {
-        status: response.status,
-        data: response.data,
-        headers: response.headers,
-      });
-    }
+    // Log in both development and production
+    console.log('API Response:', {
+      status: response.status,
+      url: response.config.url,
+    });
     return response;
   },
   (error) => {
     // Log detailed error information
-    if (process.env.NODE_ENV === 'development') {
-      console.error('API Error:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        config: {
-          url: error.config?.url,
-          method: error.config?.method,
-          baseURL: error.config?.baseURL,
-          headers: error.config?.headers,
-        }
-      });
-    }
+    console.error('API Error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+      url: error.config?.url,
+      baseURL: error.config?.baseURL,
+    });
 
     // Handle authentication errors
     if (error.response?.status === 401 || error.response?.status === 403) {
