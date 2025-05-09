@@ -22,6 +22,7 @@ api.interceptors.request.use(
       method: config.method,
       baseURL: config.baseURL,
       headers: config.headers,
+      isDevelopment: process.env.NODE_ENV === 'development',
     });
 
     // Add auth token if available
@@ -45,6 +46,7 @@ api.interceptors.response.use(
       status: response.status,
       url: response.config.url,
       headers: response.headers,
+      isDevelopment: process.env.NODE_ENV === 'development',
     });
     return response;
   },
@@ -58,7 +60,17 @@ api.interceptors.response.use(
       baseURL: error.config?.baseURL,
       headers: error.config?.headers,
       responseHeaders: error.response?.headers,
+      isDevelopment: process.env.NODE_ENV === 'development',
     });
+
+    // Handle development connection refused
+    if (process.env.NODE_ENV === 'development' && error.message.includes('ECONNREFUSED')) {
+      console.error('Development Server Error:', {
+        message: 'Backend server is not running on localhost:5000',
+        error: error.message,
+      });
+      return Promise.reject(new Error('Backend server is not running. Please start the backend server on port 5000.'));
+    }
 
     // Handle CORS errors
     if (error.message.includes('CORS') || error.message.includes('Network Error')) {
@@ -66,6 +78,7 @@ api.interceptors.response.use(
         origin: window.location.origin,
         target: error.config?.baseURL,
         headers: error.config?.headers,
+        isDevelopment: process.env.NODE_ENV === 'development',
       });
       return Promise.reject(new Error('CORS error - please check API configuration'));
     }
