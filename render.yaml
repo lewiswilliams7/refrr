@@ -12,7 +12,7 @@ services:
       - key: REACT_APP_API_URL
         value: "https://refrr-backend.onrender.com"
       - key: GENERATE_SOURCEMAP
-        value: "false"
+        value: "true"
       - key: CI
         value: "false"
       - key: DISABLE_ESLINT_PLUGIN
