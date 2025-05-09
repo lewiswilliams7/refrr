@@ -46,7 +46,7 @@ interface FilterState {
 }
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading, error: authError } = useAuth();
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,8 +65,10 @@ export default function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchBusinesses();
-  }, []);
+    if (!isAuthLoading) {
+      fetchBusinesses();
+    }
+  }, [isAuthLoading]);
 
   const fetchBusinesses = async () => {
     try {
@@ -107,6 +109,19 @@ export default function Home() {
     }
   });
 
+  if (isAuthLoading) {
+    return (
+      <PublicLayout>
+        <Container maxWidth="lg" sx={{ mt: 8, textAlign: 'center' }}>
+          <CircularProgress />
+          <Typography variant="h6" sx={{ mt: 2 }}>
+            Loading...
+          </Typography>
+        </Container>
+      </PublicLayout>
+    );
+  }
+
   return (
     <PublicLayout>
       <Container maxWidth="lg">
@@ -129,6 +144,19 @@ export default function Home() {
           </a>
           .
         </Alert>
+
+        {authError && (
+          <Alert severity="error" sx={{ mb: 4 }}>
+            {authError}
+            <Button 
+              size="small" 
+              onClick={() => window.location.reload()}
+              sx={{ ml: 2 }}
+            >
+              Retry
+            </Button>
+          </Alert>
+        )}
 
         {error && (
           <Alert severity="error" sx={{ mb: 4 }}>
