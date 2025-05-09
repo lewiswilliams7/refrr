@@ -19,6 +19,7 @@ import {
   Stack,
   alpha,
   Alert,
+  CircularProgress,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -47,6 +48,8 @@ interface FilterState {
 export default function Home() {
   const { user } = useAuth();
   const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState<FilterState>({
     businessType: '',
@@ -67,11 +70,16 @@ export default function Home() {
 
   const fetchBusinesses = async () => {
     try {
+      setIsLoading(true);
+      setError(null);
       const response = await axios.get(`${config.apiUrl}/api/businesses/public`);
-      console.log('Fetched businesses:', response.data);
       setBusinesses(response.data);
     } catch (error) {
       console.error('Error fetching businesses:', error);
+      setError('Failed to load businesses. Please try again later.');
+      setBusinesses([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -121,6 +129,19 @@ export default function Home() {
           </a>
           .
         </Alert>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 4 }}>
+            {error}
+            <Button 
+              size="small" 
+              onClick={fetchBusinesses}
+              sx={{ ml: 2 }}
+            >
+              Retry
+            </Button>
+          </Alert>
+        )}
 
         {/* Hero Section */}
         <Box
@@ -402,101 +423,109 @@ export default function Home() {
           </Paper>
 
           {/* Business Cards */}
-          <Grid container spacing={3}>
-            {sortedBusinesses.map((business) => (
-              <Grid item xs={12} md={6} key={business._id}>
-                <Card 
-                  sx={{ 
-                    height: '100%',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: theme.shadows[8],
-                    }
-                  }}
-                >
-                  <CardContent>
-                    <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-                      <Box>
-                        <Typography variant="h6" gutterBottom>
-                          {business.businessName}
-                        </Typography>
-                        <Chip
-                          label={business.businessType}
-                          color="primary"
-                          size="small"
-                          sx={{ mb: 1 }}
-                        />
-                        <Typography color="textSecondary" paragraph>
-                          <LocationIcon fontSize="small" sx={{ mr: 1 }} />
-                          {business.location.city}
-                        </Typography>
-                      </Box>
-                      <Box>
-                        {business.activeCampaigns.count > 0 ? (
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={() => navigate('/register/customer')}
-                            sx={{ borderRadius: 2 }}
-                          >
-                            Register to Refer
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            disabled
-                            sx={{ borderRadius: 2 }}
-                          >
-                            No Active Campaigns
-                          </Button>
-                        )}
-                      </Box>
-                    </Box>
-                    {business.activeCampaigns.rewards.length > 0 ? (
-                      <Box mt={2}>
-                        <Typography variant="subtitle1" gutterBottom>
-                          Active Rewards:
-                        </Typography>
-                        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                          {business.activeCampaigns.rewards.map((reward, index) => (
+          <Box sx={{ mt: 6 }}>
+            <Typography variant="h4" gutterBottom>
+              Featured Businesses
+            </Typography>
+            
+            {isLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : businesses.length === 0 ? (
+              <Alert severity="info" sx={{ mt: 2 }}>
+                No businesses found. Check back later for updates!
+              </Alert>
+            ) : (
+              <Grid container spacing={3}>
+                {sortedBusinesses.map((business) => (
+                  <Grid item xs={12} md={6} key={business._id}>
+                    <Card 
+                      sx={{ 
+                        height: '100%',
+                        transition: 'transform 0.2s, box-shadow 0.2s',
+                        '&:hover': {
+                          transform: 'translateY(-4px)',
+                          boxShadow: theme.shadows[8],
+                        }
+                      }}
+                    >
+                      <CardContent>
+                        <Box display="flex" justifyContent="space-between" alignItems="flex-start">
+                          <Box>
+                            <Typography variant="h6" gutterBottom>
+                              {business.businessName}
+                            </Typography>
                             <Chip
-                              key={index}
-                              label={`${reward.value}${reward.type === 'percentage' ? '%' : ' points'} - ${reward.description}`}
+                              label={business.businessType}
                               color="primary"
                               size="small"
-                              sx={{ borderRadius: 1 }}
+                              sx={{ mb: 1 }}
                             />
-                          ))}
-                        </Stack>
-                        <Button
-                          size="small"
-                          variant="text"
-                          onClick={() => navigate(`/business/${business._id}`)}
-                          sx={{ mt: 1 }}
-                        >
-                          View Details
-                        </Button>
-                      </Box>
-                    ) : (
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                        No active campaigns
-                      </Typography>
-                    )}
-                  </CardContent>
-                </Card>
+                            <Typography color="textSecondary" paragraph>
+                              <LocationIcon fontSize="small" sx={{ mr: 1 }} />
+                              {business.location.city}
+                            </Typography>
+                          </Box>
+                          <Box>
+                            {business.activeCampaigns.count > 0 ? (
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={() => navigate('/register/customer')}
+                                sx={{ borderRadius: 2 }}
+                              >
+                                Register to Refer
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="outlined"
+                                color="primary"
+                                disabled
+                                sx={{ borderRadius: 2 }}
+                              >
+                                No Active Campaigns
+                              </Button>
+                            )}
+                          </Box>
+                        </Box>
+                        {business.activeCampaigns.rewards.length > 0 ? (
+                          <Box mt={2}>
+                            <Typography variant="subtitle1" gutterBottom>
+                              Active Rewards:
+                            </Typography>
+                            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                              {business.activeCampaigns.rewards.map((reward, index) => (
+                                <Chip
+                                  key={index}
+                                  label={`${reward.value}${reward.type === 'percentage' ? '%' : ' points'} - ${reward.description}`}
+                                  color="primary"
+                                  size="small"
+                                  sx={{ borderRadius: 1 }}
+                                />
+                              ))}
+                            </Stack>
+                            <Button
+                              size="small"
+                              variant="text"
+                              onClick={() => navigate(`/business/${business._id}`)}
+                              sx={{ mt: 1 }}
+                            >
+                              View Details
+                            </Button>
+                          </Box>
+                        ) : (
+                          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                            No active campaigns
+                          </Typography>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
               </Grid>
-            ))}
-          </Grid>
-
-          {sortedBusinesses.length === 0 && (
-            <Box sx={{ textAlign: 'center', mt: 4 }}>
-              <Typography variant="h6" color="text.secondary">
-                No businesses found matching your criteria
-              </Typography>
-            </Box>
-          )}
+            )}
+          </Box>
         </Container>
       </Container>
     </PublicLayout>
