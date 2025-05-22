@@ -26,20 +26,24 @@ app.set('trust proxy', 1);
 
 // CORS configuration
 app.use(cors({
-  origin: function(origin, callback) {
-    const allowedOrigins = ['https://refrr-frontend.onrender.com', 'http://localhost:3000'];
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
+  origin: '*', // Allow all origins temporarily for debugging
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 600 // Cache preflight request for 10 minutes
 }));
+
+// Add CORS debugging middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+  console.log('CORS Debug - Request:', {
+    origin: req.headers.origin,
+    method: req.method,
+    path: req.path,
+    headers: req.headers
+  });
+  next();
+});
 
 // Basic middleware
 app.use(morgan('dev'));
