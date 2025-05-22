@@ -129,7 +129,8 @@ mongoose.connect(MONGODB_URI)
     process.exit(1);
   });
 
-const PORT = process.env.PORT || 5000;
+// Use the PORT environment variable provided by Render.com
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
