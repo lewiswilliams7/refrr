@@ -23,6 +23,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Stack,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -34,34 +35,30 @@ import {
   People as PeopleIcon,
   TrendingUp as TrendingUpIcon,
   AccessTime as AccessTimeIcon,
+  LocationOn as LocationIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { campaignApi } from '../services/api';
-import Navigation from '../components/common/Navigation';
+import axios from 'axios';
+import config from '../config';
+import { useAuth } from '../contexts/AuthContext';
+import Logo from '../components/common/Logo';
 
 interface Campaign {
-  _id: string;
-  title: string;
+  id: string;
+  name: string;
   description: string;
-  rewardType: 'percentage' | 'fixed';
-  rewardValue: number;
-  rewardDescription: string;
-  status: 'draft' | 'active' | 'paused' | 'completed';
   businessName: string;
-  businessType: string;
+  reward: string;
+  status: string;
   location: {
-    address?: string;
+    address: string;
     city: string;
     postcode: string;
-  };
-  referralLink?: string;
+  } | string;
+  businessType: string;
+  rewardType: 'percentage' | 'fixed';
+  rewardValue: number;
   tags?: string[];
-  referralCount?: number;
-  expirationDate?: string;
-  popularity?: number;
-  showRewardDisclaimer?: boolean;
-  rewardDisclaimerText?: string;
 }
 
 interface Analytics {
@@ -69,22 +66,12 @@ interface Analytics {
   successfulReferrals: number;
   pendingReferrals: number;
   totalRewards: number;
-  recentActivity: Array<{
-    _id: string;
-    campaignId: {
-      title: string;
-      businessName: string;
-      rewardType: string;
-      rewardValue: number;
-    };
-    status: string;
-    createdAt: string;
-  }>;
 }
 
 interface FilterState {
   businessType: string;
   city: string;
+  hasActiveCampaigns: boolean;
   rewardType: 'all' | 'percentage' | 'fixed';
   minRewardValue: number;
 }
@@ -92,29 +79,78 @@ interface FilterState {
 export default function CustomerCampaigns() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [copySuccess, setCopySuccess] = useState<string | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
-  const [sortBy, setSortBy] = useState<'title' | 'rewardValue' | 'businessName'>('title');
   const [filters, setFilters] = useState<FilterState>({
     businessType: '',
     city: '',
+    hasActiveCampaigns: false,
     rewardType: 'all',
     minRewardValue: 0,
   });
-  const { user } = useAuth();
-  const navigate = useNavigate();
+  const [sortBy, setSortBy] = useState<'name' | 'rewardValue' | 'businessName'>('name');
+  const [showFilters, setShowFilters] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [copySuccess, setCopySuccess] = useState<string | null>(null);
   const [bookmarkedCampaigns, setBookmarkedCampaigns] = useState<string[]>([]);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
 
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
   useEffect(() => {
-    fetchCampaigns();
-    fetchAnalytics();
-  }, [user]);
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const token = localStorage.getItem('token');
+        console.log('Token available:', !!token);
+        
+        if (!token) {
+          console.log('No token found, redirecting to login');
+          navigate('/login', { replace: true });
+          return;
+        }
+
+        // Set the token in axios defaults for future requests
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+        console.log('Fetching campaigns...');
+        const campaignsRes = await axios.get(`${config.apiUrl}/api/campaigns/public`);
+        console.log('Campaigns response:', campaignsRes.data);
+        setCampaigns(campaignsRes.data);
+
+        // Try to fetch analytics, but don't fail if it's not available
+        try {
+          const analyticsRes = await axios.get(`${config.apiUrl}/api/campaigns/analytics`);
+          console.log('Analytics response:', analyticsRes.data);
+          setAnalytics(analyticsRes.data);
+        } catch (analyticsError) {
+          console.log('Analytics not available:', analyticsError);
+          // Set default analytics
+          setAnalytics({
+            totalReferrals: 0,
+            successfulReferrals: 0,
+            pendingReferrals: 0,
+            totalRewards: 0
+          });
+        }
+      } catch (err: any) {
+        console.error('Error fetching data:', err);
+        if (err.response?.status === 401) {
+          console.log('Unauthorized, redirecting to login');
+          navigate('/login', { replace: true });
+        } else {
+          setError(err.response?.data?.message || 'Failed to load data');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [navigate]);
 
   useEffect(() => {
     const savedBookmarks = localStorage.getItem('bookmarkedCampaigns');
@@ -123,76 +159,30 @@ export default function CustomerCampaigns() {
     }
   }, []);
 
-  const fetchAnalytics = async () => {
+  const handleGenerateReferral = async (campaignId: string) => {
     try {
-      const response = await campaignApi.getAnalytics();
-      setAnalytics(response.data);
-    } catch (err: any) {
-      console.error('Error fetching analytics:', err);
-      setError(err.response?.data?.message || 'Failed to load analytics');
-    }
-  };
-
-  const fetchCampaigns = async () => {
-    try {
-      setLoading(true);
-      const data = await campaignApi.listPublic();
-      const validatedCampaigns = data.map((campaign: any) => ({
-        ...campaign,
-        _id: campaign._id || campaign.id
-      }));
-      setCampaigns(validatedCampaigns);
-    } catch (err: any) {
-      console.error('Error fetching campaigns:', err);
-      setError(err.response?.data?.message || 'Failed to load campaigns');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGenerateLink = async (campaignId: string) => {
-    if (!campaignId) {
-      setError('Invalid campaign ID');
-      return;
-    }
-
-    if (!user?.email) {
-      setError('Please log in to generate referral links');
-      navigate('/login');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError('');
-      
-      const response = await campaignApi.generateReferralLink(campaignId, {
-        referrerEmail: user.email
-      });
-      
-      if (!response?.code) {
-        throw new Error('No referral code received from server');
+      const userEmail = localStorage.getItem('userEmail');
+      if (!userEmail) {
+        alert('Please log in to generate a referral link');
+        return;
       }
 
-      const referralLink = `${window.location.origin}/refer/${response.code}`;
-      
-      setCampaigns(prevCampaigns => 
-        prevCampaigns.map(campaign => 
-          campaign._id === campaignId 
-            ? { ...campaign, referralLink }
-            : campaign
-        )
+      const response = await axios.post(
+        `${config.apiUrl}/api/referrals/generate/${campaignId}`,
+        { referrerEmail: userEmail },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
       );
+      // Copy referral link to clipboard
+      const referralLink = `${window.location.origin}/#/referral/${response.data.code}`;
+      await navigator.clipboard.writeText(referralLink);
+      alert('Referral link copied to clipboard!');
     } catch (err: any) {
-      console.error('Error generating referral link:', err);
-      if (err.response?.status === 401) {
-        setError('Please log in to generate referral links');
-        navigate('/login');
-      } else {
-        setError(err.response?.data?.message || 'Failed to generate referral link');
-      }
-    } finally {
-      setLoading(false);
+      console.error('Error generating referral:', err);
+      alert(err.response?.data?.message || 'Failed to generate referral link');
     }
   };
 
@@ -230,14 +220,29 @@ export default function CustomerCampaigns() {
     return 'error';
   };
 
+  const formatLocation = (location: Campaign['location']): string => {
+    if (typeof location === 'string') {
+      return location;
+    }
+    return `${location.address}, ${location.city}, ${location.postcode}`;
+  };
+
   const filteredCampaigns = campaigns.filter(campaign => {
     const matchesSearch = 
-      campaign.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      campaign.businessName.toLowerCase().includes(searchTerm.toLowerCase());
+      (campaign.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (campaign.businessName?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     const matchesType = !filters.businessType || campaign.businessType === filters.businessType;
-    const matchesCity = !filters.city || campaign.location.city.toLowerCase().includes(filters.city.toLowerCase());
+    
+    // Handle location filtering based on type
+    const matchesCity = !filters.city || (() => {
+      if (typeof campaign.location === 'string') {
+        return campaign.location.toLowerCase().includes(filters.city.toLowerCase());
+      }
+      return campaign.location?.city?.toLowerCase().includes(filters.city.toLowerCase()) || false;
+    })();
+
     const matchesRewardType = filters.rewardType === 'all' || campaign.rewardType === filters.rewardType;
-    const matchesRewardValue = campaign.rewardValue >= filters.minRewardValue;
+    const matchesRewardValue = (campaign.rewardValue || 0) >= filters.minRewardValue;
     const matchesTags = selectedTags.length === 0 || 
       (campaign.tags && selectedTags.every(tag => campaign.tags?.includes(tag)));
 
@@ -251,7 +256,7 @@ export default function CustomerCampaigns() {
       case 'businessName':
         return a.businessName.localeCompare(b.businessName);
       default:
-        return a.title.localeCompare(b.title);
+        return a.name.localeCompare(b.name);
     }
   });
 
@@ -268,390 +273,233 @@ export default function CustomerCampaigns() {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <>
-        <Navigation />
-        <Container maxWidth="lg" sx={{ mt: 8, textAlign: 'center' }}>
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
           <CircularProgress />
-        </Container>
-      </>
+        </Box>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Alert severity="error">
+          {error}
+        </Alert>
+      </Container>
     );
   }
 
   return (
-    <>
-      <Navigation />
-      <Container maxWidth="xl" sx={{ mt: 8, mb: 8 }}>
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" gutterBottom>
-            Customer Dashboard
-          </Typography>
-          <Typography variant="subtitle1" color="textSecondary">
-            Welcome, {user?.firstName} {user?.lastName}
-          </Typography>
-        </Box>
+    <Container maxWidth="lg" sx={{ mt: 4 }}>
+      <Box 
+        sx={{ 
+          mb: 4,
+          cursor: 'pointer',
+          transition: 'transform 0.2s ease-in-out',
+          '&:hover': {
+            transform: 'scale(1.05)'
+          }
+        }}
+        onClick={() => navigate('/')}
+      >
+        <Logo />
+      </Box>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 4 }}>
-            {error}
-          </Alert>
-        )}
+      <Typography variant="h4" component="h1" gutterBottom>
+        Available Campaigns
+      </Typography>
 
-        <Grid container spacing={4}>
-          {/* Analytics Section - Left Side */}
-          <Grid item xs={12} md={4}>
-            <Box sx={{ position: 'sticky', top: 20 }}>
-              <Typography variant="h5" gutterBottom>
-                My Analytics
-              </Typography>
-              
-              {/* Analytics Cards */}
-              <Grid container spacing={2} sx={{ mb: 4 }}>
-                <Grid item xs={6}>
-                  <Paper sx={{ p: 2, height: '100%' }}>
-                    <Typography variant="h6" color="textSecondary">Total Referrals</Typography>
-                    <Typography variant="h3" sx={{ mt: 1 }}>
-                      {analytics?.totalReferrals || 0}
-                    </Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={6}>
-                  <Paper sx={{ p: 2, height: '100%' }}>
-                    <Typography variant="h6" color="textSecondary">Successful</Typography>
-                    <Typography variant="h3" sx={{ mt: 1 }}>
-                      {analytics?.successfulReferrals || 0}
-                    </Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={6}>
-                  <Paper sx={{ p: 2, height: '100%' }}>
-                    <Typography variant="h6" color="textSecondary">Pending</Typography>
-                    <Typography variant="h3" sx={{ mt: 1 }}>
-                      {analytics?.pendingReferrals || 0}
-                    </Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={6}>
-                  <Paper sx={{ p: 2, height: '100%' }}>
-                    <Typography variant="h6" color="textSecondary">Total Rewards</Typography>
-                    <Typography variant="h3" sx={{ mt: 1 }}>
-                      {analytics?.totalRewards || 0}
-                      {analytics?.totalRewards ? ' points' : ''}
-                    </Typography>
-                  </Paper>
-                </Grid>
-              </Grid>
-
-              {/* Recent Activity */}
-              <Box>
+      {analytics && (
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
                 <Typography variant="h6" gutterBottom>
-                  Recent Activity
+                  Total Referrals
                 </Typography>
-                <Box sx={{ maxHeight: '400px', overflow: 'auto' }}>
-                  {analytics?.recentActivity.map((activity) => (
-                    <Card key={activity._id} sx={{ mb: 2 }}>
-                      <CardContent>
-                        <Box display="flex" justifyContent="space-between" alignItems="center">
-                          <Box>
-                            <Typography variant="subtitle1">
-                              {activity.campaignId.title}
-                            </Typography>
-                            <Typography variant="body2" color="textSecondary">
-                              {activity.campaignId.businessName}
-                            </Typography>
-                            <Typography variant="body2" color="textSecondary">
-                              {new Date(activity.createdAt).toLocaleDateString()}
-                            </Typography>
-                          </Box>
-                          <Chip 
-                            label={activity.status.toUpperCase()} 
-                            color={getStatusColor(activity.status) as any}
-                            size="small"
-                          />
-                        </Box>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </Box>
-              </Box>
-            </Box>
+                <Typography variant="h3">
+                  {analytics.totalReferrals}
+                </Typography>
+              </CardContent>
+            </Card>
           </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Successful Referrals
+                </Typography>
+                <Typography variant="h3">
+                  {analytics.successfulReferrals}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Pending Referrals
+                </Typography>
+                <Typography variant="h3">
+                  {analytics.pendingReferrals}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Total Rewards
+                </Typography>
+                <Typography variant="h3">
+                  {analytics.totalRewards}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      )}
 
-          {/* Campaigns Section - Right Side */}
-          <Grid item xs={12} md={8}>
-            <Box>
-              <Typography variant="h5" gutterBottom>
-                Available Campaigns
-              </Typography>
-              
-              {/* Search and Filter Bar */}
-              <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  placeholder="Search campaigns..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{ flex: 1, minWidth: 200 }}
-                />
-                <IconButton 
-                  onClick={() => setShowFilters(!showFilters)}
-                  color={showFilters ? 'primary' : 'default'}
-                >
-                  <FilterIcon />
-                </IconButton>
-                <FormControl sx={{ minWidth: 120 }}>
-                  <InputLabel>Sort By</InputLabel>
-                  <Select
-                    value={sortBy}
-                    label="Sort By"
-                    onChange={(e) => setSortBy(e.target.value as any)}
-                  >
-                    <MenuItem value="title">Title</MenuItem>
-                    <MenuItem value="rewardValue">Reward Value</MenuItem>
-                    <MenuItem value="businessName">Business Name</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
-
-              {/* Filters */}
-              {showFilters && (
-                <Paper sx={{ p: 3, mb: 3 }}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <FormControl fullWidth>
-                        <InputLabel>Business Type</InputLabel>
-                        <Select
-                          value={filters.businessType}
-                          label="Business Type"
-                          onChange={(e) => setFilters({ ...filters, businessType: e.target.value })}
-                        >
-                          <MenuItem value="">All Types</MenuItem>
-                          <MenuItem value="restaurant">Restaurant</MenuItem>
-                          <MenuItem value="retail">Retail</MenuItem>
-                          <MenuItem value="service">Service</MenuItem>
-                          <MenuItem value="other">Other</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label="City"
-                        value={filters.city}
-                        onChange={(e) => setFilters({ ...filters, city: e.target.value })}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <FormControl fullWidth>
-                        <InputLabel>Reward Type</InputLabel>
-                        <Select
-                          value={filters.rewardType}
-                          label="Reward Type"
-                          onChange={(e) => setFilters({ ...filters, rewardType: e.target.value as any })}
-                        >
-                          <MenuItem value="all">All Types</MenuItem>
-                          <MenuItem value="percentage">Percentage</MenuItem>
-                          <MenuItem value="fixed">Fixed</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label="Min Reward Value"
-                        type="number"
-                        value={filters.minRewardValue}
-                        onChange={(e) => setFilters({ ...filters, minRewardValue: Number(e.target.value) })}
-                      />
-                    </Grid>
-                  </Grid>
-                </Paper>
-              )}
-
-              {/* Tags Filter */}
-              <Box sx={{ mb: 3, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                {Array.from(new Set(campaigns.flatMap(c => c.tags || []))).map(tag => (
-                  <Chip
-                    key={tag}
-                    label={tag}
-                    onClick={() => handleTagClick(tag)}
-                    color={selectedTags.includes(tag) ? 'primary' : 'default'}
-                    sx={{ m: 0.5 }}
-                  />
-                ))}
-              </Box>
-
-              {/* Campaigns Grid */}
-              <Grid container spacing={3}>
-                {sortedCampaigns.map((campaign) => (
-                  <Grid item xs={12} key={campaign._id}>
-                    <Card>
-                      <CardContent>
-                        <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-                          <Box>
-                            <Typography variant="h6" gutterBottom>
-                              {campaign.title}
-                            </Typography>
-                            <Typography color="textSecondary" paragraph>
-                              {campaign.businessName} - {campaign.businessType}
-                            </Typography>
-                            <Typography color="textSecondary" paragraph>
-                              {campaign.location.address ? `${campaign.location.address}, ` : ''}{campaign.location.city}, {campaign.location.postcode}
-                            </Typography>
-                            <Typography paragraph>
-                              {campaign.description}
-                            </Typography>
-                            
-                            {/* Tags */}
-                            <Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                              {campaign.tags?.map(tag => (
-                                <Chip
-                                  key={tag}
-                                  label={tag}
-                                  size="small"
-                                  onClick={() => handleTagClick(tag)}
-                                  color={selectedTags.includes(tag) ? 'primary' : 'default'}
-                                />
-                              ))}
-                            </Box>
-
-                            {/* Campaign Stats */}
-                            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                              {campaign.referralCount && (
-                                <Chip
-                                  icon={<PeopleIcon />}
-                                  label={`${campaign.referralCount} referrals`}
-                                  size="small"
-                                />
-                              )}
-                              {campaign.popularity && (
-                                <Chip
-                                  icon={<TrendingUpIcon />}
-                                  label={`${campaign.popularity}% popular`}
-                                  size="small"
-                                  color={getPopularityColor(campaign.popularity) as any}
-                                />
-                              )}
-                              {campaign.expirationDate && (
-                                <Chip
-                                  icon={<AccessTimeIcon />}
-                                  label={`Expires ${new Date(campaign.expirationDate).toLocaleDateString()}`}
-                                  size="small"
-                                />
-                              )}
-                            </Box>
-
-                            <Typography variant="body1" sx={{ mb: 2 }}>
-                              Reward: {campaign.rewardValue}
-                              {campaign.rewardType === 'percentage' ? '%' : ' points'} - {campaign.rewardDescription}
-                            </Typography>
-
-                            {campaign.showRewardDisclaimer && (
-                              <Typography variant="body2" color="textSecondary" sx={{ mt: 1, fontStyle: 'italic' }}>
-                                {campaign.rewardDisclaimerText || 'Reward will be provided after the referred customer books with the business'}
-                              </Typography>
-                            )}
-                          </Box>
-                          <Box>
-                            <IconButton onClick={() => handleShare(campaign)}>
-                              <ShareIcon />
-                            </IconButton>
-                            <IconButton onClick={() => handleBookmark(campaign._id)}>
-                              {bookmarkedCampaigns.includes(campaign._id) ? (
-                                <BookmarkIcon color="primary" />
-                              ) : (
-                                <BookmarkBorderIcon />
-                              )}
-                            </IconButton>
-                          </Box>
-                        </Box>
-
-                        {campaign.referralLink ? (
-                          <Box sx={{ mt: 2 }}>
-                            <TextField
-                              fullWidth
-                              value={campaign.referralLink}
-                              InputProps={{
-                                endAdornment: (
-                                  <InputAdornment position="end">
-                                    <Tooltip title={copySuccess === campaign.referralLink ? "Copied!" : "Copy to clipboard"}>
-                                      <IconButton onClick={() => handleCopyLink(campaign.referralLink!)}>
-                                        <CopyIcon />
-                                      </IconButton>
-                                    </Tooltip>
-                                  </InputAdornment>
-                                ),
-                              }}
-                              variant="outlined"
-                            />
-                          </Box>
-                        ) : (
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            fullWidth
-                            onClick={() => handleGenerateLink(campaign._id)}
-                            disabled={loading}
-                          >
-                            Generate Referral Link
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
+      <Paper sx={{ p: 3, mb: 4 }}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="Search campaigns..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+              <Button
+                variant="outlined"
+                startIcon={<FilterIcon />}
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                {showFilters ? 'Hide Filters' : 'Show Filters'}
+              </Button>
             </Box>
           </Grid>
         </Grid>
-      </Container>
 
-      {/* Share Dialog */}
-      <Dialog open={shareDialogOpen} onClose={() => setShareDialogOpen(false)}>
-        <DialogTitle>Share Campaign</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<ShareIcon />}
-              onClick={() => {
-                window.open(
-                  `https://twitter.com/intent/tweet?text=Check out this amazing campaign: ${selectedCampaign?.title}&url=${selectedCampaign?.referralLink}`,
-                  '_blank'
-                );
-              }}
-            >
-              Share on Twitter
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<ShareIcon />}
-              onClick={() => {
-                window.open(
-                  `https://www.facebook.com/sharer/sharer.php?u=${selectedCampaign?.referralLink}`,
-                  '_blank'
-                );
-              }}
-            >
-              Share on Facebook
-            </Button>
+        {showFilters && (
+          <Box sx={{ mt: 3 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={3}>
+                <FormControl fullWidth>
+                  <InputLabel>Business Type</InputLabel>
+                  <Select
+                    value={filters.businessType}
+                    onChange={(e) => setFilters({ ...filters, businessType: e.target.value })}
+                    label="Business Type"
+                  >
+                    <MenuItem value="">All Types</MenuItem>
+                    <MenuItem value="restaurant">Restaurant</MenuItem>
+                    <MenuItem value="retail">Retail</MenuItem>
+                    <MenuItem value="service">Service</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <TextField
+                  fullWidth
+                  label="City"
+                  value={filters.city}
+                  onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <FormControl fullWidth>
+                  <InputLabel>Reward Type</InputLabel>
+                  <Select
+                    value={filters.rewardType}
+                    onChange={(e) => setFilters({ ...filters, rewardType: e.target.value as FilterState['rewardType'] })}
+                    label="Reward Type"
+                  >
+                    <MenuItem value="all">All Rewards</MenuItem>
+                    <MenuItem value="percentage">Percentage</MenuItem>
+                    <MenuItem value="fixed">Fixed Amount</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <TextField
+                  fullWidth
+                  label="Min Reward Value"
+                  type="number"
+                  value={filters.minRewardValue}
+                  onChange={(e) => setFilters({ ...filters, minRewardValue: Number(e.target.value) })}
+                />
+              </Grid>
+            </Grid>
           </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShareDialogOpen(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-    </>
+        )}
+      </Paper>
+
+      <Grid container spacing={3}>
+        {sortedCampaigns.map((campaign) => (
+          <Grid item xs={12} md={6} key={campaign.id}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  {campaign.name}
+                </Typography>
+                <Typography color="textSecondary" paragraph>
+                  {campaign.description}
+                </Typography>
+                <Typography variant="subtitle1" gutterBottom>
+                  Business: {campaign.businessName}
+                </Typography>
+                <Typography variant="subtitle1" gutterBottom>
+                  Reward: {campaign.reward}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  <LocationIcon fontSize="small" sx={{ mr: 1 }} />
+                  {formatLocation(campaign.location)}
+                </Typography>
+                {campaign.tags && campaign.tags.length > 0 && (
+                  <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+                    {campaign.tags.map((tag, index) => (
+                      <Chip key={index} label={tag} size="small" />
+                    ))}
+                  </Stack>
+                )}
+                <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleGenerateReferral(campaign.id)}
+                  >
+                    Generate Referral
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => navigate(`/customer/campaign/${campaign.id}`)}
+                  >
+                    View Details
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </Container>
   );
 } 

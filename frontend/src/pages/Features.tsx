@@ -6,224 +6,363 @@ import {
   Grid,
   Card,
   CardContent,
-  Paper,
-  Stack,
-  alpha,
+  Button,
   useTheme,
 } from '@mui/material';
 import {
-  Campaign as CampaignIcon,
-  Analytics as AnalyticsIcon,
+  TrendingUp as TrendingUpIcon,
   People as PeopleIcon,
-  Share as ShareIcon,
-  Security as SecurityIcon,
-  Speed as SpeedIcon,
+  LocalOffer as LocalOfferIcon,
+  LocationOn as LocationIcon,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import PublicLayout from '../components/Layout/PublicLayout';
-import { Link } from 'react-router-dom';
 
-export default function Features() {
+const Features: React.FC = () => {
+  const navigate = useNavigate();
   const theme = useTheme();
-
-  const features = [
-    {
-      icon: <CampaignIcon sx={{ fontSize: 40 }} />,
-      title: 'Campaign Management',
-      description: 'Create and manage multiple referral campaigns with ease. Set up rewards, track performance, and optimize your strategy.',
-    },
-    {
-      icon: <AnalyticsIcon sx={{ fontSize: 40 }} />,
-      title: 'Analytics Dashboard',
-      description: 'Track your campaign performance with detailed analytics. Monitor referrals, conversions, and ROI in real-time.',
-    },
-    {
-      icon: <PeopleIcon sx={{ fontSize: 40 }} />,
-      title: 'Customer Network',
-      description: 'Build and grow your customer network. Connect with local businesses and customers through referrals.',
-    },
-    {
-      icon: <ShareIcon sx={{ fontSize: 40 }} />,
-      title: 'Social Sharing',
-      description: 'Easily share your referral links across social media platforms. Increase your reach and engagement.',
-    },
-    {
-      icon: <SecurityIcon sx={{ fontSize: 40 }} />,
-      title: 'Secure Platform',
-      description: 'Your data is protected with enterprise-grade security. We ensure your information is safe and private.',
-    },
-    {
-      icon: <SpeedIcon sx={{ fontSize: 40 }} />,
-      title: 'Fast Integration',
-      description: 'Get started quickly with our easy-to-use platform. No technical expertise required.',
-    },
-  ];
 
   return (
     <PublicLayout>
-      {/* Hero Section */}
-      <Box
-        sx={{
-          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${alpha(theme.palette.primary.dark, 0.8)} 100%)`,
-          color: 'white',
-          py: { xs: 8, md: 12 },
-          mb: 6,
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'url("/pattern.svg")',
-            opacity: 0.1,
-          }
-        }}
-      >
-        <Container maxWidth="lg">
-          <Box sx={{ textAlign: 'center', maxWidth: '800px', mx: 'auto' }}>
-            <Typography 
-              variant="h2" 
-              gutterBottom
-              sx={{
-                fontWeight: 700,
-                fontSize: { xs: '2.5rem', md: '3.5rem' },
-                lineHeight: 1.2,
-              }}
-            >
-              Powerful Features for Your Business
-            </Typography>
-            <Typography 
-              variant="h5" 
-              sx={{ 
-                opacity: 0.9,
-                fontSize: { xs: '1.2rem', md: '1.5rem' }
-              }}
-            >
-              Everything you need to run successful referral campaigns
-            </Typography>
-          </Box>
-        </Container>
-      </Box>
-
-      {/* Features Grid */}
-      <Container maxWidth="lg" sx={{ mb: 8 }}>
-        <Grid container spacing={4}>
-          {features.map((feature, index) => (
-            <Grid item xs={12} md={6} key={index}>
-              <Card 
-                sx={{ 
-                  height: '100%',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: theme.shadows[8],
-                  }
-                }}
-              >
+      <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
+        {/* Business Benefits Section */}
+        <Box sx={{ mb: 8 }}>
+          <Typography 
+            variant="h3" 
+            component="h1" 
+            gutterBottom 
+            align="center"
+            sx={{ 
+              fontWeight: 700, 
+              mb: 6,
+              letterSpacing: '0.01em',
+              fontSize: { xs: '2rem', md: '2.5rem' }
+            }}
+          >
+            Powerful Features for Your Business
+          </Typography>
+          <Grid container spacing={4}>
+            <Grid item xs={12} md={4}>
+              <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
                 <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                    <Box
-                      sx={{
-                        p: 2,
-                        borderRadius: 2,
-                        bgcolor: alpha(theme.palette.primary.main, 0.1),
-                        color: theme.palette.primary.main,
-                      }}
-                    >
-                      {feature.icon}
-                    </Box>
-                    <Typography variant="h5" component="h3">
-                      {feature.title}
-                    </Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                    <TrendingUpIcon sx={{ fontSize: 40, color: 'primary.main' }} />
                   </Box>
-                  <Typography color="text.secondary">
-                    {feature.description}
+                  <Typography 
+                    variant="h5" 
+                    component="h3" 
+                    gutterBottom 
+                    align="center"
+                    sx={{ 
+                      fontWeight: 600,
+                      letterSpacing: '0.01em'
+                    }}
+                  >
+                    Smart Analytics
+                  </Typography>
+                  <Typography 
+                    color="text.secondary" 
+                    align="center"
+                    sx={{ 
+                      letterSpacing: '0.01em'
+                    }}
+                  >
+                    Track referral performance, customer engagement, and ROI with detailed analytics and insights.
                   </Typography>
                 </CardContent>
               </Card>
             </Grid>
-          ))}
-        </Grid>
-      </Container>
+            <Grid item xs={12} md={4}>
+              <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                    <PeopleIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+                  </Box>
+                  <Typography 
+                    variant="h5" 
+                    component="h3" 
+                    gutterBottom 
+                    align="center"
+                    sx={{ 
+                      fontWeight: 600,
+                      letterSpacing: '0.01em'
+                    }}
+                  >
+                    Customer Management
+                  </Typography>
+                  <Typography 
+                    color="text.secondary" 
+                    align="center"
+                    sx={{ 
+                      letterSpacing: '0.01em'
+                    }}
+                  >
+                    Manage your customer base, track referrals, and automate reward distribution all in one place.
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Card sx={{ height: '100%', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                    <LocalOfferIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+                  </Box>
+                  <Typography 
+                    variant="h5" 
+                    component="h3" 
+                    gutterBottom 
+                    align="center"
+                    sx={{ 
+                      fontWeight: 600,
+                      letterSpacing: '0.01em'
+                    }}
+                  >
+                    Custom Rewards
+                  </Typography>
+                  <Typography 
+                    color="text.secondary" 
+                    align="center"
+                    sx={{ 
+                      letterSpacing: '0.01em'
+                    }}
+                  >
+                    Create and manage custom rewards, discounts, and incentives to motivate your customers to refer.
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </Box>
 
-      {/* CTA Section */}
-      <Box
-        sx={{
-          py: 8,
-          bgcolor: alpha(theme.palette.primary.main, 0.05),
-        }}
-      >
-        <Container maxWidth="lg">
-          <Paper
-            elevation={0}
-            sx={{
-              p: 6,
-              textAlign: 'center',
-              bgcolor: 'white',
-              borderRadius: 4,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+        {/* Customer Benefits Section */}
+        <Box sx={{ mb: 8, bgcolor: 'grey.50', py: 6, borderRadius: 4 }}>
+          <Container maxWidth="md">
+            <Typography 
+              variant="h3" 
+              component="h2" 
+              gutterBottom 
+              align="center"
+              sx={{ 
+                fontWeight: 700, 
+                mb: 6,
+                letterSpacing: '0.01em',
+                fontSize: { xs: '2rem', md: '2.5rem' }
+              }}
+            >
+              Customer Experience
+            </Typography>
+            <Grid container spacing={4}>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                  <Box sx={{ 
+                    bgcolor: 'primary.main', 
+                    color: 'white',
+                    p: 1.5,
+                    borderRadius: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <LocalOfferIcon />
+                  </Box>
+                  <Box>
+                    <Typography 
+                      variant="h6" 
+                      gutterBottom
+                      sx={{ 
+                        fontWeight: 600,
+                        letterSpacing: '0.01em'
+                      }}
+                    >
+                      Easy Rewards
+                    </Typography>
+                    <Typography 
+                      color="text.secondary"
+                      sx={{ 
+                        letterSpacing: '0.01em'
+                      }}
+                    >
+                      Get discounts, free services, or cash rewards when you refer friends to your favorite local businesses.
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                  <Box sx={{ 
+                    bgcolor: 'primary.main', 
+                    color: 'white',
+                    p: 1.5,
+                    borderRadius: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <PeopleIcon />
+                  </Box>
+                  <Box>
+                    <Typography 
+                      variant="h6" 
+                      gutterBottom
+                      sx={{ 
+                        fontWeight: 600,
+                        letterSpacing: '0.01em'
+                      }}
+                    >
+                      Simple Sharing
+                    </Typography>
+                    <Typography 
+                      color="text.secondary"
+                      sx={{ 
+                        letterSpacing: '0.01em'
+                      }}
+                    >
+                      Share your favorite local businesses with friends and family through our simple referral system.
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                  <Box sx={{ 
+                    bgcolor: 'primary.main', 
+                    color: 'white',
+                    p: 1.5,
+                    borderRadius: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <TrendingUpIcon />
+                  </Box>
+                  <Box>
+                    <Typography 
+                      variant="h6" 
+                      gutterBottom
+                      sx={{ 
+                        fontWeight: 600,
+                        letterSpacing: '0.01em'
+                      }}
+                    >
+                      Reward Tracking
+                    </Typography>
+                    <Typography 
+                      color="text.secondary"
+                      sx={{ 
+                        letterSpacing: '0.01em'
+                      }}
+                    >
+                      Keep track of all your referrals and rewards in one place. No more lost vouchers or forgotten discounts.
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                  <Box sx={{ 
+                    bgcolor: 'primary.main', 
+                    color: 'white',
+                    p: 1.5,
+                    borderRadius: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <LocationIcon />
+                  </Box>
+                  <Box>
+                    <Typography 
+                      variant="h6" 
+                      gutterBottom
+                      sx={{ 
+                        fontWeight: 600,
+                        letterSpacing: '0.01em'
+                      }}
+                    >
+                      Local Discovery
+                    </Typography>
+                    <Typography 
+                      color="text.secondary"
+                      sx={{ 
+                        letterSpacing: '0.01em'
+                      }}
+                    >
+                      Find and support great local businesses in your area while earning rewards for your recommendations.
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
+            </Grid>
+          </Container>
+        </Box>
+
+        {/* CTA Section */}
+        <Box sx={{ textAlign: 'center', mt: 8 }}>
+          <Typography 
+            variant="h4" 
+            gutterBottom
+            sx={{ 
+              fontWeight: 700,
+              letterSpacing: '0.01em'
             }}
           >
-            <Typography variant="h4" gutterBottom>
-              Ready to Get Started?
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: '600px', mx: 'auto' }}>
-              Join thousands of businesses already using Refrr to grow their customer base through referrals.
-            </Typography>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
-              <Link
-                to="/register"
-                style={{
-                  textDecoration: 'none',
-                }}
-              >
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 2,
-                    bgcolor: theme.palette.primary.main,
-                    color: 'white',
-                    borderRadius: 2,
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                    }
-                  }}
-                >
-                  Register Your Business
-                </Paper>
-              </Link>
-              <Link
-                to="/register/customer"
-                style={{
-                  textDecoration: 'none',
-                }}
-              >
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 2,
-                    bgcolor: 'white',
-                    color: theme.palette.primary.main,
-                    border: `1px solid ${theme.palette.primary.main}`,
-                    borderRadius: 2,
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                    }
-                  }}
-                >
-                  Register as Customer
-                </Paper>
-              </Link>
-            </Stack>
-          </Paper>
-        </Container>
-      </Box>
+            Ready to Get Started?
+          </Typography>
+          <Typography 
+            variant="h6" 
+            color="text.secondary" 
+            sx={{ 
+              mb: 4,
+              fontWeight: 500,
+              letterSpacing: '0.01em'
+            }}
+          >
+            Join Refrr today and start growing your business through referrals
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              onClick={() => navigate('/register/customer')}
+              sx={{ 
+                px: 4,
+                py: 1.5,
+                fontSize: '1.1rem',
+                textTransform: 'none',
+                fontWeight: 600,
+                letterSpacing: '0.01em'
+              }}
+            >
+              Register as Customer (Free)
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              onClick={() => navigate('/register')}
+              sx={{ 
+                px: 4,
+                py: 1.5,
+                fontSize: '1.1rem',
+                textTransform: 'none',
+                fontWeight: 600,
+                letterSpacing: '0.01em',
+                bgcolor: 'white',
+                color: 'primary.main',
+                '&:hover': {
+                  bgcolor: 'grey.100',
+                }
+              }}
+            >
+              Register as Business
+            </Button>
+          </Box>
+        </Box>
+      </Container>
     </PublicLayout>
   );
-} 
+};
+
+export default Features; 

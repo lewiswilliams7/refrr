@@ -38,7 +38,7 @@ import {
   BookmarkBorder as BookmarkBorderIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import Navigation from '../components/common/Navigation';
 

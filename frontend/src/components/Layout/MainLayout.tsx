@@ -20,7 +20,7 @@ import {
   People,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import Logo from '../common/Logo';
 import Avatar from '../common/Avatar';
 

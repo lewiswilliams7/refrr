@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Box,
@@ -18,11 +18,15 @@ import {
   Chip,
   CircularProgress,
   Alert,
+  Grid,
+  Card,
+  CardContent,
+  Button,
 } from '@mui/material';
 import { MoreVert as MoreVertIcon } from '@mui/icons-material';
-import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
-import Navigation from '../components/common/Navigation';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import config from '../config';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -46,82 +50,77 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-interface Campaign {
-  _id: string;
-  title: string;
-  description: string;
-  status: string;
-  businessId: {
-    businessName: string;
-    email: string;
-  };
-  createdAt: string;
-}
-
-interface Company {
-  _id: string;
-  businessName: string;
-  email: string;
-  status: string;
-  createdAt: string;
-}
-
 interface User {
-  _id: string;
-  firstName: string;
-  lastName: string;
+  id: string;
   email: string;
-  role: 'admin' | 'business' | 'customer';
-  status: 'active' | 'inactive' | 'suspended';
-  businessName?: string;
-  businessType?: string;
-  location?: {
-    address: string;
-    city: string;
-    postcode: string;
-  };
-  businessDescription?: string;
-  avatar?: string;
-  createdAt: string;
-  updatedAt: string;
+  name: string;
+  role: string;
 }
 
-const AdminDashboard = () => {
+interface Campaign {
+  id: string;
+  name: string;
+  description: string;
+  businessName: string;
+  reward: string;
+  status: string;
+}
+
+interface Referral {
+  id: string;
+  campaignName: string;
+  referrerEmail: string;
+  referredEmail: string;
+  status: string;
+  createdAt: string;
+}
+
+export default function AdminDashboard() {
   const [value, setValue] = useState(0);
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [companies, setCompanies] = useState<Company[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedItem, setSelectedItem] = useState<{ id: string; type: string } | null>(null);
-  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (user?.role !== 'admin') {
-      setError('Access denied. Admin privileges required.');
-      return;
-    }
-    fetchData();
-  }, [user]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [campaignsRes, companiesRes, usersRes] = await Promise.all([
-        api.get('/admin/campaigns'),
-        api.get('/admin/companies'),
-        api.get('/admin/users')
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      const [usersRes, campaignsRes, referralsRes] = await Promise.all([
+        axios.get(`${config.apiUrl}/api/users`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get(`${config.apiUrl}/api/campaigns`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get(`${config.apiUrl}/api/referrals`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
       ]);
-      setCampaigns(campaignsRes.data);
-      setCompanies(companiesRes.data);
+
       setUsers(usersRes.data);
+      setCampaigns(campaignsRes.data);
+      setReferrals(referralsRes.data);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error fetching data');
+      console.error('Error fetching dashboard data:', err);
+      setError(err.response?.data?.message || 'Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -142,7 +141,9 @@ const AdminDashboard = () => {
 
     try {
       setLoading(true);
-      await api.delete(`/admin/${selectedItem.type}/${selectedItem.id}`);
+      await axios.delete(`${config.apiUrl}/api/${selectedItem.type}/${selectedItem.id}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
       await fetchData();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error deleting item');
@@ -157,8 +158,10 @@ const AdminDashboard = () => {
 
     try {
       setLoading(true);
-      await api.patch(`/admin/${selectedItem.type}/${selectedItem.id}/status`, {
+      await axios.patch(`${config.apiUrl}/api/${selectedItem.type}/${selectedItem.id}/status`, {
         status: newStatus
+      }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       await fetchData();
     } catch (err: any) {
@@ -184,190 +187,94 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <>
-        <Navigation />
-        <Container maxWidth="lg" sx={{ mt: 8, textAlign: 'center' }}>
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
           <CircularProgress />
-        </Container>
-      </>
+        </Box>
+      </Container>
     );
   }
 
   if (error) {
     return (
-      <>
-        <Navigation />
-        <Container maxWidth="lg" sx={{ mt: 8 }}>
-          <Alert severity="error">{error}</Alert>
-        </Container>
-      </>
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Alert severity="error">
+          {error}
+        </Alert>
+      </Container>
     );
   }
 
   return (
-    <>
-      <Navigation />
-      <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" gutterBottom>
-            Admin Dashboard
-          </Typography>
-          <Typography variant="subtitle1" color="textSecondary">
-            Welcome, {user?.firstName} {user?.lastName}
-          </Typography>
-        </Box>
+    <Container maxWidth="lg" sx={{ mt: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Admin Dashboard
+      </Typography>
 
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={value} onChange={handleChange}>
-            <Tab label="Campaigns" />
-            <Tab label="Companies" />
-            <Tab label="Users" />
-          </Tabs>
-        </Box>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={4}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Users
+              </Typography>
+              <Typography variant="h3">
+                {users.length}
+              </Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                sx={{ mt: 2 }}
+                onClick={() => navigate('/admin/users')}
+              >
+                View All Users
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
 
-        <TabPanel value={value} index={0}>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Title</TableCell>
-                  <TableCell>Company</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Created</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {campaigns.map((campaign) => (
-                  <TableRow key={campaign._id}>
-                    <TableCell>{campaign.title}</TableCell>
-                    <TableCell>{campaign.businessId.businessName}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={campaign.status}
-                        color={getStatusColor(campaign.status) as any}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {new Date(campaign.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <IconButton
-                        onClick={(e) => handleMenuClick(e, campaign._id, 'campaigns')}
-                      >
-                        <MoreVertIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </TabPanel>
+        <Grid item xs={12} md={4}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Campaigns
+              </Typography>
+              <Typography variant="h3">
+                {campaigns.length}
+              </Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                sx={{ mt: 2 }}
+                onClick={() => navigate('/admin/campaigns')}
+              >
+                View All Campaigns
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
 
-        <TabPanel value={value} index={1}>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Company Name</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Created</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {companies.map((company) => (
-                  <TableRow key={company._id}>
-                    <TableCell>{company.businessName}</TableCell>
-                    <TableCell>{company.email}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={company.status}
-                        color={getStatusColor(company.status) as any}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {new Date(company.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <IconButton
-                        onClick={(e) => handleMenuClick(e, company._id, 'companies')}
-                      >
-                        <MoreVertIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </TabPanel>
-
-        <TabPanel value={value} index={2}>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Role</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Created</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user._id}>
-                    <TableCell>{`${user.firstName} ${user.lastName}`}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.role}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={user.status}
-                        color={getStatusColor(user.status) as any}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <IconButton
-                        onClick={(e) => handleMenuClick(e, user._id, 'users')}
-                      >
-                        <MoreVertIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </TabPanel>
-
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
-        >
-          <MenuItem onClick={() => handleStatusChange('active')}>
-            Set Active
-          </MenuItem>
-          <MenuItem onClick={() => handleStatusChange('inactive')}>
-            Set Inactive
-          </MenuItem>
-          <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
-            Delete
-          </MenuItem>
-        </Menu>
-      </Container>
-    </>
+        <Grid item xs={12} md={4}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Referrals
+              </Typography>
+              <Typography variant="h3">
+                {referrals.length}
+              </Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                sx={{ mt: 2 }}
+                onClick={() => navigate('/admin/referrals')}
+              >
+                View All Referrals
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Container>
   );
-};
-
-export default AdminDashboard; 
+} 

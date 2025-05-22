@@ -7,36 +7,12 @@ interface Config {
 // Helper to determine if we're in development
 const isDevelopment = process.env.NODE_ENV === 'development';
 
-// Get the API URL from environment or use defaults
-const getApiUrl = () => {
-  // First try environment variable
-  if (process.env.REACT_APP_API_URL) {
-    return process.env.REACT_APP_API_URL;
-  }
-
-  // Then try window.location for production
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    
-    // Development environment
-    if (isDevelopment) {
-      console.log('Running in development mode');
-      return 'http://localhost:5000';
-    }
-    
-    // Production environment
-    if (hostname === 'refrr-frontend.onrender.com') {
-      return 'https://refrr-backend.onrender.com';
-    }
-  }
-
-  // Default to backend URL
-  return 'https://refrr-backend.onrender.com';
-};
-
+// Force the API URL to be the correct one
 const config: Config = {
-  apiUrl: getApiUrl(),
-  environment: process.env.NODE_ENV as 'development' | 'production',
+  apiUrl: isDevelopment 
+    ? 'http://localhost:5000'
+    : 'https://refrr-backend.onrender.com',
+  environment: isDevelopment ? 'development' : 'production',
   isDevelopment,
 };
 
@@ -45,8 +21,6 @@ console.log('API Configuration:', {
   apiUrl: config.apiUrl,
   environment: config.environment,
   isDevelopment,
-  env: process.env.REACT_APP_API_URL,
-  hostname: typeof window !== 'undefined' ? window.location.hostname : 'server',
   nodeEnv: process.env.NODE_ENV,
 });
 

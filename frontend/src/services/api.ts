@@ -3,29 +3,20 @@ import config from '../config';
 import { RegisterData, LoginData, AuthResponse } from '../types/auth';
 import { getToken } from '../utils/auth';
 
+// Create axios instance with base configuration
 const api = axios.create({
-  baseURL: config.apiUrl,
+  baseURL: process.env.NODE_ENV === 'development' ? 'http://localhost:5000/api' : '/api',
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    'Accept': 'application/json'
   },
-  timeout: 10000, // 10 second timeout
-  withCredentials: true, // Enable sending cookies
+  timeout: 10000,
+  withCredentials: true
 });
 
-// Add request interceptor for debugging
+// Add auth token to all requests
 api.interceptors.request.use(
   (config) => {
-    // Log in both development and production
-    console.log('API Request:', {
-      url: config.url,
-      method: config.method,
-      baseURL: config.baseURL,
-      headers: config.headers,
-      isDevelopment: process.env.NODE_ENV === 'development',
-    });
-
-    // Add auth token if available
     const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -33,86 +24,72 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error('API Request Error:', error);
     return Promise.reject(error);
   }
 );
 
-// Add response interceptor for debugging and error handling
+// Request interceptor for debugging
+api.interceptors.request.use(
+  (config) => {
+    const fullUrl = `${config.baseURL}${config.url}`;
+    console.log('Request:', {
+      method: config.method,
+      url: config.url,
+      baseURL: config.baseURL,
+      fullUrl,
+      headers: config.headers,
+      data: config.data
+    });
+    return config;
+  },
+  (error) => {
+    console.error('Request error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor for debugging
 api.interceptors.response.use(
   (response) => {
-    // Log in both development and production
-    console.log('API Response:', {
+    console.log('Response:', {
       status: response.status,
-      url: response.config.url,
+      statusText: response.statusText,
       headers: response.headers,
-      isDevelopment: process.env.NODE_ENV === 'development',
+      data: response.data,
+      config: {
+        url: response.config.url,
+        baseURL: response.config.baseURL,
+        method: response.config.method
+      }
     });
     return response;
   },
   (error) => {
-    // Log detailed error information
-    console.error('API Error:', {
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message,
-      url: error.config?.url,
-      baseURL: error.config?.baseURL,
-      headers: error.config?.headers,
-      responseHeaders: error.response?.headers,
-      isDevelopment: process.env.NODE_ENV === 'development',
-    });
-
-    // Handle development connection refused
-    if (process.env.NODE_ENV === 'development' && error.message.includes('ECONNREFUSED')) {
-      console.error('Development Server Error:', {
-        message: 'Backend server is not running on localhost:5000',
-        error: error.message,
+    if (error.response) {
+      console.error('Response error:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        headers: error.response.headers,
+        data: error.response.data,
+        config: {
+          url: error.config.url,
+          baseURL: error.config.baseURL,
+          method: error.config.method
+        }
       });
-      return Promise.reject(new Error('Backend server is not running. Please start the backend server on port 5000.'));
-    }
-
-    // Handle CORS errors
-    if (error.message.includes('CORS') || error.message.includes('Network Error')) {
-      console.error('CORS Error Details:', {
-        origin: window.location.origin,
-        target: error.config?.baseURL,
-        headers: error.config?.headers,
-        isDevelopment: process.env.NODE_ENV === 'development',
+    } else if (error.request) {
+      console.error('Request error (No Response):', {
+        request: error.request,
+        config: {
+          url: error.config.url,
+          baseURL: error.config.baseURL,
+          method: error.config.method
+        }
       });
-      return Promise.reject(new Error('CORS error - please check API configuration'));
+    } else {
+      console.error('Error:', error.message);
     }
-
-    // Handle authentication errors
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-      return Promise.reject(new Error('Authentication failed - please login again'));
-    }
-
-    // Handle network errors
-    if (!error.response) {
-      if (error.code === 'ECONNABORTED') {
-        return Promise.reject(new Error('Request timed out - please try again'));
-      }
-      return Promise.reject(new Error('Network error - please check your connection'));
-    }
-
-    // Handle server errors
-    if (error.response.status >= 500) {
-      return Promise.reject(new Error('Server error - please try again later'));
-    }
-
-    // Handle validation errors
-    if (error.response.status === 400) {
-      const message = error.response.data?.message || 'Invalid request';
-      return Promise.reject(new Error(message));
-    }
-
-    // Handle other errors
-    const message = error.response.data?.message || error.message || 'An unexpected error occurred';
-    return Promise.reject(new Error(message));
+    return Promise.reject(error);
   }
 );
 
@@ -137,6 +114,7 @@ export interface Campaign {
   requireBookingConfirmation: boolean;
   expirationDate?: string;
   startDate?: string;
+  endDate: string;
   maxReferrals?: number;
   category?: string;
   tags?: string[];
@@ -160,8 +138,25 @@ export interface Campaign {
 
 export const authApi = {
   login: async (data: LoginData) => {
-    const response = await api.post('/auth/login', data);
-    return response.data;
+    console.log('Making login API call with data:', { email: data.email });
+    try {
+      const response = await api.post('/auth/login', data);
+      console.log('Login API response:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+        data: response.data
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Login API error:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
+      throw error;
+    }
   },
 
   register: async (data: RegisterData): Promise<AuthResponse> => {
@@ -169,15 +164,19 @@ export const authApi = {
     return response.data;
   },
 
+  registerBusiness: async (data: RegisterData): Promise<AuthResponse> => {
+    const response = await api.post('/auth/register/business', data);
+    return response.data;
+  },
+
   registerCustomer: async (data: RegisterCustomerData) => {
     try {
+      console.log('Registering customer with data:', data);
       const response = await api.post('/auth/register/customer', data);
-      if (!response.data || !response.data.token || !response.data.user) {
-        throw new Error('Invalid response from server');
-      }
+      console.log('Registration response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Customer registration error:', error);
+      console.error('Registration error:', error);
       throw error;
     }
   },
@@ -186,6 +185,48 @@ export const authApi = {
     const response = await api.get('/auth/me');
     return response.data;
   },
+
+  verifyEmail: async (token: string) => {
+    const response = await api.get(`/auth/verify-email/${token}`);
+    return response.data;
+  },
+
+  resendVerification: async (email: string) => {
+    const response = await api.post('/auth/resend-verification', { email });
+    return response.data;
+  },
+};
+
+export const businessApi = {
+  getPublicBusinesses: async () => {
+    const response = await api.get('/business/public');
+    return response.data;
+  },
+
+  getPublicBusiness: async (id: string) => {
+    const response = await api.get(`/business/public/${id}`);
+    return response.data;
+  },
+
+  getBusinessProfile: async () => {
+    const response = await api.get('/business/profile');
+    return response.data;
+  },
+
+  updateBusinessProfile: async (data: any) => {
+    const response = await api.put('/business/profile', data);
+    return response.data;
+  },
+
+  getBusinessCampaigns: async () => {
+    const response = await api.get('/business/campaigns');
+    return response.data;
+  },
+
+  getBusinessAnalytics: async () => {
+    const response = await api.get('/business/analytics');
+    return response.data;
+  }
 };
 
 export const campaignApi = {
@@ -195,7 +236,7 @@ export const campaignApi = {
   },
 
   list: async () => {
-    const response = await api.get('/campaigns');
+    const response = await api.get('/campaigns/business');
     return response.data;
   },
 
@@ -209,6 +250,11 @@ export const campaignApi = {
     return response.data;
   },
 
+  getById: async (id: string) => {
+    const response = await api.get(`/campaigns/${id}`);
+    return response.data;
+  },
+
   update: async (id: string, data: Partial<Campaign>) => {
     const response = await api.put(`/campaigns/${id}`, data);
     return response.data;
@@ -216,6 +262,11 @@ export const campaignApi = {
 
   delete: async (id: string) => {
     const response = await api.delete(`/campaigns/${id}`);
+    return response.data;
+  },
+
+  toggleActive: async (id: string) => {
+    const response = await api.put(`/campaigns/${id}/toggle`);
     return response.data;
   },
 
@@ -240,7 +291,7 @@ export const campaignApi = {
         referrerEmail: data.referrerEmail
       }, {
         headers: {
-          Authorization: `Bearer ${token}`
+          'Authorization': `Bearer ${token}`
         }
       });
 

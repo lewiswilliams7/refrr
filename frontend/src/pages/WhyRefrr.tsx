@@ -6,151 +6,158 @@ import {
   Grid,
   Card,
   CardContent,
-  TextField,
-  InputAdornment,
-  IconButton,
-  Tooltip,
-  CircularProgress,
-  Alert,
+  Button,
   Paper,
-  Stack,
-  alpha,
-  useTheme,
 } from '@mui/material';
 import {
   TrendingUp as TrendingUpIcon,
-  People as PeopleIcon,
   Security as SecurityIcon,
   Speed as SpeedIcon,
+  Support as SupportIcon,
   Analytics as AnalyticsIcon,
+  People as PeopleIcon,
   LocalOffer as LocalOfferIcon,
-  Search as SearchIcon,
-  ContentCopy as CopyIcon,
-  FilterList as FilterIcon,
-  Share as ShareIcon,
-  Bookmark as BookmarkIcon,
-  BookmarkBorder as BookmarkBorderIcon,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import PublicLayout from '../components/Layout/PublicLayout';
-import { Link } from 'react-router-dom';
 
-export default function WhyRefrr() {
-  const theme = useTheme();
+const benefits = [
+  {
+    title: 'Built for Small Businesses',
+    description: 'Unlike enterprise solutions costing £100+/month, Refrr is specifically designed for small businesses like barber shops, salons, and local services.',
+    icon: <LocalOfferIcon sx={{ fontSize: 40 }} />,
+  },
+  {
+    title: 'Affordable Pricing',
+    description: 'At just £9.99/month, Refrr is the most cost-effective referral solution for small businesses. No hidden fees or complex pricing tiers.',
+    icon: <TrendingUpIcon sx={{ fontSize: 40 }} />,
+  },
+  {
+    title: 'Industry-Specific Features',
+    description: 'Tailored features for service-based businesses like appointment tracking, customer management, and easy reward distribution.',
+    icon: <PeopleIcon sx={{ fontSize: 40 }} />,
+  },
+  {
+    title: 'Simple Setup',
+    description: 'Get started in minutes with our intuitive platform. No technical expertise required - perfect for busy business owners.',
+    icon: <SpeedIcon sx={{ fontSize: 40 }} />,
+  },
+  {
+    title: 'Local Business Focus',
+    description: 'Unlike generic referral platforms, Refrr understands the unique needs of local service businesses and their customers.',
+    icon: <AnalyticsIcon sx={{ fontSize: 40 }} />,
+  },
+  {
+    title: 'Dedicated Support',
+    description: 'Our team specializes in helping small businesses succeed with their referral programs. Get personalized support when you need it.',
+    icon: <SupportIcon sx={{ fontSize: 40 }} />,
+  },
+];
 
-  const benefits = [
-    {
-      icon: <TrendingUpIcon sx={{ fontSize: 40 }} />,
-      title: 'Grow Your Business',
-      description: 'Increase customer acquisition through word-of-mouth marketing.',
-    },
-    {
-      icon: <PeopleIcon sx={{ fontSize: 40 }} />,
-      title: 'Build Trust',
-      description: 'Leverage existing customer relationships to build credibility.',
-    },
-    {
-      icon: <SecurityIcon sx={{ fontSize: 40 }} />,
-      title: 'Secure Platform',
-      description: 'Enterprise-grade security to protect your data and customers.',
-    },
-    {
-      icon: <SpeedIcon sx={{ fontSize: 40 }} />,
-      title: 'Quick Setup',
-      description: 'Get started in minutes with our easy-to-use platform.',
-    },
-    {
-      icon: <AnalyticsIcon sx={{ fontSize: 40 }} />,
-      title: 'Track Performance',
-      description: 'Monitor campaign success with detailed analytics.',
-    },
-    {
-      icon: <LocalOfferIcon sx={{ fontSize: 40 }} />,
-      title: 'Flexible Rewards',
-      description: 'Customize rewards to match your business goals.',
-    },
-  ];
+const WhyRefrr: React.FC = () => {
+  const navigate = useNavigate();
 
   return (
     <PublicLayout>
-      {/* Hero Section */}
-      <Box
-        sx={{
-          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${alpha(theme.palette.primary.dark, 0.8)} 100%)`,
-          color: 'white',
-          py: { xs: 8, md: 12 },
-          mb: 6,
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'url("/pattern.svg")',
-            opacity: 0.1,
-          }
-        }}
-      >
-        <Container maxWidth="lg">
-          <Box sx={{ textAlign: 'center', maxWidth: '800px', mx: 'auto' }}>
-            <Typography 
-              variant="h2" 
-              gutterBottom
-              sx={{
-                fontWeight: 700,
-                fontSize: { xs: '2.5rem', md: '3.5rem' },
-                lineHeight: 1.2,
-              }}
-            >
-              Why Choose Refrr?
-            </Typography>
-            <Typography 
-              variant="h5" 
-              sx={{ 
-                opacity: 0.9,
-                fontSize: { xs: '1.2rem', md: '1.5rem' }
-              }}
-            >
-              The smarter way to grow your business through referrals
-            </Typography>
-          </Box>
-        </Container>
-      </Box>
+      <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
+        <Box sx={{ textAlign: 'center', mb: 8 }}>
+          <Typography 
+            variant="h2" 
+            component="h1" 
+            gutterBottom
+            sx={{ 
+              fontWeight: 700,
+              letterSpacing: '0.01em',
+              fontSize: { xs: '2.5rem', md: '3rem' }
+            }}
+          >
+            Why Choose Refrr?
+          </Typography>
+          <Typography 
+            variant="h5" 
+            color="text.secondary" 
+            paragraph
+            sx={{ 
+              fontWeight: 500,
+              letterSpacing: '0.01em',
+              fontSize: { xs: '1.25rem', md: '1.5rem' }
+            }}
+          >
+            The only referral platform built specifically for small businesses
+          </Typography>
+        </Box>
 
-      {/* Benefits Section */}
-      <Container maxWidth="lg" sx={{ mb: 8 }}>
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            p: 4, 
+            mb: 8, 
+            bgcolor: 'primary.main', 
+            color: 'white',
+            textAlign: 'center',
+            borderRadius: 2,
+          }}
+        >
+          <Typography 
+            variant="h4" 
+            gutterBottom
+            sx={{ 
+              fontWeight: 600,
+              letterSpacing: '0.01em'
+            }}
+          >
+            Most referral platforms are built for large enterprises
+          </Typography>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              opacity: 0.9,
+              fontWeight: 500,
+              letterSpacing: '0.01em'
+            }}
+          >
+            They charge £100+ per month and include features you'll never use.
+          </Typography>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              opacity: 0.9, 
+              mt: 2,
+              fontWeight: 500,
+              letterSpacing: '0.01em'
+            }}
+          >
+            Refrr is different. We're built for businesses like yours.
+          </Typography>
+        </Paper>
+
         <Grid container spacing={4}>
           {benefits.map((benefit, index) => (
-            <Grid item xs={12} md={6} key={index}>
-              <Card 
-                sx={{ 
-                  height: '100%',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: theme.shadows[8],
-                  }
-                }}
-              >
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                    <Box
-                      sx={{
-                        p: 2,
-                        borderRadius: 2,
-                        bgcolor: alpha(theme.palette.primary.main, 0.1),
-                        color: theme.palette.primary.main,
-                      }}
-                    >
-                      {benefit.icon}
-                    </Box>
-                    <Typography variant="h5" component="h3">
-                      {benefit.title}
-                    </Typography>
+            <Grid item xs={12} md={4} key={index}>
+              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                    {benefit.icon}
                   </Box>
-                  <Typography color="text.secondary">
+                  <Typography 
+                    variant="h5" 
+                    component="h2" 
+                    gutterBottom 
+                    align="center"
+                    sx={{ 
+                      fontWeight: 600,
+                      letterSpacing: '0.01em'
+                    }}
+                  >
+                    {benefit.title}
+                  </Typography>
+                  <Typography 
+                    color="text.secondary" 
+                    align="center"
+                    sx={{ 
+                      letterSpacing: '0.01em'
+                    }}
+                  >
                     {benefit.description}
                   </Typography>
                 </CardContent>
@@ -158,156 +165,38 @@ export default function WhyRefrr() {
             </Grid>
           ))}
         </Grid>
-      </Container>
 
-      {/* Stats Section */}
-      <Box
-        sx={{
-          py: 8,
-          bgcolor: alpha(theme.palette.primary.main, 0.05),
-        }}
-      >
-        <Container maxWidth="lg">
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={4}>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 4,
-                  textAlign: 'center',
-                  bgcolor: 'white',
-                  borderRadius: 4,
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                }}
-              >
-                <Typography variant="h2" color="primary" gutterBottom>
-                  10x
-                </Typography>
-                <Typography variant="h6" gutterBottom>
-                  Higher Conversion
-                </Typography>
-                <Typography color="text.secondary">
-                  Referred customers convert at a much higher rate
-                </Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 4,
-                  textAlign: 'center',
-                  bgcolor: 'white',
-                  borderRadius: 4,
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                }}
-              >
-                <Typography variant="h2" color="primary" gutterBottom>
-                  25%
-                </Typography>
-                <Typography variant="h6" gutterBottom>
-                  Lower Cost
-                </Typography>
-                <Typography color="text.secondary">
-                  Compared to traditional marketing channels
-                </Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 4,
-                  textAlign: 'center',
-                  bgcolor: 'white',
-                  borderRadius: 4,
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                }}
-              >
-                <Typography variant="h2" color="primary" gutterBottom>
-                  3x
-                </Typography>
-                <Typography variant="h6" gutterBottom>
-                  More Value
-                </Typography>
-                <Typography color="text.secondary">
-                  Referred customers spend more and stay longer
-                </Typography>
-              </Paper>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
-
-      {/* CTA Section */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Paper
-          elevation={0}
-          sx={{
-            p: 6,
-            textAlign: 'center',
-            bgcolor: 'white',
-            borderRadius: 4,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-          }}
-        >
-          <Typography variant="h4" gutterBottom>
-            Ready to Grow Your Business?
+        <Box sx={{ textAlign: 'center', mt: 8 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={() => navigate('/register')}
+            sx={{
+              fontWeight: 600,
+              letterSpacing: '0.01em',
+              textTransform: 'none',
+              px: 4,
+              py: 1.5,
+              fontSize: '1.1rem'
+            }}
+          >
+            Start Your 14-Day Free Trial
+          </Button>
+          <Typography 
+            variant="body2" 
+            color="text.secondary" 
+            sx={{ 
+              mt: 2,
+              letterSpacing: '0.01em'
+            }}
+          >
+            No credit card required. Cancel anytime.
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: '600px', mx: 'auto' }}>
-            Join thousands of businesses already using Refrr to grow their customer base through referrals.
-          </Typography>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
-            <Link
-              to="/register"
-              style={{
-                textDecoration: 'none',
-              }}
-            >
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2,
-                  bgcolor: theme.palette.primary.main,
-                  color: 'white',
-                  borderRadius: 2,
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                  }
-                }}
-              >
-                Register Your Business
-              </Paper>
-            </Link>
-            <Link
-              to="/register/customer"
-              style={{
-                textDecoration: 'none',
-              }}
-            >
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2,
-                  bgcolor: 'white',
-                  color: theme.palette.primary.main,
-                  border: `1px solid ${theme.palette.primary.main}`,
-                  borderRadius: 2,
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                  }
-                }}
-              >
-                Register as Customer
-              </Paper>
-            </Link>
-          </Stack>
-        </Paper>
+        </Box>
       </Container>
     </PublicLayout>
   );
-} 
+};
+
+export default WhyRefrr; 

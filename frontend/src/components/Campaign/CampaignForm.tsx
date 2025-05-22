@@ -1,274 +1,184 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
   Button,
+  TextField,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Box,
-  Typography,
-  Alert,
-  CircularProgress,
   FormControlLabel,
   Switch,
-  Divider,
+  Stack,
 } from '@mui/material';
-import { campaignApi, Campaign } from '../../services/api';
-import { useAuth } from '../../context/AuthContext';
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  campaign?: Campaign | null;
-  onSubmit: () => void;
+  campaign?: any;
+  onSubmit: (data: any) => void;
 }
 
 export default function CampaignForm({ open, onClose, campaign, onSubmit }: Props) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { user, token } = useAuth();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [rewardType, setRewardType] = useState<'percentage' | 'fixed'>('percentage');
-  const [rewardValue, setRewardValue] = useState('');
-  const [rewardDescription, setRewardDescription] = useState('');
-  const [showRewardDisclaimer, setShowRewardDisclaimer] = useState(true);
-  const [rewardDisclaimerText, setRewardDisclaimerText] = useState('Reward will be provided after the referred customer books with the business');
-  const [requireBookingConfirmation, setRequireBookingConfirmation] = useState(true);
-  const [expirationDate, setExpirationDate] = useState('');
-  const [maxReferrals, setMaxReferrals] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [title, setTitle] = useState(campaign?.title || '');
+  const [description, setDescription] = useState(campaign?.description || '');
+  const [rewardType, setRewardType] = useState<'percentage' | 'fixed'>(campaign?.rewardType || 'percentage');
+  const [rewardValue, setRewardValue] = useState(campaign?.rewardValue || '');
+  const [rewardDescription, setRewardDescription] = useState(campaign?.rewardDescription || '');
+  const [showRewardDisclaimer, setShowRewardDisclaimer] = useState(campaign?.showRewardDisclaimer || false);
+  const [rewardDisclaimerText, setRewardDisclaimerText] = useState(campaign?.rewardDisclaimerText || '');
+  const [startDate, setStartDate] = useState(campaign?.startDate ? new Date(campaign.startDate).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16));
+  const [endDate, setEndDate] = useState(campaign?.endDate ? new Date(campaign.endDate).toISOString().slice(0, 16) : '');
+  const [expirationDate, setExpirationDate] = useState(campaign?.expirationDate ? new Date(campaign.expirationDate).toISOString().slice(0, 16) : '');
+  const [maxReferrals, setMaxReferrals] = useState(campaign?.maxReferrals || '');
+  const [tags, setTags] = useState(campaign?.tags?.join(', ') || '');
 
-  useEffect(() => {
-    if (campaign) {
-      setTitle(campaign.title);
-      setDescription(campaign.description || '');
-      setRewardType(campaign.rewardType);
-      setRewardValue(campaign.rewardValue.toString());
-      setRewardDescription(campaign.rewardDescription || '');
-      setShowRewardDisclaimer(campaign.showRewardDisclaimer ?? true);
-      setRewardDisclaimerText(campaign.rewardDisclaimerText || 'Reward will be provided after the referred customer books with the business');
-      setRequireBookingConfirmation(campaign.requireBookingConfirmation ?? true);
-      setExpirationDate(campaign.expirationDate || '');
-      setMaxReferrals(campaign.maxReferrals?.toString() || '');
-    } else {
-      resetForm();
-    }
-  }, [campaign]);
-
-  const resetForm = () => {
-    setTitle('');
-    setDescription('');
-    setRewardType('percentage');
-    setRewardValue('');
-    setRewardDescription('');
-    setShowRewardDisclaimer(true);
-    setRewardDisclaimerText('Reward will be provided after the referred customer books with the business');
-    setRequireBookingConfirmation(true);
-    setExpirationDate('');
-    setMaxReferrals('');
-    setError('');
-    setIsLoading(false);
-  };
-
-  const handleSubmit = async () => {
-    try {
-      setIsLoading(true);
-      setError('');
-
-      const campaignData = {
-        title,
-        description,
-        rewardType,
-        rewardValue: Number(rewardValue),
-        rewardDescription,
-        showRewardDisclaimer,
-        rewardDisclaimerText,
-        requireBookingConfirmation,
-        expirationDate: expirationDate || undefined,
-        maxReferrals: maxReferrals ? Number(maxReferrals) : undefined,
-        status: 'draft' as const,
-        analytics: {
-          totalReferrals: 0,
-          successfulReferrals: 0,
-          conversionRate: 0,
-          rewardRedemptions: 0,
-          lastUpdated: new Date().toISOString()
-        },
-        startDate: new Date().toISOString(),
-        tags: []
-      };
-
-      if (campaign?._id) {
-        await campaignApi.update(campaign._id, campaignData);
-      } else {
-        await campaignApi.create(campaignData);
-      }
-
-      onSubmit();
-      onClose();
-      resetForm();
-    } catch (err: any) {
-      console.error('Error saving campaign:', err);
-      setError(err.response?.data?.message || 'Failed to save campaign. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit({
+      title,
+      description,
+      rewardType,
+      rewardValue: Number(rewardValue),
+      rewardDescription,
+      showRewardDisclaimer,
+      rewardDisclaimerText,
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
+      expirationDate: expirationDate ? new Date(expirationDate) : undefined,
+      maxReferrals: maxReferrals ? Number(maxReferrals) : undefined,
+      tags: tags.split(',').map((tag: string) => tag.trim()).filter(Boolean),
+    });
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        {campaign ? 'Edit Campaign' : 'Create New Campaign'}
-      </DialogTitle>
-      <DialogContent>
-        <Box display="flex" flexDirection="column" gap={3} mt={1}>
-          {error && (
-            <Alert severity="error" onClose={() => setError('')}>
-              {error}
-            </Alert>
-          )}
-
-          <TextField
-            label="Campaign Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            fullWidth
-            disabled={isLoading}
-          />
-
-          <TextField
-            label="Campaign Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            multiline
-            rows={3}
-            fullWidth
-            disabled={isLoading}
-          />
-
-          <FormControl fullWidth disabled={isLoading}>
-            <InputLabel>Reward Type</InputLabel>
-            <Select
-              value={rewardType}
-              onChange={(e) => setRewardType(e.target.value as 'percentage' | 'fixed')}
-              label="Reward Type"
-            >
-              <MenuItem value="percentage" key="percentage">Percentage</MenuItem>
-              <MenuItem value="fixed" key="fixed">Fixed Points</MenuItem>
-            </Select>
-          </FormControl>
-
-          <TextField
-            label="Reward Value"
-            type="number"
-            value={rewardValue}
-            onChange={(e) => setRewardValue(e.target.value)}
-            required
-            fullWidth
-            disabled={isLoading}
-            InputProps={{
-              endAdornment: (
-                <Typography color="textSecondary">
-                  {rewardType === 'percentage' ? '%' : ' points'}
-                </Typography>
-              ),
-            }}
-          />
-
-          <TextField
-            label="Reward Description"
-            value={rewardDescription}
-            onChange={(e) => setRewardDescription(e.target.value)}
-            required
-            fullWidth
-            multiline
-            rows={2}
-            disabled={isLoading}
-            placeholder={`Example: ${
-              rewardType === 'percentage' 
-                ? '% off your next haircut'
-                : 'points towards your next purchase'
-            }`}
-            helperText="Describe what the reward means (e.g., '% off next haircut', 'points towards next purchase')"
-          />
-
-          <Divider />
-
-          <Typography variant="h6">Reward Settings</Typography>
-
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showRewardDisclaimer}
-                onChange={(e) => setShowRewardDisclaimer(e.target.checked)}
-                disabled={isLoading}
-              />
-            }
-            label="Show Reward Disclaimer"
-          />
-
-          {showRewardDisclaimer && (
+      <DialogTitle>{campaign ? 'Edit Campaign' : 'Create Campaign'}</DialogTitle>
+      <form onSubmit={handleSubmit}>
+        <DialogContent>
+          <Stack spacing={3}>
             <TextField
-              label="Reward Disclaimer Text"
-              value={rewardDisclaimerText}
-              onChange={(e) => setRewardDisclaimerText(e.target.value)}
               fullWidth
-              multiline
-              rows={2}
-              disabled={isLoading}
+              label="Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
             />
-          )}
-
-          <FormControlLabel
-            control={
-              <Switch
-                checked={requireBookingConfirmation}
-                onChange={(e) => setRequireBookingConfirmation(e.target.checked)}
-                disabled={isLoading}
+            <TextField
+              fullWidth
+              label="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              multiline
+              rows={4}
+              required
+            />
+            <FormControl fullWidth>
+              <InputLabel>Reward Type</InputLabel>
+              <Select
+                value={rewardType}
+                label="Reward Type"
+                onChange={(e) => setRewardType(e.target.value as 'percentage' | 'fixed')}
+              >
+                <MenuItem value="percentage">Percentage</MenuItem>
+                <MenuItem value="fixed">Fixed Amount</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              fullWidth
+              label="Reward Value"
+              type="number"
+              value={rewardValue}
+              onChange={(e) => setRewardValue(e.target.value)}
+              required
+              InputProps={{
+                endAdornment: rewardType === 'percentage' ? '%' : 'points',
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Reward Description"
+              value={rewardDescription}
+              onChange={(e) => setRewardDescription(e.target.value)}
+              required
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={showRewardDisclaimer}
+                  onChange={(e) => setShowRewardDisclaimer(e.target.checked)}
+                />
+              }
+              label="Show Reward Disclaimer"
+            />
+            {showRewardDisclaimer && (
+              <TextField
+                fullWidth
+                label="Reward Disclaimer Text"
+                value={rewardDisclaimerText}
+                onChange={(e) => setRewardDisclaimerText(e.target.value)}
+                multiline
+                rows={2}
               />
-            }
-            label="Require Booking Confirmation"
-          />
-
-          <TextField
-            label="Expiration Date"
-            type="date"
-            value={expirationDate}
-            onChange={(e) => setExpirationDate(e.target.value)}
-            fullWidth
-            disabled={isLoading}
-            InputLabelProps={{ shrink: true }}
-          />
-
-          <TextField
-            label="Maximum Referrals"
-            type="number"
-            value={maxReferrals}
-            onChange={(e) => setMaxReferrals(e.target.value)}
-            fullWidth
-            disabled={isLoading}
-            helperText="Leave empty for unlimited referrals"
-          />
-        </Box>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={isLoading}>Cancel</Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          color="primary"
-          disabled={!title || !rewardValue || !rewardDescription || isLoading}
-        >
-          {isLoading ? <CircularProgress size={24} /> : (campaign ? 'Update' : 'Create')}
-        </Button>
-      </DialogActions>
+            )}
+            <TextField
+              fullWidth
+              label="Start Date"
+              type="datetime-local"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              required
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+            <TextField
+              fullWidth
+              label="End Date"
+              type="datetime-local"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              required
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Expiration Date (Optional)"
+              type="datetime-local"
+              value={expirationDate}
+              onChange={(e) => setExpirationDate(e.target.value)}
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Maximum Referrals (Optional)"
+              type="number"
+              value={maxReferrals}
+              onChange={(e) => setMaxReferrals(e.target.value)}
+            />
+            <TextField
+              fullWidth
+              label="Tags (comma-separated)"
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              helperText="Enter tags separated by commas"
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button type="submit" variant="contained" color="primary">
+            {campaign ? 'Update' : 'Create'}
+          </Button>
+        </DialogActions>
+      </form>
     </Dialog>
   );
 }

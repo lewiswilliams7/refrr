@@ -10,17 +10,18 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 import PublicLayout from '../components/Layout/PublicLayout';
 
 export default function RegisterCustomer() {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
+    firstName: '',
+    lastName: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -35,26 +36,25 @@ export default function RegisterCustomer() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
-      setLoading(false);
       return;
     }
 
+    setLoading(true);
+
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register/customer', {
+      await register(formData.email, formData.password, {
         firstName: formData.firstName,
         lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
+        role: 'customer'
       });
-
-      localStorage.setItem('token', response.data.token);
-      navigate('/customer/campaigns');
+      navigate('/login', { 
+        state: { message: 'Registration successful! Please login.' }
+      });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to register');
+      setError(err.response?.data?.message || 'Failed to register. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -65,7 +65,7 @@ export default function RegisterCustomer() {
       <Container maxWidth="sm" sx={{ mt: 8 }}>
         <Paper elevation={3} sx={{ p: 4 }}>
           <Typography variant="h4" component="h1" gutterBottom align="center">
-            Register as Customer
+            Customer Registration
           </Typography>
 
           {error && (

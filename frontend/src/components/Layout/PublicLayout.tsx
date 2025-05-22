@@ -6,82 +6,17 @@ import {
   Button,
   Container,
   useTheme,
-  IconButton,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Divider,
+  alpha,
 } from '@mui/material';
-import { Menu as MenuIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import Logo from '../common/Logo';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import Avatar from '../common/Avatar';
+import Logo from '../common/Logo';
 
-const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export default function PublicLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const theme = useTheme();
   const { isAuthenticated, user, logout } = useAuth();
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  const drawer = (
-    <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
-      <Box sx={{ p: 2 }}>
-        <Logo />
-      </Box>
-      <Divider />
-      <List>
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate('/features')}>
-            <ListItemText primary="Features" />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate('/pricing')}>
-            <ListItemText primary="Pricing" />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate('/why-refrr')}>
-            <ListItemText primary="Why Refrr?" />
-          </ListItemButton>
-        </ListItem>
-        {!isAuthenticated ? (
-          <>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate('/login')}>
-                <ListItemText primary="Login" />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate('/register')}>
-                <ListItemText primary="Register Business" />
-              </ListItemButton>
-            </ListItem>
-          </>
-        ) : (
-          <>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => navigate(user?.businessName ? '/dashboard' : '/customer/campaigns')}>
-                <ListItemText primary={user?.businessName ? "Dashboard" : "My Campaigns"} />
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton onClick={logout}>
-                <ListItemText primary="Logout" />
-              </ListItemButton>
-            </ListItem>
-          </>
-        )}
-      </List>
-    </Box>
-  );
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -90,117 +25,230 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         sx={{
           backgroundColor: 'white',
           color: 'text.primary',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.12)'
+          boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+          backdropFilter: 'blur(8px)',
+          borderBottom: '1px solid',
+          borderColor: 'divider'
         }}
       >
         <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
           <Box 
-            sx={{ 
+            sx={{
               flexGrow: 1, 
               display: 'flex', 
               alignItems: 'center',
-              cursor: 'pointer' 
+              cursor: 'pointer',
+              transition: 'transform 0.2s ease-in-out',
+              '&:hover': {
+                transform: 'scale(1.02)'
+              }
             }}
             onClick={() => navigate('/')}
           >
             <Logo />
           </Box>
-          <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 2, mr: 2 }}>
-            <Button color="inherit" onClick={() => navigate('/features')}>
+          <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1.5, mr: 2 }}>
+            <Button 
+              color="inherit" 
+              onClick={() => navigate('/features')}
+              sx={{ 
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                letterSpacing: '0.01em',
+                px: 2,
+                py: 1,
+                borderRadius: 2,
+                transition: 'all 0.2s ease-in-out',
+                color: 'text.primary',
+                '&:hover': {
+                  color: 'primary.main',
+                  backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  transform: 'translateY(-1px)'
+                }
+              }}
+            >
               Features
             </Button>
-            <Button color="inherit" onClick={() => navigate('/pricing')}>
+            <Button 
+              color="inherit" 
+              onClick={() => navigate('/pricing')}
+              sx={{ 
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                letterSpacing: '0.01em',
+                px: 2,
+                py: 1,
+                borderRadius: 2,
+                transition: 'all 0.2s ease-in-out',
+                color: 'text.primary',
+                '&:hover': {
+                  color: 'primary.main',
+                  backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  transform: 'translateY(-1px)'
+                }
+              }}
+            >
               Pricing
             </Button>
-            <Button color="inherit" onClick={() => navigate('/why-refrr')}>
+            <Button 
+              color="inherit" 
+              onClick={() => navigate('/why-refrr')}
+              sx={{ 
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                letterSpacing: '0.01em',
+                px: 2,
+                py: 1,
+                borderRadius: 2,
+                transition: 'all 0.2s ease-in-out',
+                color: 'text.primary',
+                '&:hover': {
+                  color: 'primary.main',
+                  backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  transform: 'translateY(-1px)'
+                }
+              }}
+            >
               Why Refrr?
             </Button>
+            <Button 
+              color="inherit" 
+              onClick={() => navigate('/contact')}
+              sx={{ 
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                letterSpacing: '0.01em',
+                px: 2,
+                py: 1,
+                borderRadius: 2,
+                transition: 'all 0.2s ease-in-out',
+                color: 'text.primary',
+                '&:hover': {
+                  color: 'primary.main',
+                  backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  transform: 'translateY(-1px)'
+                }
+              }}
+            >
+              Contact
+            </Button>
           </Box>
-          
-          {!isAuthenticated ? (
-            <>
+          {isAuthenticated ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Button 
+                variant="contained" 
+                color="primary"
+                onClick={() => navigate('/dashboard')}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  letterSpacing: '0.01em',
+                  textTransform: 'none',
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.15)'
+                  }
+                }}
+              >
+                Dashboard
+              </Button>
+              <Avatar
+                src={user?.avatar}
+                firstName={user?.firstName}
+                lastName={user?.lastName}
+                size="small"
+                alt={`${user?.firstName} ${user?.lastName}'s avatar`}
+                sx={{
+                  border: '2px solid',
+                  borderColor: 'primary.main',
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    transform: 'scale(1.05)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                  }
+                }}
+              />
+              <Button 
+                variant="outlined" 
+                color="primary"
+                onClick={logout}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  letterSpacing: '0.01em',
+                  textTransform: 'none',
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  borderWidth: 2,
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    borderWidth: 2,
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                  }
+                }}
+              >
+                Logout
+              </Button>
+            </Box>
+          ) : (
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button 
+                variant="outlined" 
                 color="primary"
                 onClick={() => navigate('/login')}
-                sx={{ mr: { xs: 0, sm: 2 } }}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  letterSpacing: '0.01em',
+                  textTransform: 'none',
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  borderWidth: 2,
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    borderWidth: 2,
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                  }
+                }}
               >
                 Login
               </Button>
               <Button 
-                variant="contained"
+                variant="contained" 
                 color="primary"
                 onClick={() => navigate('/register')}
-                sx={{ display: { xs: 'none', sm: 'block' } }}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  letterSpacing: '0.01em',
+                  textTransform: 'none',
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.15)'
+                  }
+                }}
               >
-                Register Business
+                Register
               </Button>
-            </>
-          ) : (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              {isAuthenticated && (
-                <>
-                  <Avatar
-                    src={user?.avatar}
-                    firstName={user?.firstName}
-                    lastName={user?.lastName}
-                    size="small"
-                    alt={`${user?.firstName} ${user?.lastName}'s avatar`}
-                    sx={{
-                      border: '2px solid',
-                      borderColor: 'primary.main',
-                      '&:hover': {
-                        transform: 'scale(1.05)',
-                        transition: 'transform 0.2s ease-in-out',
-                      }
-                    }}
-                  />
-                  <Button 
-                    color="primary"
-                    onClick={() => navigate(user?.businessName ? '/dashboard' : '/customer/campaigns')}
-                    sx={{ mr: { xs: 0, sm: 2 } }}
-                  >
-                    {user?.businessName ? "Dashboard" : "My Campaigns"}
-                  </Button>
-                  <Button 
-                    variant="outlined"
-                    color="primary"
-                    onClick={logout}
-                  >
-                    Logout
-                  </Button>
-                </>
-              )}
             </Box>
           )}
         </Toolbar>
       </AppBar>
-
-      <Box component="nav">
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true,
-          }}
-          sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 240 },
-          }}
-        >
-          {drawer}
-        </Drawer>
-      </Box>
-
+      <Toolbar /> {/* Spacer for fixed AppBar */}
       <Box
         component="main"
         sx={{
@@ -220,6 +268,8 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
           px: 2,
           mt: 'auto',
           backgroundColor: theme.palette.grey[100],
+          borderTop: '1px solid',
+          borderColor: 'divider'
         }}
       >
         <Container maxWidth="lg">
@@ -230,6 +280,4 @@ const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
       </Box>
     </Box>
   );
-};
-
-export default PublicLayout;
+}

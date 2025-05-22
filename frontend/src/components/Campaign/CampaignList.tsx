@@ -18,6 +18,7 @@ import {
   CircularProgress,
   Paper,
   Chip,
+  Switch,
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { campaignApi, Campaign } from '../../services/api';
@@ -57,6 +58,17 @@ export default function CampaignList() {
   useEffect(() => {
     fetchCampaigns();
   }, []);
+
+  const handleToggleStatus = async (id: string) => {
+    try {
+      const response = await campaignApi.toggleActive(id);
+      console.log('Toggle status response:', response);
+      fetchCampaigns(); // Refresh the list
+    } catch (err) {
+      console.error('Error toggling campaign status:', err);
+      setError('Failed to toggle campaign status');
+    }
+  };
 
   const handleDelete = async (id: string) => {
     console.log('Starting delete process for campaign ID:', id);
@@ -139,7 +151,7 @@ export default function CampaignList() {
               <Card key={`card-${campaignId}`}>
                 <CardContent key={`card-content-${campaignId}`}>
                   <Box display="flex" justifyContent="space-between" alignItems="flex-start" key={`main-box-${campaignId}`}>
-                    <Box key={`content-box-${campaignId}`}>
+                    <Box flex={1}>
                       <Typography variant="h6" gutterBottom key={`title-${campaignId}`}>
                         {campaign.title}
                       </Typography>
@@ -166,8 +178,18 @@ export default function CampaignList() {
                           Maximum Referrals: {campaign.maxReferrals}
                         </Typography>
                       )}
+                      <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+                        <Typography variant="body2" sx={{ mr: 1 }}>
+                          Status: {campaign.status}
+                        </Typography>
+                        <Switch
+                          checked={campaign.status === 'active'}
+                          onChange={() => handleToggleStatus(campaignId)}
+                          color="primary"
+                        />
+                      </Box>
                     </Box>
-                    <Box key={`actions-box-${campaignId}`}>
+                    <Box>
                       <IconButton 
                         size="small"
                         onClick={() => setEditingCampaign(campaign)}

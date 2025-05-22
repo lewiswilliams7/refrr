@@ -55,25 +55,56 @@ export default function ReferralLanding() {
   const [campaignDetails, setCampaignDetails] = useState<CampaignDetails | null>(null);
 
   const fetchReferralDetails = useCallback(async () => {
+    if (!code) {
+      setError('Invalid referral code');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError('');
       const response = await axios.get(`${config.apiUrl}/api/referrals/code/${code}`);
-      setCampaignDetails(response.data.campaignDetails);
+      const referral = response.data;
+      
+      if (!referral || !referral.campaignId) {
+        throw new Error('Invalid referral data received');
+      }
+
+      setCampaignDetails({
+        title: referral.campaignId.title,
+        description: referral.campaignId.description || '',
+        rewardType: referral.campaignId.rewardType,
+        rewardValue: referral.campaignId.rewardValue,
+        rewardDescription: referral.campaignId.rewardDescription || '',
+        businessName: referral.businessId?.businessName || 'Unknown Business',
+        businessType: referral.businessId?.businessType || 'Unknown Type',
+        location: {
+          address: referral.businessId?.location?.address || '',
+          city: referral.businessId?.location?.city || '',
+          postcode: referral.businessId?.location?.postcode || ''
+        }
+      });
     } catch (err: any) {
+      console.error('Error fetching referral:', err);
       setError(err.response?.data?.message || 'Invalid or expired referral link');
+      // Don't navigate away, just show the error
     } finally {
       setLoading(false);
     }
   }, [code]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchReferralDetails();
   }, [fetchReferralDetails]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!code) {
+      setError('Invalid referral code');
+      return;
+    }
+
     setError('');
     setLoading(true);
 
@@ -86,6 +117,7 @@ export default function ReferralLanding() {
       setSuccess(true);
       console.log('Referral completed:', response.data);
     } catch (err: any) {
+      console.error('Error completing referral:', err);
       setError(err.response?.data?.message || 'Failed to complete referral');
     } finally {
       setLoading(false);
@@ -97,6 +129,25 @@ export default function ReferralLanding() {
       <PublicLayout>
         <Container maxWidth="sm" sx={{ mt: 8, textAlign: 'center' }}>
           <CircularProgress />
+        </Container>
+      </PublicLayout>
+    );
+  }
+
+  if (error && !campaignDetails) {
+    return (
+      <PublicLayout>
+        <Container maxWidth="sm" sx={{ mt: 8 }}>
+          <Alert severity="error" sx={{ mb: 4 }}>
+            {error}
+          </Alert>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={() => navigate('/')}
+          >
+            Go to Homepage
+          </Button>
         </Container>
       </PublicLayout>
     );
@@ -142,6 +193,9 @@ export default function ReferralLanding() {
                   Reward: {campaignDetails.rewardValue}
                   {campaignDetails.rewardType === 'percentage' ? '%' : ' points'} - {campaignDetails.rewardDescription}
                 </Typography>
+                <Typography variant="body2" color="textSecondary" sx={{ mt: 2 }}>
+                  {campaignDetails.businessName} - {campaignDetails.businessType}
+                </Typography>
               </CardContent>
             </Card>
           )}
@@ -153,6 +207,9 @@ export default function ReferralLanding() {
           )}
 
           <form onSubmit={handleSubmit}>
+            <Typography variant="body1" sx={{ mb: 3 }}>
+              Complete your details below to redeem your referral reward:
+            </Typography>
             <TextField
               label="Full Name"
               fullWidth
@@ -184,10 +241,9 @@ export default function ReferralLanding() {
               variant="contained"
               color="primary"
               fullWidth
-              size="large"
               disabled={loading}
             >
-              {loading ? 'Processing...' : 'Complete Referral'}
+              {loading ? <CircularProgress size={24} /> : 'Complete Referral'}
             </Button>
           </form>
         </Paper>

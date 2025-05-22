@@ -1,87 +1,119 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
-  Card,
-  CardContent,
   Typography,
-  Grid,
-  Chip,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
   IconButton,
   Menu,
   MenuItem,
-  Button
+  CircularProgress,
+  Alert,
+  Chip,
 } from '@mui/material';
-import { MoreVert as MoreVertIcon } from '@mui/icons-material';
-import { useAuth } from '../../context/AuthContext';
+import {
+  MoreVert as MoreVertIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  Pending as PendingIcon,
+} from '@mui/icons-material';
+import axios from 'axios';
+import config from '../../config';
 
 interface Referral {
-  _id: string;
-  campaignId: {
-    _id: string;
-    title: string;
-    rewardType: string;
-    rewardValue: number;
-  };
+  id: string;
+  campaignName: string;
   referrerEmail: string;
   referredEmail: string;
   status: 'pending' | 'approved' | 'rejected';
-  code: string;
   createdAt: string;
 }
 
 export default function ReferralList() {
   const [referrals, setReferrals] = useState<Referral[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedReferral, setSelectedReferral] = useState<string | null>(null);
-  const { token } = useAuth();
 
   const fetchReferrals = useCallback(async () => {
     try {
-      const response = await fetch('/api/referrals', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      setLoading(true);
+      const token = localStorage.getItem('token');
       
-      if (!response.ok) throw new Error('Failed to fetch referrals');
-      
-      const data = await response.json();
-      setReferrals(data);
-    } catch (err) {
-      setError('Failed to load referrals');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [token]);
+      if (!token) {
+        setError('Please log in to view referrals');
+        return;
+      }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+      const response = await axios.get(`${config.apiUrl}/api/referrals`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setReferrals(response.data);
+    } catch (err: any) {
+      console.error('Error fetching referrals:', err);
+      setError(err.response?.data?.message || 'Failed to load referrals');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchReferrals();
   }, [fetchReferrals]);
 
-  const handleStatusChange = async (referralId: string, newStatus: string) => {
-    try {
-      const response = await fetch(`/api/referrals/${referralId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ status: newStatus })
-      });
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>, referralId: string) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedReferral(referralId);
+  };
 
-      if (!response.ok) throw new Error('Failed to update status');
-
-      // Refresh the list
-      fetchReferrals();
-    } catch (err) {
-      console.error(err);
-      setError('Failed to update referral status');
-    }
+  const handleMenuClose = () => {
     setAnchorEl(null);
+    setSelectedReferral(null);
+  };
+
+  const handleStatusUpdate = async (status: 'approved' | 'rejected') => {
+    if (!selectedReferral) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Please log in to update referral status');
+        return;
+      }
+
+      await axios.patch(
+        `${config.apiUrl}/api/referrals/${selectedReferral}`,
+        { status },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      setReferrals(referrals.map(referral =>
+        referral.id === selectedReferral
+          ? { ...referral, status }
+          : referral
+      ));
+    } catch (err: any) {
+      console.error('Error updating referral status:', err);
+      setError(err.response?.data?.message || 'Failed to update referral status');
+    } finally {
+      handleMenuClose();
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return <CheckCircleIcon color="success" />;
+      case 'rejected':
+        return <CancelIcon color="error" />;
+      default:
+        return <PendingIcon color="warning" />;
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -95,84 +127,83 @@ export default function ReferralList() {
     }
   };
 
-  if (isLoading) return <Box>Loading...</Box>;
-  if (error) return <Box color="error.main">{error}</Box>;
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error">{error}</Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h5">Referrals</Typography>
-        <Button 
-          variant="contained" 
-          color="primary"
-          onClick={() => {/* TODO: Implement share/create referral */}}
-        >
-          Share Referral Link
-        </Button>
-      </Box>
+      <Typography variant="h6" gutterBottom>
+        Referrals
+      </Typography>
 
-      <Grid container spacing={3}>
-        {referrals.map((referral) => (
-          <Grid item xs={12} key={referral._id}>
-            <Card>
-              <CardContent>
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Box>
-                    <Typography variant="h6">
-                      Campaign: {referral.campaignId.title}
+      {referrals.length === 0 ? (
+        <Typography color="text.secondary">
+          No referrals found
+        </Typography>
+      ) : (
+        <List>
+          {referrals.map((referral) => (
+            <ListItem key={referral.id}>
+              <ListItemText
+                primary={referral.campaignName}
+                secondary={
+                  <>
+                    <Typography component="span" variant="body2" color="text.primary">
+                      Referrer: {referral.referrerEmail}
                     </Typography>
-                    <Typography color="textSecondary" gutterBottom>
-                      Code: {referral.code}
+                    <br />
+                    <Typography component="span" variant="body2" color="text.primary">
+                      Referred: {referral.referredEmail}
                     </Typography>
-                  </Box>
-                  <Box>
-                    <Chip 
-                      label={referral.status.toUpperCase()} 
-                      color={getStatusColor(referral.status) as any}
-                      size="small"
-                      sx={{ mr: 1 }}
-                    />
-                    <IconButton
-                      onClick={(e) => {
-                        setAnchorEl(e.currentTarget);
-                        setSelectedReferral(referral._id);
-                      }}
-                    >
-                      <MoreVertIcon />
-                    </IconButton>
-                  </Box>
-                </Box>
-                <Box mt={2}>
-                  <Typography>
-                    Referrer: {referral.referrerEmail}
-                  </Typography>
-                  <Typography>
-                    Referred: {referral.referredEmail}
-                  </Typography>
-                  <Typography>
-                    Reward: {referral.campaignId.rewardValue}
-                    {referral.campaignId.rewardType === 'percentage' ? '%' : ' points'}
-                  </Typography>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+                    <br />
+                    <Typography component="span" variant="body2" color="text.secondary">
+                      Created: {new Date(referral.createdAt).toLocaleDateString()}
+                    </Typography>
+                  </>
+                }
+              />
+              <ListItemSecondaryAction>
+                <Chip
+                  icon={getStatusIcon(referral.status)}
+                  label={referral.status}
+                  color={getStatusColor(referral.status)}
+                  size="small"
+                  sx={{ mr: 1 }}
+                />
+                <IconButton
+                  edge="end"
+                  onClick={(e) => handleMenuClick(e, referral.id)}
+                >
+                  <MoreVertIcon />
+                </IconButton>
+              </ListItemSecondaryAction>
+            </ListItem>
+          ))}
+        </List>
+      )}
 
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
-        onClose={() => setAnchorEl(null)}
+        onClose={handleMenuClose}
       >
-        <MenuItem 
-          onClick={() => selectedReferral && handleStatusChange(selectedReferral, 'approved')}
-        >
+        <MenuItem onClick={() => handleStatusUpdate('approved')}>
           Approve
         </MenuItem>
-        <MenuItem 
-          onClick={() => selectedReferral && handleStatusChange(selectedReferral, 'rejected')}
-        >
+        <MenuItem onClick={() => handleStatusUpdate('rejected')}>
           Reject
         </MenuItem>
       </Menu>

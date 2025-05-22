@@ -21,51 +21,52 @@ import {
   Business as BusinessIcon,
   Diamond as DiamondIcon,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import PublicLayout from '../components/Layout/PublicLayout';
 
-export default function Pricing() {
-  const theme = useTheme();
+const tiers = [
+  {
+    title: 'Business',
+    price: '£9.99',
+    period: '/month',
+    description: 'Perfect for businesses of all sizes',
+    icon: <BusinessIcon sx={{ fontSize: 40 }} />,
+    features: [
+      'Unlimited campaigns',
+      'Advanced analytics',
+      'Priority support',
+      'Custom branding',
+      'Bulk referral management',
+      'API access',
+      'Team collaboration',
+    ],
+    buttonText: 'Start Free Trial',
+    buttonVariant: 'contained',
+    highlighted: true,
+  },
+  {
+    title: 'Enterprise',
+    price: 'Coming Soon',
+    description: 'For large organizations with specific needs',
+    icon: <DiamondIcon sx={{ fontSize: 40 }} />,
+    features: [
+      'Everything in Business plan',
+      'Custom integrations',
+      'Dedicated account manager',
+      'SLA guarantee',
+      'Advanced security features',
+      'Custom reporting',
+      'Training & onboarding',
+    ],
+    buttonText: 'Coming Soon',
+    buttonVariant: 'outlined',
+    disabled: true,
+  },
+];
 
-  const plans = [
-    {
-      name: 'Business',
-      price: '£10',
-      period: '/month',
-      description: 'Ideal for growing businesses with multiple campaigns',
-      icon: <BusinessIcon sx={{ fontSize: 40 }} />,
-      features: [
-        'Unlimited campaigns',
-        'Advanced analytics',
-        'Priority support',
-        'Custom branding',
-        'Bulk referral management',
-        'API access',
-        'Team collaboration',
-      ],
-      buttonText: 'Start Free Trial',
-      buttonVariant: 'contained',
-      popular: true,
-    },
-    {
-      name: 'Enterprise',
-      price: 'Coming Soon',
-      description: 'For large organizations with specific needs',
-      icon: <DiamondIcon sx={{ fontSize: 40 }} />,
-      features: [
-        'Everything in Business plan',
-        'Custom integrations',
-        'Dedicated account manager',
-        'SLA guarantee',
-        'Advanced security features',
-        'Custom reporting',
-        'Training & onboarding',
-      ],
-      buttonText: 'Coming Soon',
-      buttonVariant: 'outlined',
-      popular: false,
-      disabled: true,
-    },
-  ];
+const Pricing: React.FC = () => {
+  const theme = useTheme();
+  const navigate = useNavigate();
 
   return (
     <PublicLayout>
@@ -78,6 +79,8 @@ export default function Pricing() {
           mb: 6,
           position: 'relative',
           overflow: 'hidden',
+          borderRadius: 4,
+          boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -87,10 +90,20 @@ export default function Pricing() {
             bottom: 0,
             background: 'url("/pattern.svg")',
             opacity: 0.1,
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)',
+            zIndex: 1
           }
         }}
       >
-        <Container maxWidth="lg">
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
           <Box sx={{ textAlign: 'center', maxWidth: '800px', mx: 'auto' }}>
             <Typography 
               variant="h2" 
@@ -99,6 +112,8 @@ export default function Pricing() {
                 fontWeight: 700,
                 fontSize: { xs: '2.5rem', md: '3.5rem' },
                 lineHeight: 1.2,
+                textShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                mb: 3
               }}
             >
               Simple, Transparent Pricing
@@ -107,7 +122,9 @@ export default function Pricing() {
               variant="h5" 
               sx={{ 
                 opacity: 0.9,
-                fontSize: { xs: '1.2rem', md: '1.5rem' }
+                fontSize: { xs: '1.2rem', md: '1.5rem' },
+                textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                maxWidth: '800px'
               }}
             >
               Choose the plan that's right for your business
@@ -117,138 +134,108 @@ export default function Pricing() {
       </Box>
 
       {/* Pricing Plans */}
-      <Container maxWidth="lg" sx={{ mb: 8 }}>
-        <Grid container spacing={4} alignItems="stretch">
-          {plans.map((plan, index) => (
-            <Grid item xs={12} md={6} key={index}>
-              <Card 
-                sx={{ 
+      <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
+        <Grid container spacing={4} alignItems="stretch" justifyContent="center">
+          {tiers.map((tier) => (
+            <Grid item xs={12} md={6} key={tier.title}>
+              <Card
+                sx={{
                   height: '100%',
-                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
                   transition: 'transform 0.2s, box-shadow 0.2s',
                   '&:hover': {
                     transform: 'translateY(-4px)',
                     boxShadow: theme.shadows[8],
                   },
-                  ...(plan.popular && {
-                    border: `2px solid ${theme.palette.primary.main}`,
+                  ...(tier.highlighted && {
+                    border: '2px solid',
+                    borderColor: 'primary.main',
                   }),
-                  ...(plan.disabled && {
+                  ...(tier.disabled && {
                     opacity: 0.7,
-                  })
+                  }),
                 }}
               >
-                {plan.popular && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 16,
-                      right: 16,
-                      bgcolor: theme.palette.primary.main,
-                      color: 'white',
-                      px: 2,
-                      py: 0.5,
-                      borderRadius: 1,
-                      fontSize: '0.875rem',
-                      fontWeight: 600,
-                      zIndex: 1,
-                    }}
-                  >
-                    Most Popular
+                <CardContent sx={{ flexGrow: 1, p: 4 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+                    {tier.icon}
                   </Box>
-                )}
-                {plan.disabled && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 16,
-                      right: 16,
-                      bgcolor: 'grey.500',
-                      color: 'white',
-                      px: 2,
-                      py: 0.5,
-                      borderRadius: 1,
-                      fontSize: '0.875rem',
-                      fontWeight: 600,
-                      zIndex: 1,
-                    }}
+                  <Typography 
+                    variant="h4" 
+                    component="h2" 
+                    gutterBottom 
+                    align="center"
+                    sx={{ fontWeight: 600 }}
                   >
-                    Coming Soon
-                  </Box>
-                )}
-                <CardContent sx={{ p: 4 }}>
+                    {tier.title}
+                  </Typography>
                   <Box sx={{ textAlign: 'center', mb: 3 }}>
-                    <Box
-                      sx={{
-                        display: 'inline-flex',
-                        p: 2,
-                        borderRadius: 2,
-                        bgcolor: alpha(theme.palette.primary.main, 0.1),
-                        color: theme.palette.primary.main,
-                        mb: 2,
+                    <Typography 
+                      variant="h3" 
+                      component="div"
+                      sx={{ 
+                        fontWeight: 700,
+                        color: 'primary.main'
                       }}
                     >
-                      {plan.icon}
-                    </Box>
-                    <Typography variant="h5" component="h3" gutterBottom>
-                      {plan.name}
+                      {tier.price}
                     </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', mb: 1 }}>
-                      <Typography variant="h3" component="span" sx={{ fontWeight: 700 }}>
-                        {plan.price}
+                    {tier.period && (
+                      <Typography variant="subtitle1" color="text.secondary">
+                        {tier.period}
                       </Typography>
-                      {plan.period && (
-                        <Typography variant="body1" color="text.secondary" sx={{ ml: 1 }}>
-                          {plan.period}
-                        </Typography>
-                      )}
-                    </Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                      {plan.description}
-                    </Typography>
+                    )}
                   </Box>
-                  <Divider sx={{ my: 3 }} />
-                  <List sx={{ mb: 3 }}>
-                    {plan.features.map((feature, featureIndex) => (
-                      <ListItem key={featureIndex} sx={{ px: 0, py: 0.5 }}>
-                        <ListItemIcon sx={{ minWidth: 40 }}>
+                  <Typography 
+                    color="text.secondary" 
+                    paragraph 
+                    align="center"
+                    sx={{ mb: 4 }}
+                  >
+                    {tier.description}
+                  </Typography>
+                  <List>
+                    {tier.features.map((feature) => (
+                      <ListItem key={feature} sx={{ py: 1 }}>
+                        <ListItemIcon>
                           <CheckIcon color="primary" />
                         </ListItemIcon>
                         <ListItemText 
                           primary={feature}
-                          sx={{
-                            '& .MuiListItemText-primary': {
-                              fontSize: '0.95rem',
-                            }
+                          primaryTypographyProps={{
+                            sx: { fontWeight: 500 }
                           }}
                         />
                       </ListItem>
                     ))}
                   </List>
-                  <Box sx={{ mt: 4, textAlign: 'center' }}>
-                    <Button
-                      variant={plan.buttonVariant as 'contained' | 'outlined'}
-                      size="large"
-                      fullWidth
-                      disabled={plan.disabled}
-                      sx={{
-                        borderRadius: 2,
-                        py: 1.5,
-                        fontSize: '1rem',
-                        fontWeight: 600,
-                        ...(plan.popular && {
-                          bgcolor: theme.palette.primary.main,
-                          color: 'white',
-                          '&:hover': {
-                            bgcolor: theme.palette.primary.dark,
-                          }
-                        })
-                      }}
-                    >
-                      {plan.buttonText}
-                    </Button>
-                  </Box>
                 </CardContent>
+                <Box sx={{ p: 3, textAlign: 'center' }}>
+                  <Button
+                    variant={tier.buttonVariant as 'outlined' | 'contained'}
+                    color="primary"
+                    fullWidth
+                    size="large"
+                    disabled={tier.disabled}
+                    onClick={() => !tier.disabled && navigate('/register')}
+                    sx={{ 
+                      py: 1.5,
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      fontSize: '1.1rem',
+                      fontWeight: 500,
+                      boxShadow: tier.buttonVariant === 'contained' ? '0 4px 14px rgba(0,0,0,0.1)' : 'none',
+                      '&:hover': {
+                        transform: 'translateY(-1px)',
+                        boxShadow: tier.buttonVariant === 'contained' ? '0 6px 20px rgba(0,0,0,0.15)' : 'none',
+                        transition: 'all 0.3s ease'
+                      }
+                    }}
+                  >
+                    {tier.buttonText}
+                  </Button>
+                </Box>
               </Card>
             </Grid>
           ))}
@@ -260,16 +247,37 @@ export default function Pricing() {
         sx={{
           py: 8,
           bgcolor: alpha(theme.palette.primary.main, 0.05),
+          borderRadius: 4,
+          mt: 8
         }}
       >
         <Container maxWidth="lg">
-          <Typography variant="h4" align="center" gutterBottom>
+          <Typography 
+            variant="h4" 
+            align="center" 
+            gutterBottom
+            sx={{ 
+              fontWeight: 700,
+              mb: 4
+            }}
+          >
             Frequently Asked Questions
           </Typography>
           <Grid container spacing={4} sx={{ mt: 2 }}>
             <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 3, height: '100%' }}>
-                <Typography variant="h6" gutterBottom>
+              <Paper 
+                sx={{ 
+                  p: 4, 
+                  height: '100%',
+                  borderRadius: 2,
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: theme.shadows[4],
+                  }
+                }}
+              >
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                   Can I change plans later?
                 </Typography>
                 <Typography color="text.secondary">
@@ -278,8 +286,19 @@ export default function Pricing() {
               </Paper>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 3, height: '100%' }}>
-                <Typography variant="h6" gutterBottom>
+              <Paper 
+                sx={{ 
+                  p: 4, 
+                  height: '100%',
+                  borderRadius: 2,
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: theme.shadows[4],
+                  }
+                }}
+              >
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                   Is there a free trial?
                 </Typography>
                 <Typography color="text.secondary">
@@ -288,8 +307,19 @@ export default function Pricing() {
               </Paper>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 3, height: '100%' }}>
-                <Typography variant="h6" gutterBottom>
+              <Paper 
+                sx={{ 
+                  p: 4, 
+                  height: '100%',
+                  borderRadius: 2,
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: theme.shadows[4],
+                  }
+                }}
+              >
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                   What payment methods do you accept?
                 </Typography>
                 <Typography color="text.secondary">
@@ -298,8 +328,19 @@ export default function Pricing() {
               </Paper>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 3, height: '100%' }}>
-                <Typography variant="h6" gutterBottom>
+              <Paper 
+                sx={{ 
+                  p: 4, 
+                  height: '100%',
+                  borderRadius: 2,
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: theme.shadows[4],
+                  }
+                }}
+              >
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                   Do you offer refunds?
                 </Typography>
                 <Typography color="text.secondary">
@@ -310,52 +351,8 @@ export default function Pricing() {
           </Grid>
         </Container>
       </Box>
-
-      {/* Demo CTA Section */}
-      <Box
-        sx={{
-          py: 8,
-          bgcolor: alpha(theme.palette.primary.main, 0.05),
-        }}
-      >
-        <Container maxWidth="lg">
-          <Paper
-            elevation={0}
-            sx={{
-              p: 6,
-              textAlign: 'center',
-              bgcolor: 'white',
-              borderRadius: 4,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-            }}
-          >
-            <Typography variant="h4" gutterBottom>
-              Want to Learn More?
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: '600px', mx: 'auto' }}>
-              Schedule a personalized demo to see how Refrr can help grow your business through referrals.
-            </Typography>
-            <Button
-              variant="contained"
-              size="large"
-              sx={{
-                borderRadius: 2,
-                py: 1.5,
-                px: 4,
-                fontSize: '1.1rem',
-                fontWeight: 600,
-                bgcolor: theme.palette.primary.main,
-                color: 'white',
-                '&:hover': {
-                  bgcolor: theme.palette.primary.dark,
-                }
-              }}
-            >
-              Book a Demo
-            </Button>
-          </Paper>
-        </Container>
-      </Box>
     </PublicLayout>
   );
-} 
+};
+
+export default Pricing; 
