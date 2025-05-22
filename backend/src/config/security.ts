@@ -1,62 +1,54 @@
 import cors from 'cors';
-import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import { Express } from 'express';
 
-// CORS Configuration
-export const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+const corsOptions = {
+  origin: true, // Allow all origins
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin',
+    'X-Forwarded-For',
+    'X-Forwarded-Proto',
+    'X-Forwarded-Host',
+    'X-Forwarded-Port'
+  ],
+  exposedHeaders: ['Set-Cookie'],
+  optionsSuccessStatus: 200,
+  preflightContinue: false
 };
 
-// Rate Limiting
-export const limiter = rateLimit({
-  windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-  max: Number(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
-});
+const rateLimitOptions = {
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  trustProxy: true,
+  skip: (req: any) => {
+    // Skip rate limiting for health check endpoints
+    return req.path === '/api/health' || req.path === '/api/health/status';
+  }
+};
 
-// Security Headers
-export const helmetConfig = helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", 'data:', 'https:'],
-      connectSrc: ["'self'", process.env.API_URL || 'http://localhost:5000'],
-    },
-  },
-  crossOriginEmbedderPolicy: true,
-  crossOriginOpenerPolicy: true,
-  crossOriginResourcePolicy: { policy: "same-site" },
-  dnsPrefetchControl: { allow: false },
-  frameguard: { action: 'sameorigin' },
-  hidePoweredBy: true,
-  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
-  ieNoOpen: true,
-  noSniff: true,
-  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-  xssFilter: true,
-});
+export const setupSecurity = (app: Express) => {
+  // Enable trust proxy
+  app.set('trust proxy', 1);
 
-export const setupSecurity = (app: any) => {
-  // CORS configuration
-  app.use(cors({
-    origin: process.env.FRONTEND_URL,
-    credentials: true
-  }));
+  // Setup CORS
+  app.use(cors(corsOptions));
 
-  // Helmet for security headers
-  app.use(helmet());
+  // Setup rate limiting
+  app.use(rateLimit(rateLimitOptions));
 
-  // Rate limiting
-  const limiter = rateLimit({
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
-    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100') // limit each IP to 100 requests per windowMs
+  // Add security headers
+  app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    next();
   });
-
-  // Apply rate limiting to all routes
-  app.use(limiter);
 }; 
