@@ -25,14 +25,20 @@ const app = express();
 app.set('trust proxy', 1);
 
 // CORS configuration
-app.use(cors({
-  origin: '*', // Allow all origins temporarily for debugging
+const corsOptions = {
+  origin: 'https://refrr-frontend.onrender.com',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
   maxAge: 600 // Cache preflight request for 10 minutes
-}));
+};
+
+// Apply CORS middleware
+app.use(cors(corsOptions));
+
+// Handle OPTIONS requests explicitly
+app.options('*', cors(corsOptions));
 
 // Add CORS debugging middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
