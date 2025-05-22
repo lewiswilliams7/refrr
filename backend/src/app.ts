@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -14,7 +14,6 @@ import dashboardRoutes from './routes/dashboard';
 import healthRoutes from './routes/health';
 import referralRoutes from './routes/referral';
 import { setupSecurity } from './config/security';
-import { Request, Response, NextFunction } from 'express';
 
 // Load environment variables
 dotenv.config();
@@ -25,7 +24,7 @@ const app = express();
 app.set('trust proxy', 1);
 
 // CORS configuration - Apply before any other middleware
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   res.header('Access-Control-Allow-Origin', 'https://refrr-frontend.onrender.com');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
@@ -33,7 +32,8 @@ app.use((req, res, next) => {
   
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    res.status(200).end();
+    return;
   }
   next();
 });
