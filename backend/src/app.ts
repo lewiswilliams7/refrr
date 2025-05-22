@@ -24,30 +24,17 @@ const app = express();
 // Trust proxy
 app.set('trust proxy', 1);
 
-// CORS configuration
-const corsOptions = {
-  origin: 'https://refrr-frontend.onrender.com',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 600 // Cache preflight request for 10 minutes
-};
-
-// Apply CORS middleware
-app.use(cors(corsOptions));
-
-// Handle OPTIONS requests explicitly
-app.options('*', cors(corsOptions));
-
-// Add CORS debugging middleware
-app.use((req: Request, res: Response, next: NextFunction) => {
-  console.log('CORS Debug - Request:', {
-    origin: req.headers.origin,
-    method: req.method,
-    path: req.path,
-    headers: req.headers
-  });
+// CORS configuration - Apply before any other middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://refrr-frontend.onrender.com');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
   next();
 });
 
