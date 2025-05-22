@@ -24,4 +24,9 @@ console.log('API Configuration:', {
   nodeEnv: process.env.NODE_ENV,
 });
 
+// Configure axios defaults
+import axios from 'axios';
+axios.defaults.withCredentials = true;
+axios.defaults.headers.common['Content-Type'] = 'application/json';
+
 export default config; 
