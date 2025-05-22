@@ -14,21 +14,46 @@ import dashboardRoutes from './routes/dashboard';
 import healthRoutes from './routes/health';
 import referralRoutes from './routes/referral';
 import { setupSecurity } from './config/security';
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
-app.use(helmet());
+// Trust proxy
+app.set('trust proxy', 1);
+
+// CORS configuration
+app.use(cors({
+  origin: 'https://refrr-frontend.onrender.com',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Basic middleware
 app.use(morgan('dev'));
 app.use(express.json());
 
-// Setup security
+// Setup security (includes rate limiting)
 setupSecurity(app);
+
+// Add request logging middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+  console.log('Incoming request:', {
+    method: req.method,
+    url: req.url,
+    path: req.path,
+    baseUrl: req.baseUrl,
+    originalUrl: req.originalUrl,
+    headers: req.headers,
+    body: req.body,
+    params: req.params,
+    query: req.query
+  });
+  next();
+});
 
 // Root route
 app.get('/', (req: Request, res: Response) => {
@@ -39,6 +64,37 @@ app.get('/', (req: Request, res: Response) => {
     documentation: '/api/docs'
   });
 });
+
+// API Routes - Order matters!
+app.use('/api/auth', authRoutes);
+app.use('/api/referrals', referralRoutes);
+app.use('/api/business', businessRoutes);
+app.use('/api/campaigns', campaignRoutes);
+app.use('/api/customer', customerRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/health', healthRoutes);
+
+// 404 handler
+app.use((req: Request, res: Response) => {
+  console.log('404 - Route not found:', {
+    method: req.method,
+    url: req.url,
+    path: req.path,
+    baseUrl: req.baseUrl,
+    originalUrl: req.originalUrl,
+    headers: req.headers,
+    body: req.body,
+    params: req.params,
+    query: req.query
+  });
+  res.status(404).json({
+    message: 'Route not found'
+  });
+});
+
+// Error handling middleware
+app.use(errorHandler);
 
 // Connect to MongoDB
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -53,27 +109,6 @@ mongoose.connect(MONGODB_URI)
     console.error('MongoDB connection error:', err);
     process.exit(1);
   });
-
-// Routes
-app.use('/api/health', healthRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/business', businessRoutes);
-app.use('/api/campaigns', campaignRoutes);
-app.use('/api/customer', customerRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/referrals', referralRoutes);
-
-// 404 handler
-app.use((req: Request, res: Response) => {
-  res.status(404).json({
-    message: 'Not Found',
-    documentation: '/api/docs'
-  });
-});
-
-// Error handling middleware
-app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

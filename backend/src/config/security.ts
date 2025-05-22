@@ -1,26 +1,5 @@
-import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import { Express } from 'express';
-
-const corsOptions = {
-  origin: true, // Allow all origins
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'Accept',
-    'Origin',
-    'X-Forwarded-For',
-    'X-Forwarded-Proto',
-    'X-Forwarded-Host',
-    'X-Forwarded-Port'
-  ],
-  exposedHeaders: ['Set-Cookie'],
-  optionsSuccessStatus: 200,
-  preflightContinue: false
-};
 
 const rateLimitOptions = {
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -37,9 +16,6 @@ const rateLimitOptions = {
 export const setupSecurity = (app: Express) => {
   // Enable trust proxy
   app.set('trust proxy', 1);
-
-  // Setup CORS
-  app.use(cors(corsOptions));
 
   // Setup rate limiting
   app.use(rateLimit(rateLimitOptions));
