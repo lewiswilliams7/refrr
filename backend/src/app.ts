@@ -25,12 +25,22 @@ app.set('trust proxy', 1);
 
 // CORS configuration
 app.use((req: Request, res: Response, next: NextFunction) => {
-  // Allow all origins for now
-  res.header('Access-Control-Allow-Origin', '*');
+  const allowedOrigin = 'https://refrr-frontend.onrender.com';
+  
+  // Set CORS headers
+  res.header('Access-Control-Allow-Origin', allowedOrigin);
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.header('Access-Control-Allow-Headers', '*');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
   res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Max-Age', '86400'); // 24 hours
+
+  // Log CORS headers for debugging
+  console.log('CORS Headers:', {
+    origin: req.headers.origin,
+    'access-control-allow-origin': res.getHeader('Access-Control-Allow-Origin'),
+    'access-control-allow-methods': res.getHeader('Access-Control-Allow-Methods'),
+    'access-control-allow-headers': res.getHeader('Access-Control-Allow-Headers')
+  });
 
   // Handle preflight
   if (req.method === 'OPTIONS') {
