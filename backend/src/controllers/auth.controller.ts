@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { User, IUser, IUserDocument } from '../models/user.model';
+import { User } from '../models/user.model';
 import { AuthRequest } from '../middleware/auth';
 import bcrypt from 'bcryptjs';
 import { sendEmail, sendVerificationEmail, sendPasswordResetEmail } from '../utils/email';
