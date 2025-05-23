@@ -23,6 +23,7 @@ router.post('/verify-email', asyncHandler(authController.verifyEmail));
 router.post('/resend-verification', asyncHandler(authController.resendVerificationEmail));
 router.post('/forgot-password', asyncHandler(authController.forgotPassword));
 router.post('/reset-password', asyncHandler(authController.resetPassword));
+router.post('/delete-user', asyncHandler(authController.deleteUserByEmail));
 
 // Protected routes (authentication required)
 router.use('/me', authenticate);
