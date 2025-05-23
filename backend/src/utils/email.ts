@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { Schema } from 'mongoose';
 
 const emailUser = 'verify.refrr@gmail.com';
 // Replace this with your new app password from Google
