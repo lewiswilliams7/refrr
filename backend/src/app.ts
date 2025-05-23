@@ -24,33 +24,30 @@ const app = express();
 app.set('trust proxy', 1);
 
 // CORS configuration - MUST be first middleware
-const corsOptions = {
-  origin: function(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-    console.log('CORS Origin Check:', {
-      origin,
-      allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',') || [process.env.CORS_ORIGIN || 'https://refrr-frontend.onrender.com']
-    });
-    
-    const allowedOrigins = process.env.ALLOWED_ORIGINS 
-      ? process.env.ALLOWED_ORIGINS.split(',')
-      : [process.env.CORS_ORIGIN || 'https://refrr-frontend.onrender.com'];
-    
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('CORS Origin Rejected:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  credentials: true,
-  maxAge: 86400, // 24 hours
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-};
+app.use((req: Request, res: Response, next: NextFunction) => {
+  // Log CORS-related headers
+  console.log('=== CORS Headers ===');
+  console.log('Origin:', req.headers.origin);
+  console.log('Access-Control-Request-Method:', req.headers['access-control-request-method']);
+  console.log('Access-Control-Request-Headers:', req.headers['access-control-request-headers']);
+  console.log('=====================');
 
-app.use(cors(corsOptions));
+  // Set CORS headers for all responses
+  res.header('Access-Control-Allow-Origin', 'https://refrr-frontend.onrender.com');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
+
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    console.log('Handling OPTIONS request');
+    res.status(204).end();
+    return;
+  }
+
+  next();
+});
 
 // Debug middleware - Log all incoming requests
 app.use((req: Request, res: Response, next: NextFunction) => {

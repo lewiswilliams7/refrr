@@ -10,8 +10,7 @@ const api = axios.create({
     : 'https://refrr-backend.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'Access-Control-Allow-Origin': 'https://refrr-frontend.onrender.com'
+    'Accept': 'application/json'
   },
   timeout: 10000,
   withCredentials: true
