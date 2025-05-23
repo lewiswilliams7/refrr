@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
 import config from '../config';
+import api from '../services/api';
 
 interface User {
   id: string;
@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      axios.get(`${config.apiUrl}/api/auth/me`, {
+      api.get('/auth/me', {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(response => {
@@ -52,10 +52,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string, role?: 'business' | 'customer'): Promise<User> => {
     try {
       const endpoint = role === 'customer' 
-        ? `${config.apiUrl}/api/auth/customer/login`
-        : `${config.apiUrl}/api/auth/business/login`;
+        ? '/auth/customer/login'
+        : '/auth/business/login';
 
-      const response = await axios.post(endpoint, {
+      const response = await api.post(endpoint, {
         email,
         password
       });
@@ -73,10 +73,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (email: string, password: string, userData: any): Promise<User> => {
     try {
       const endpoint = userData.role === 'customer' 
-        ? `${config.apiUrl}/api/auth/register/customer`
-        : `${config.apiUrl}/api/auth/register`;
+        ? '/auth/customer/register'
+        : '/auth/register';
 
-      const response = await axios.post(endpoint, {
+      const response = await api.post(endpoint, {
         email,
         password,
         ...userData
