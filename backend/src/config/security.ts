@@ -15,7 +15,25 @@ const rateLimitOptions = {
 };
 
 const corsOptions = {
-  origin: 'https://refrr-frontend.onrender.com',
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    const allowedOrigins = [
+      'https://refrr-frontend.onrender.com',
+      'http://localhost:3000'
+    ];
+    
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('Blocked by CORS:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   credentials: true,
