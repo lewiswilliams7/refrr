@@ -41,7 +41,7 @@ export const sendEmail = async (options: {
   subject: string;
   text?: string;
   html?: string;
-  date?: string;
+  date?: any;
 }): Promise<void> => {
   const mailOptions = {
     from: process.env.SMTP_FROM,
@@ -55,7 +55,7 @@ export const sendEmail = async (options: {
   await transporter.sendMail(mailOptions);
 };
 
-export const sendVerificationEmail = async (email: string, token: string, expiresAt: string): Promise<void> => {
+export const sendVerificationEmail = async (email: string, token: string, expiresAt: any): Promise<void> => {
   const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
   const html = `
     <h1>Verify Your Email</h1>
@@ -71,7 +71,7 @@ export const sendVerificationEmail = async (email: string, token: string, expire
   });
 };
 
-export const sendPasswordResetEmail = async (email: string, token: string, expiresAt: string): Promise<void> => {
+export const sendPasswordResetEmail = async (email: string, token: string, expiresAt: any): Promise<void> => {
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
   const html = `
     <h1>Reset Your Password</h1>
