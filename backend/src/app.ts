@@ -23,31 +23,16 @@ const app = express();
 // Trust proxy
 app.set('trust proxy', 1);
 
-// CORS configuration - MUST be first middleware
-app.use((req: Request, res: Response, next: NextFunction) => {
-  // Log CORS-related headers
-  console.log('=== CORS Headers ===');
-  console.log('Origin:', req.headers.origin);
-  console.log('Access-Control-Request-Method:', req.headers['access-control-request-method']);
-  console.log('Access-Control-Request-Headers:', req.headers['access-control-request-headers']);
-  console.log('=====================');
-
-  // Set CORS headers for all responses
-  res.header('Access-Control-Allow-Origin', 'https://refrr-frontend.onrender.com');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', '86400'); // 24 hours
-
-  // Handle preflight
-  if (req.method === 'OPTIONS') {
-    console.log('Handling OPTIONS request for:', req.url);
-    res.status(204).end();
-    return;
-  }
-
-  next();
-});
+// CORS configuration
+const corsOptions = {
+  origin: 'https://refrr-frontend.onrender.com',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  credentials: true,
+  maxAge: 86400, // 24 hours
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
 
 // Debug middleware - Log all incoming requests
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -59,6 +44,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   console.log('=====================');
   next();
 });
+
+// Apply CORS middleware
+app.use(cors(corsOptions));
 
 // Basic middleware
 app.use(morgan('dev'));
