@@ -25,13 +25,29 @@ app.set('trust proxy', 1);
 
 // CORS configuration - MUST be first middleware
 const corsOptions = {
-  origin: process.env.ALLOWED_ORIGINS 
-    ? process.env.ALLOWED_ORIGINS.split(',')
-    : [process.env.CORS_ORIGIN || 'https://refrr-frontend.onrender.com'],
+  origin: function(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    console.log('CORS Origin Check:', {
+      origin,
+      allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',') || [process.env.CORS_ORIGIN || 'https://refrr-frontend.onrender.com']
+    });
+    
+    const allowedOrigins = process.env.ALLOWED_ORIGINS 
+      ? process.env.ALLOWED_ORIGINS.split(',')
+      : [process.env.CORS_ORIGIN || 'https://refrr-frontend.onrender.com'];
+    
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('CORS Origin Rejected:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   credentials: true,
-  maxAge: 86400 // 24 hours
+  maxAge: 86400, // 24 hours
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));
