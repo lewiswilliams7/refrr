@@ -5,7 +5,9 @@ import { getToken } from '../utils/auth';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: process.env.NODE_ENV === 'development' ? 'http://localhost:5000/api' : '/api',
+  baseURL: process.env.NODE_ENV === 'development' 
+    ? 'http://localhost:5000/api' 
+    : 'https://refrr-backend.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -140,7 +142,7 @@ export const authApi = {
   login: async (data: LoginData) => {
     console.log('Making login API call with data:', { email: data.email });
     try {
-      const response = await api.post('/auth/login', data);
+      const response = await api.post('/auth/customer/login', data);
       console.log('Login API response:', {
         status: response.status,
         statusText: response.statusText,
