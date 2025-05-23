@@ -174,7 +174,7 @@ export const authApi = {
   registerCustomer: async (data: RegisterCustomerData) => {
     try {
       console.log('Registering customer with data:', data);
-      const response = await api.post('/auth/register/customer', data);
+      const response = await api.post('/auth/customer/register', data);
       console.log('Registration response:', response.data);
       return response.data;
     } catch (error) {
