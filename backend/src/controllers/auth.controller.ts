@@ -187,7 +187,7 @@ export const authController = {
       // Send verification email
       try {
         console.log('Attempting to send verification email to:', email);
-        await sendVerificationEmail(email, verificationToken, new Date(expiresAt).toISOString());
+        await sendVerificationEmail(email, verificationToken, expiresAt.toISOString());
         console.log('Verification email sent successfully');
       } catch (error) {
         console.error('Error sending verification email:', error);
@@ -288,7 +288,7 @@ export const authController = {
       // Send verification email
       try {
         console.log('Attempting to send verification email to:', email);
-        await sendVerificationEmail(email, verificationToken, new Date(expiresAt).toISOString());
+        await sendVerificationEmail(email, verificationToken, expiresAt.toISOString());
         console.log('Verification email sent successfully');
       } catch (error) {
         console.error('Error sending verification email:', error);
@@ -437,7 +437,7 @@ export const authController = {
 
       // Send reset email
       try {
-        await sendPasswordResetEmail(email, resetToken, new Date(expiresAt).toISOString());
+        await sendPasswordResetEmail(email, resetToken, expiresAt.toISOString());
         console.log('Password reset email sent to:', email);
         res.json({ message: 'Password reset instructions sent to your email' });
       } catch (error) {
@@ -534,7 +534,7 @@ export const authController = {
       await user.save();
 
       // Send verification email
-      await sendVerificationEmail(user.email, verificationToken, expiresAt.toString());
+      await sendVerificationEmail(user.email, verificationToken, expiresAt.toISOString());
 
       res.json({ message: 'Verification email sent' });
     } catch (error) {
