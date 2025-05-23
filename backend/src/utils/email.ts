@@ -36,13 +36,20 @@ transporter.verify(function(error, success) {
   }
 });
 
-export const sendEmail = async (to: string, subject: string, html: string, date?: any): Promise<void> => {
+export const sendEmail = async (options: {
+  to: string;
+  subject: string;
+  text?: string;
+  html?: string;
+  date?: any;
+}): Promise<void> => {
   const mailOptions = {
     from: process.env.SMTP_FROM,
-    to,
-    subject,
-    html,
-    date: date ? new Date(date).toISOString() : undefined
+    to: options.to,
+    subject: options.subject,
+    text: options.text,
+    html: options.html,
+    date: options.date ? new Date(options.date).toISOString() : undefined
   };
 
   await transporter.sendMail(mailOptions);
@@ -56,7 +63,12 @@ export const sendVerificationEmail = async (email: string, token: string, expire
     <a href="${verificationUrl}">${verificationUrl}</a>
     <p>This link will expire in 24 hours.</p>
   `;
-  await sendEmail(email, 'Verify Your Email', html, expiresAt);
+  await sendEmail({
+    to: email,
+    subject: 'Verify Your Email',
+    html,
+    date: expiresAt
+  });
 };
 
 export const sendPasswordResetEmail = async (email: string, token: string, expiresAt: any): Promise<void> => {
@@ -67,5 +79,10 @@ export const sendPasswordResetEmail = async (email: string, token: string, expir
     <a href="${resetUrl}">${resetUrl}</a>
     <p>This link will expire in 24 hours.</p>
   `;
-  await sendEmail(email, 'Reset Your Password', html, expiresAt);
+  await sendEmail({
+    to: email,
+    subject: 'Reset Your Password',
+    html,
+    date: expiresAt
+  });
 }; 
