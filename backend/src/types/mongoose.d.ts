@@ -4,6 +4,8 @@ declare module 'mongoose' {
   interface Document {
     isVerified: boolean;
     verificationToken?: string;
-    verificationTokenExpires?: Date | string;
+    verificationTokenExpires?: Date;
+    resetToken?: string;
+    resetTokenExpires?: Date;
   }
 } 

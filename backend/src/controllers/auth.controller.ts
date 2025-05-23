@@ -277,8 +277,7 @@ export const authController = {
       // Generate verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
       user.resetToken = verificationToken;
-      const expiresDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-      user.resetTokenExpires = expiresDate.toISOString();
+      user.resetTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
       // Save the user
       const savedUser = await user.save();
