@@ -142,7 +142,7 @@ export const authApi = {
   login: async (data: LoginData) => {
     console.log('Making login API call with data:', { email: data.email });
     try {
-      const response = await api.post('/auth/customer/login', data);
+      const response = await api.post('/customer/login', data);
       console.log('Login API response:', {
         status: response.status,
         statusText: response.statusText,
