@@ -26,14 +26,14 @@ interface IUserDocument extends Document {
   role: 'admin' | 'business' | 'customer';
   status: 'active' | 'inactive';
   isVerified: boolean;
-  lastLogin?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  lastLogin?: Schema.Types.Date;
+  createdAt: Schema.Types.Date;
+  updatedAt: Schema.Types.Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
   resetToken?: string;
-  resetTokenExpires?: Date;
+  resetTokenExpires?: Schema.Types.Date;
   verificationToken?: string;
-  verificationTokenExpires?: Date;
+  verificationTokenExpires?: Schema.Types.Date;
   businessName?: string;
   businessType?: string;
   location?: {
@@ -85,12 +85,12 @@ const userSchema = new Schema({
     default: false,
   },
   lastLogin: {
-    type: Date,
+    type: Schema.Types.Date,
   },
   resetToken: String,
-  resetTokenExpires: Date,
+  resetTokenExpires: Schema.Types.Date,
   verificationToken: String,
-  verificationTokenExpires: Date,
+  verificationTokenExpires: Schema.Types.Date,
   businessName: {
     type: String,
     required: function(this: IUserDocument) { return this.role === 'business'; },
