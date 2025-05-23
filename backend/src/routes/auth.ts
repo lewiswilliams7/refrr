@@ -16,10 +16,20 @@ router.use(loggerMiddleware);
 
 // Public routes (no authentication required)
 router.options('/customer/login', (req: Request, res: Response) => {
-  res.status(200).end();
+  console.log('Handling OPTIONS request for customer login');
+  res.header('Access-Control-Allow-Origin', 'https://refrr-frontend.onrender.com');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.status(204).end();
 });
 router.options('/business/login', (req: Request, res: Response) => {
-  res.status(200).end();
+  console.log('Handling OPTIONS request for business login');
+  res.header('Access-Control-Allow-Origin', 'https://refrr-frontend.onrender.com');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.status(204).end();
 });
 router.post('/business/register', asyncHandler(authController.registerBusiness));
 router.post('/customer/register', asyncHandler(authController.registerCustomer));

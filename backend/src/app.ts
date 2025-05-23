@@ -41,7 +41,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
   // Handle preflight
   if (req.method === 'OPTIONS') {
-    console.log('Handling OPTIONS request');
+    console.log('Handling OPTIONS request for:', req.url);
     res.status(204).end();
     return;
   }
