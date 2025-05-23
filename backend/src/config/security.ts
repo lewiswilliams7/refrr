@@ -18,7 +18,9 @@ const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     const allowedOrigins = [
       'https://refrr-frontend.onrender.com',
-      'http://localhost:3000'
+      'http://localhost:3000',
+      'https://refrr.onrender.com',
+      'https://refrr-backend.onrender.com'
     ];
     
     // Allow requests with no origin (like mobile apps or curl requests)
@@ -28,6 +30,7 @@ const corsOptions = {
     }
 
     if (allowedOrigins.indexOf(origin) !== -1) {
+      console.log('Allowed CORS origin:', origin);
       callback(null, true);
     } else {
       console.log('Blocked by CORS:', origin);
