@@ -62,7 +62,7 @@ export const sendEmail = async (options: EmailOptions): Promise<void> => {
       subject: options.subject,
       text: options.text,
       html: options.html,
-      date: options.date ? new Date(options.date).toISOString() : undefined
+      date: options.date ? new Date(options.date.toString()).toISOString() : undefined
     };
 
     await transporter.sendMail(mailOptions);
