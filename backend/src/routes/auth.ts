@@ -23,8 +23,8 @@ router.options('/business/login', (req: Request, res: Response) => {
 });
 router.post('/business/register', asyncHandler(authController.registerBusiness));
 router.post('/customer/register', asyncHandler(authController.registerCustomer));
-router.post('/business/login', asyncHandler(authController.loginBusiness));
-router.post('/customer/login', asyncHandler(authController.loginCustomer));
+router.post('/business/login', asyncHandler(authController.login));
+router.post('/customer/login', asyncHandler(authController.login));
 router.post('/verify-email', asyncHandler(authController.verifyEmail));
 router.post('/resend-verification', asyncHandler(authController.resendVerificationEmail));
 router.post('/forgot-password', asyncHandler(authController.forgotPassword));
