@@ -39,7 +39,7 @@ export const sendEmail = async (options: {
   subject: string;
   text: string;
   html?: string;
-  date?: Date;
+  date?: Date | Schema.Types.Date;
 }) => {
   try {
     console.log('Preparing to send email to:', options.to);
@@ -49,7 +49,7 @@ export const sendEmail = async (options: {
       subject: options.subject,
       text: options.text,
       html: options.html,
-      date: options.date ? options.date.toISOString() : undefined
+      date: options.date instanceof Date ? options.date.toISOString() : options.date?.toString()
     };
 
     console.log('Sending email with options:', {
@@ -68,7 +68,7 @@ export const sendEmail = async (options: {
   }
 };
 
-export const sendVerificationEmail = async (email: string, token: string, expiresAt?: Date) => {
+export const sendVerificationEmail = async (email: string, token: string, expiresAt?: Date | Schema.Types.Date) => {
   const verificationUrl = `${process.env.FRONTEND_URL}/#/verify-email/${token}`;
   console.log('Generated verification URL:', verificationUrl);
   console.log('FRONTEND_URL:', process.env.FRONTEND_URL);
@@ -95,7 +95,7 @@ export const sendVerificationEmail = async (email: string, token: string, expire
   });
 };
 
-export const sendPasswordResetEmail = async (email: string, token: string, expiresAt?: Date) => {
+export const sendPasswordResetEmail = async (email: string, token: string, expiresAt?: Date | Schema.Types.Date) => {
   const resetUrl = `${process.env.FRONTEND_URL}/#/reset-password/${token}`;
   
   await sendEmail({
