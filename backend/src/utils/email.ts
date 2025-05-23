@@ -1,15 +1,30 @@
 import nodemailer from 'nodemailer';
 import { Schema } from 'mongoose';
 
-const emailUser = 'verify.refrr@gmail.com';
-// Replace this with your new app password from Google
-const emailPass = 'nuyy kvfe jhhc ytur';
+// Validate required environment variables
+const requiredEnvVars = [
+  'SMTP_HOST',
+  'SMTP_PORT',
+  'SMTP_USER',
+  'SMTP_PASS',
+  'SMTP_FROM',
+  'FRONTEND_URL'
+];
+
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    console.error(`Missing required environment variable: ${envVar}`);
+    process.exit(1);
+  }
+}
 
 // Log email configuration (without sensitive data)
 console.log('Email configuration:', {
-  service: 'gmail',
-  user: emailUser,
-  frontendUrl: process.env.FRONTEND_URL || 'not configured'
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT,
+  secure: process.env.SMTP_SECURE === 'true',
+  from: process.env.SMTP_FROM,
+  frontendUrl: process.env.FRONTEND_URL
 });
 
 const transporter = nodemailer.createTransport({
@@ -26,36 +41,38 @@ const transporter = nodemailer.createTransport({
 transporter.verify(function(error, success) {
   if (error) {
     console.error('Email transporter verification failed:', error);
-    console.error('Email configuration:', {
-      service: 'gmail',
-      user: emailUser,
-      pass: emailPass ? 'configured' : 'not configured'
-    });
   } else {
     console.log('Email transporter is ready to send messages');
   }
 });
 
-export const sendEmail = async (options: {
+interface EmailOptions {
   to: string;
   subject: string;
   text?: string;
   html?: string;
-  date?: any;
-}): Promise<void> => {
-  const mailOptions = {
-    from: process.env.SMTP_FROM,
-    to: options.to,
-    subject: options.subject,
-    text: options.text,
-    html: options.html,
-    date: options.date ? new Date(options.date).toISOString() : undefined
-  };
+  date?: string | Date | Schema.Types.Date;
+}
 
-  await transporter.sendMail(mailOptions);
+export const sendEmail = async (options: EmailOptions): Promise<void> => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_FROM,
+      to: options.to,
+      subject: options.subject,
+      text: options.text,
+      html: options.html,
+      date: options.date ? new Date(options.date).toISOString() : undefined
+    };
+
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw new Error('Failed to send email');
+  }
 };
 
-export const sendVerificationEmail = async (email: string, token: string, expiresAt: any): Promise<void> => {
+export const sendVerificationEmail = async (email: string, token: string, expiresAt: string | Date | Schema.Types.Date): Promise<void> => {
   const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
   const html = `
     <h1>Verify Your Email</h1>
@@ -71,7 +88,7 @@ export const sendVerificationEmail = async (email: string, token: string, expire
   });
 };
 
-export const sendPasswordResetEmail = async (email: string, token: string, expiresAt: any): Promise<void> => {
+export const sendPasswordResetEmail = async (email: string, token: string, expiresAt: string | Date | Schema.Types.Date): Promise<void> => {
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
   const html = `
     <h1>Reset Your Password</h1>
