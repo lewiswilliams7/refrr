@@ -178,16 +178,14 @@ export const authController = {
 
       // Generate verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
       savedUser.resetToken = verificationToken;
-      savedUser.resetTokenExpires = expiresAt;
       await savedUser.save();
       console.log('Verification token generated:', verificationToken);
 
       // Send verification email
       try {
         console.log('Attempting to send verification email to:', email);
-        await sendVerificationEmail(email, verificationToken, expiresAt.toISOString());
+        await sendVerificationEmail(email, verificationToken);
         console.log('Verification email sent successfully');
       } catch (error) {
         console.error('Error sending verification email:', error);
@@ -277,18 +275,14 @@ export const authController = {
 
       // Generate verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
       user.resetToken = verificationToken;
-      user.resetTokenExpires = expiresAt;
-
-      // Save the user
-      const savedUser = await user.save();
-      console.log('Customer user saved:', savedUser);
+      await user.save();
+      console.log('Customer user saved:', user);
 
       // Send verification email
       try {
         console.log('Attempting to send verification email to:', email);
-        await sendVerificationEmail(email, verificationToken, expiresAt.toISOString());
+        await sendVerificationEmail(email, verificationToken);
         console.log('Verification email sent successfully');
       } catch (error) {
         console.error('Error sending verification email:', error);
@@ -296,12 +290,12 @@ export const authController = {
       }
 
       // Generate JWT token
-      const token = generateToken(savedUser._id as Types.ObjectId);
+      const token = generateToken(user._id as Types.ObjectId);
 
       res.status(201).json({
         message: 'Customer registered successfully. Please check your email to verify your account.',
         token,
-        user: { ...savedUser.toObject(), password: undefined },
+        user: { ...user.toObject(), password: undefined },
         needsVerification: true
       });
     } catch (error: unknown) {
@@ -430,14 +424,12 @@ export const authController = {
 
       // Generate reset token
       const resetToken = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
       user.resetToken = resetToken;
-      user.resetTokenExpires = expiresAt;
       await user.save();
 
       // Send reset email
       try {
-        await sendPasswordResetEmail(email, resetToken, expiresAt.toISOString());
+        await sendPasswordResetEmail(email, resetToken);
         console.log('Password reset email sent to:', email);
         res.json({ message: 'Password reset instructions sent to your email' });
       } catch (error) {
@@ -457,8 +449,7 @@ export const authController = {
 
       // Find user with valid reset token
       const user = await User.findOne({
-        resetToken: token,
-        resetTokenExpires: { $gt: new Date() }
+        resetToken: token
       });
 
       if (!user) {
@@ -470,7 +461,6 @@ export const authController = {
       // Update password (will be hashed by pre-save hook)
       user.password = password;
       user.resetToken = undefined;
-      user.resetTokenExpires = undefined;
       await user.save();
 
       console.log('Password reset successful for user:', user.email);
@@ -486,8 +476,7 @@ export const authController = {
     try {
       console.log('Verifying email with token:', req.params.token);
       const user = await User.findOne({ 
-        verificationToken: req.params.token,
-        verificationTokenExpires: { $gt: new Date() }
+        verificationToken: req.params.token
       });
       console.log('Found user:', user ? 'yes' : 'no');
 
@@ -499,7 +488,6 @@ export const authController = {
 
       user.isVerified = true;
       user.verificationToken = undefined;
-      user.verificationTokenExpires = undefined;
       await user.save();
       console.log('User verified successfully:', user.email);
 
@@ -528,13 +516,11 @@ export const authController = {
 
       // Generate new verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
       user.verificationToken = verificationToken;
-      user.verificationTokenExpires = expiresAt;
       await user.save();
 
       // Send verification email
-      await sendVerificationEmail(user.email, verificationToken, expiresAt.toISOString());
+      await sendVerificationEmail(user.email, verificationToken);
 
       res.json({ message: 'Verification email sent' });
     } catch (error) {
