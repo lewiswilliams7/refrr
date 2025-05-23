@@ -25,12 +25,15 @@ export interface IUser extends Document {
   lastName: string;
   role: 'admin' | 'business' | 'customer';
   status: 'active' | 'inactive';
-  lastLogin?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  isVerified: boolean;
+  lastLogin?: Schema.Types.Date;
+  createdAt: Schema.Types.Date;
+  updatedAt: Schema.Types.Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
   resetToken?: string;
-  resetTokenExpires?: Date;
+  resetTokenExpires?: Schema.Types.Date;
+  verificationToken?: string;
+  verificationTokenExpires?: Schema.Types.Date;
   businessName?: string;
   businessType?: string;
   location?: {
@@ -77,11 +80,17 @@ const userSchema = new Schema<IUser>({
     enum: ['active', 'inactive'],
     default: 'active',
   },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
   lastLogin: {
-    type: Date,
+    type: Schema.Types.Date,
   },
   resetToken: String,
-  resetTokenExpires: Date,
+  resetTokenExpires: Schema.Types.Date,
+  verificationToken: String,
+  verificationTokenExpires: Schema.Types.Date,
   businessName: {
     type: String,
     required: function(this: IUser) { return this.role === 'business'; },
@@ -115,17 +124,23 @@ userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
   try {
+    console.log('Hashing password in pre-save hook');
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
+    console.log('Password hashed successfully');
     next();
   } catch (error) {
+    console.error('Error hashing password:', error);
     next(error as Error);
   }
 });
 
 // Method to compare password for login
 userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
-  return bcrypt.compare(candidatePassword, this.password);
+  console.log('Comparing passwords in comparePassword method');
+  const isMatch = await bcrypt.compare(candidatePassword, this.password);
+  console.log('Password comparison result:', isMatch);
+  return isMatch;
 };
 
 export const User = mongoose.model<IUser>('User', userSchema);

@@ -5,7 +5,7 @@ import { AuthRequest } from '../middleware/auth';
 import bcrypt from 'bcryptjs';
 import { sendEmail, sendVerificationEmail, sendPasswordResetEmail } from '../utils/email';
 import crypto from 'crypto';
-import mongoose, { Types } from 'mongoose';
+import mongoose, { Types, Schema } from 'mongoose';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { Business } from '../models/business.model';
 import { validateEmail } from '../utils/validators';
@@ -179,7 +179,7 @@ export const authController = {
       // Generate verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
       savedUser.resetToken = verificationToken;
-      savedUser.resetTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      savedUser.resetTokenExpires = new Schema.Types.Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
       await savedUser.save();
       console.log('Verification token generated:', verificationToken);
 
@@ -277,7 +277,7 @@ export const authController = {
       // Generate verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
       user.resetToken = verificationToken;
-      user.resetTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      user.resetTokenExpires = new Schema.Types.Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
       // Save the user
       const savedUser = await user.save();
@@ -429,7 +429,7 @@ export const authController = {
       // Generate reset token
       const resetToken = crypto.randomBytes(32).toString('hex');
       user.resetToken = resetToken;
-      user.resetTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      user.resetTokenExpires = new Schema.Types.Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
       await user.save();
 
       // Send reset email
@@ -526,8 +526,7 @@ export const authController = {
       // Generate new verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
       user.verificationToken = verificationToken;
-      const expiresDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-      user.verificationTokenExpires = expiresDate.toISOString();
+      user.verificationTokenExpires = new Schema.Types.Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
       await user.save();
 
       // Send verification email
