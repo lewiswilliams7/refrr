@@ -20,6 +20,7 @@ import CampaignDetails from './pages/CampaignDetails';
 import Features from './pages/Features';
 import Pricing from './pages/Pricing';
 import WhyRefrr from './pages/WhyRefrr';
+import VerifyEmail from './pages/VerifyEmail';
 
 const theme = createTheme({
   palette: {
@@ -44,6 +45,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/register/customer" element={<RegisterCustomer />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/referral/:code" element={<ReferralLanding />} />
             <Route path="/features" element={<Features />} />
             <Route path="/pricing" element={<Pricing />} />

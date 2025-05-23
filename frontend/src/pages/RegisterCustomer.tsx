@@ -50,8 +50,13 @@ export default function RegisterCustomer() {
         lastName: formData.lastName,
         role: 'customer'
       });
-      navigate('/login', { 
-        state: { message: 'Registration successful! Please login.' }
+      // Store email for verification page
+      localStorage.setItem('pendingVerificationEmail', formData.email);
+      navigate('/verify-email', { 
+        state: { 
+          email: formData.email,
+          message: 'Registration successful! Please verify your email.' 
+        }
       });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to register. Please try again.');
