@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema, Types } from 'mongoose';
+import mongoose, { Document, Schema, Types, HydratedDocument } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 const BUSINESS_TYPES = [
@@ -17,8 +17,7 @@ const BUSINESS_TYPES = [
   'Other'
 ] as const;
 
-interface IUserDocument extends Document {
-  _id: Types.ObjectId;
+interface IUser {
   email: string;
   password: string;
   firstName: string;
@@ -45,9 +44,11 @@ interface IUserDocument extends Document {
   avatar?: string;
 }
 
+type IUserDocument = HydratedDocument<IUser>;
+
 const DEFAULT_AVATAR = 'https://ui-avatars.com/api/';
 
-const userSchema = new Schema<IUserDocument>({
+const userSchema = new Schema<IUser>({
   email: {
     type: String,
     required: true,
@@ -101,18 +102,18 @@ const userSchema = new Schema<IUserDocument>({
   },
   businessName: {
     type: String,
-    required: function(this: IUserDocument) { return this.role === 'business'; },
+    required: function(this: IUser) { return this.role === 'business'; },
     trim: true,
   },
   businessType: {
     type: String,
     enum: BUSINESS_TYPES,
-    required: function(this: IUserDocument) { return this.role === 'business'; },
+    required: function(this: IUser) { return this.role === 'business'; },
   },
   location: {
-    address: { type: String, required: function(this: IUserDocument) { return this.role === 'business'; } },
-    city: { type: String, required: function(this: IUserDocument) { return this.role === 'business'; } },
-    postcode: { type: String, required: function(this: IUserDocument) { return this.role === 'business'; } },
+    address: { type: String, required: function(this: IUser) { return this.role === 'business'; } },
+    city: { type: String, required: function(this: IUser) { return this.role === 'business'; } },
+    postcode: { type: String, required: function(this: IUser) { return this.role === 'business'; } },
   },
   businessDescription: {
     type: String,
@@ -120,7 +121,7 @@ const userSchema = new Schema<IUserDocument>({
   },
   avatar: {
     type: String,
-    default: function(this: IUserDocument) {
+    default: function(this: IUser) {
       const name = encodeURIComponent(`${this.firstName || ''} ${this.lastName || ''}`.trim());
       return `${DEFAULT_AVATAR}?name=${name}&background=random&size=128`;
     }
@@ -151,6 +152,6 @@ userSchema.methods.comparePassword = async function(candidatePassword: string): 
   return isMatch;
 };
 
-export const User = mongoose.model<IUserDocument>('User', userSchema);
-export type IUser = IUserDocument;
+export const User = mongoose.model<IUser>('User', userSchema);
+export type { IUser, IUserDocument };
 export { BUSINESS_TYPES };

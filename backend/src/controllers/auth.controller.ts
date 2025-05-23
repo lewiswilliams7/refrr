@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { User, IUser } from '../models/user.model';
+import { User, IUser, IUserDocument } from '../models/user.model';
 import { AuthRequest } from '../middleware/auth';
 import bcrypt from 'bcryptjs';
 import { sendEmail, sendVerificationEmail, sendPasswordResetEmail } from '../utils/email';
 import crypto from 'crypto';
-import mongoose, { Types, Schema } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { Business } from '../models/business.model';
 import { validateEmail } from '../utils/validators';
