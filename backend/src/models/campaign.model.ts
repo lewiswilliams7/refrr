@@ -7,7 +7,7 @@ export interface ICampaign extends Document {
   description: string;
   businessId: Types.ObjectId;
   business?: IBusiness;
-  status: 'active' | 'inactive' | 'completed' | 'paused';
+  status: 'draft' | 'active' | 'inactive' | 'completed' | 'paused';
   rewardType: 'percentage' | 'fixed';
   rewardValue: number;
   rewardDescription: string;
@@ -19,6 +19,8 @@ export interface ICampaign extends Document {
     clicks: number;
     conversions: number;
     totalReferrals: number;
+    successfulReferrals: number;
+    rewardRedemptions: number;
     conversionRate: number;
   };
   expirationDate?: Date;
@@ -31,9 +33,9 @@ export interface ICampaign extends Document {
 const campaignSchema = new Schema<ICampaign>(
   {
     title: { type: String, required: true },
-    description: { type: String, required: true },
+    description: { type: String, required: false, default: '' },
     businessId: { type: Schema.Types.ObjectId, ref: 'Business', required: true },
-    status: { type: String, enum: ['active', 'inactive', 'completed', 'paused'], default: 'active' },
+    status: { type: String, enum: ['draft', 'active', 'inactive', 'completed', 'paused'], default: 'draft' },
     rewardType: { type: String, enum: ['percentage', 'fixed'], required: true },
     rewardValue: { type: Number, required: true },
     rewardDescription: { type: String, required: true },
@@ -45,6 +47,8 @@ const campaignSchema = new Schema<ICampaign>(
       clicks: { type: Number, default: 0 },
       conversions: { type: Number, default: 0 },
       totalReferrals: { type: Number, default: 0 },
+      successfulReferrals: { type: Number, default: 0 },
+      rewardRedemptions: { type: Number, default: 0 },
       conversionRate: { type: Number, default: 0 }
     },
     expirationDate: { type: Date },

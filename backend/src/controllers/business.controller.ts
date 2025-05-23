@@ -15,7 +15,7 @@ interface IReward {
 
 export const businessController = {
   // Get public business list
-  getPublicBusinesses: async (req: Request, res: Response) => {
+  getPublicBusinesses: async (req: Request, res: Response): Promise<void> => {
     try {
       console.log('Fetching public businesses...');
       const businesses = await Business.find(
@@ -53,7 +53,7 @@ export const businessController = {
             _id: business._id,
             businessName: business.businessName,
             businessType: business.businessType,
-            address: business.address,
+            location: business.location,
             description: business.description,
             activeCampaigns: {
               count: campaigns.length,
@@ -76,12 +76,62 @@ export const businessController = {
     }
   },
 
-  // Get all campaigns for a business
-  getCampaigns: async (req: AuthRequest, res: Response) => {
+  // Get public business by ID
+  getPublicBusiness: async (req: Request, res: Response): Promise<void> => {
     try {
-      const business = await Business.findOne({ userId: req.user?.userId });
+      const business = await Business.findOne({
+        _id: req.params.id,
+        status: 'active'
+      }).populate('userId', 'email firstName lastName');
+
       if (!business) {
-        return res.status(404).json({ message: 'Business not found' });
+        res.status(404).json({ message: 'Business not found' });
+        return;
+      }
+
+      const campaigns = await Campaign.find({
+        businessId: business._id,
+        status: 'active'
+      }).lean();
+
+      const rewards = campaigns.map((campaign) => ({
+        type: campaign.rewardType,
+        value: campaign.rewardValue,
+        description: campaign.rewardDescription,
+        campaignId: campaign._id.toString()
+      }));
+
+      const businessWithCampaigns = {
+        _id: business._id,
+        businessName: business.businessName,
+        businessType: business.businessType,
+        location: business.location,
+        description: business.description,
+        activeCampaigns: {
+          count: campaigns.length,
+          rewards
+        }
+      };
+
+      res.json(businessWithCampaigns);
+    } catch (error) {
+      console.error('Error fetching business:', error);
+      res.status(500).json({ message: 'Error fetching business' });
+    }
+  },
+
+  // Get business campaigns
+  getBusinessCampaigns: async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      if (!req.user?.userId) {
+        res.status(401).json({ message: 'Not authenticated' });
+        return;
+      }
+
+      const business = await Business.findOne({ userId: req.user.userId });
+      if (!business) {
+        res.status(404).json({ message: 'Business not found' });
+        return;
       }
 
       const campaigns = await Campaign.find({
@@ -95,44 +145,42 @@ export const businessController = {
     }
   },
 
-  // Get single campaign
-  getCampaign: async (req: AuthRequest, res: Response) => {
+  // Get business analytics
+  getBusinessAnalytics: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-      const business = await Business.findOne({ userId: req.user?.userId });
+      if (!req.user?.userId) {
+        res.status(401).json({ message: 'Not authenticated' });
+        return;
+      }
+
+      const business = await Business.findOne({ userId: req.user.userId });
       if (!business) {
-        return res.status(404).json({ message: 'Business not found' });
+        res.status(404).json({ message: 'Business not found' });
+        return;
       }
 
-      const campaign = await Campaign.findOne({
-        _id: req.params.id,
-        businessId: business._id
+      const campaigns = await Campaign.find({ businessId: business._id });
+      const totalReferrals = campaigns.reduce((sum, campaign) => sum + (campaign.analytics?.totalReferrals || 0), 0);
+      const successfulReferrals = campaigns.reduce((sum, campaign) => sum + (campaign.analytics?.successfulReferrals || 0), 0);
+      const totalRewards = campaigns.reduce((sum, campaign) => sum + (campaign.analytics?.rewardRedemptions || 0), 0);
+
+      res.json({
+        totalCampaigns: campaigns.length,
+        activeCampaigns: campaigns.filter(c => c.status === 'active').length,
+        totalReferrals,
+        successfulReferrals,
+        conversionRate: totalReferrals > 0 ? (successfulReferrals / totalReferrals) * 100 : 0,
+        totalRewards,
+        campaigns: campaigns.map(campaign => ({
+          id: campaign._id,
+          title: campaign.title,
+          status: campaign.status,
+          analytics: campaign.analytics
+        }))
       });
-
-      if (!campaign) {
-        return res.status(404).json({ message: 'Campaign not found' });
-      }
-
-      res.json(campaign);
     } catch (error) {
-      console.error('Error fetching campaign:', error);
-      res.status(500).json({ message: 'Error fetching campaign' });
-    }
-  },
-
-  // Process campaigns
-  processCampaigns: async (campaigns: ICampaign[]) => {
-    try {
-      for (const campaign of campaigns) {
-        console.log(`Processing campaign: ${campaign._id}`);
-        // Process campaign logic here
-        return {
-          success: true,
-          campaignId: campaign._id.toString()
-        };
-      }
-    } catch (error) {
-      console.error('Error processing campaigns:', error);
-      throw error;
+      console.error('Error fetching analytics:', error);
+      res.status(500).json({ message: 'Error fetching analytics' });
     }
   },
 
@@ -154,11 +202,11 @@ export const businessController = {
         _id: business._id,
         businessName: business.businessName,
         businessType: business.businessType,
-        industry: business.industry,
+        location: business.location,
+        status: business.status,
         website: business.website,
         description: business.description,
         logo: business.logo,
-        address: business.address,
         contactInfo: business.contactInfo,
         socialMedia: business.socialMedia,
         settings: business.settings
@@ -186,11 +234,10 @@ export const businessController = {
       const {
         businessName,
         businessType,
-        industry,
+        location,
         website,
         description,
         logo,
-        address,
         contactInfo,
         socialMedia,
         settings
@@ -199,11 +246,10 @@ export const businessController = {
       // Update business fields
       if (businessName) business.businessName = businessName;
       if (businessType) business.businessType = businessType;
-      if (industry) business.industry = industry;
+      if (location) business.location = location;
       if (website) business.website = website;
       if (description) business.description = description;
       if (logo) business.logo = logo;
-      if (address) business.address = address;
       if (contactInfo) business.contactInfo = contactInfo;
       if (socialMedia) business.socialMedia = socialMedia;
       if (settings) business.settings = settings;
@@ -211,20 +257,17 @@ export const businessController = {
       await business.save();
 
       res.json({
-        message: 'Business profile updated successfully',
-        business: {
-          _id: business._id,
-          businessName: business.businessName,
-          businessType: business.businessType,
-          industry: business.industry,
-          website: business.website,
-          description: business.description,
-          logo: business.logo,
-          address: business.address,
-          contactInfo: business.contactInfo,
-          socialMedia: business.socialMedia,
-          settings: business.settings
-        }
+        _id: business._id,
+        businessName: business.businessName,
+        businessType: business.businessType,
+        location: business.location,
+        status: business.status,
+        website: business.website,
+        description: business.description,
+        logo: business.logo,
+        contactInfo: business.contactInfo,
+        socialMedia: business.socialMedia,
+        settings: business.settings
       });
     } catch (error) {
       console.error('Update business profile error:', error);

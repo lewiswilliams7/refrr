@@ -19,7 +19,8 @@
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
-    "prepare": "node -e \"if (process.env.NODE_ENV !== 'production') require('husky').install()\""
+    "prepare": "node -e \"if (process.env.NODE_ENV !== 'production') require('husky').install()\"",
+    "cleanup": "ts-node src/scripts/cleanup.ts"
   },
   "keywords": [],
   "author": "",

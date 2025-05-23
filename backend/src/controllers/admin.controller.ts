@@ -38,7 +38,7 @@ interface PopulatedBusiness extends IBusiness {
     zipCode: string;
     country: string;
   };
-  status: 'active' | 'inactive';
+  status: 'active' | 'pending' | 'suspended';
   createdAt: Date;
   updatedAt: Date;
 }

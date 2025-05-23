@@ -43,18 +43,23 @@ interface CampaignWithBusiness {
 export const campaignController = {
   createCampaign: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+      console.log('Creating campaign for user:', req.user?.userId);
       const business = await Business.findOne({ userId: req.user?.userId });
+      
       if (!business) {
-        res.status(404).json({ message: 'Business not found' });
+        console.log('No business profile found for user:', req.user?.userId);
+        res.status(404).json({ message: 'Business profile not found. Please complete your business profile first.' });
         return;
       }
 
+      console.log('Found business:', business._id);
       const campaign = new Campaign({
         ...req.body,
         businessId: business._id
       });
 
       await campaign.save();
+      console.log('Campaign created:', campaign._id);
       res.status(201).json(campaign);
     } catch (error) {
       console.error('Create campaign error:', error);
@@ -64,13 +69,19 @@ export const campaignController = {
 
   getBusinessCampaigns: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+      console.log('Getting campaigns for user:', req.user?.userId);
       const business = await Business.findOne({ userId: req.user?.userId });
+      
       if (!business) {
-        res.status(404).json({ message: 'Business not found' });
+        console.log('No business profile found for user:', req.user?.userId);
+        // Return empty array instead of 404
+        res.json([]);
         return;
       }
 
+      console.log('Found business:', business._id);
       const campaigns = await Campaign.find({ businessId: business._id });
+      console.log('Found campaigns:', campaigns.length);
       res.json(campaigns);
     } catch (error) {
       console.error('Get campaigns error:', error);

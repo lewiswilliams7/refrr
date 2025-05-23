@@ -3,19 +3,18 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IBusiness extends Document {
   _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
+  email: string;
   businessName: string;
   businessType: string;
-  industry: string;
+  location: {
+    address: string;
+    city: string;
+    postcode: string;
+  };
+  status: 'pending' | 'active' | 'suspended';
   website?: string;
   description?: string;
   logo?: string;
-  address?: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
   contactInfo?: {
     email: string;
     phone: string;
@@ -38,19 +37,18 @@ export interface IBusiness extends Document {
 
 const businessSchema = new Schema<IBusiness>({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  email: { type: String, required: true, unique: true },
   businessName: { type: String, required: true },
   businessType: { type: String, required: true },
-  industry: { type: String, required: true },
+  location: {
+    address: { type: String, required: true },
+    city: { type: String, required: true },
+    postcode: { type: String, required: true }
+  },
+  status: { type: String, enum: ['pending', 'active', 'suspended'], default: 'pending' },
   website: { type: String },
   description: { type: String },
   logo: { type: String },
-  address: {
-    street: { type: String },
-    city: { type: String },
-    state: { type: String },
-    zipCode: { type: String },
-    country: { type: String }
-  },
   contactInfo: {
     email: { type: String },
     phone: { type: String }
