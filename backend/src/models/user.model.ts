@@ -25,14 +25,14 @@ interface IUser {
   role: 'admin' | 'business' | 'customer';
   status: 'active' | 'inactive';
   isVerified: boolean;
-  lastLogin?: number;
-  createdAt: number;
-  updatedAt: number;
+  lastLogin?: Date;
+  createdAt: Date;
+  updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
   resetToken?: string;
-  resetTokenExpires?: number;
+  resetTokenExpires?: Date;
   verificationToken?: string;
-  verificationTokenExpires?: number;
+  verificationTokenExpires?: Date;
   businessName?: string;
   businessType?: string;
   location?: {
@@ -86,19 +86,19 @@ const userSchema = new Schema<IUser>({
     default: false,
   },
   lastLogin: {
-    type: Number,
+    type: Date,
   },
   resetToken: {
     type: String,
   },
   resetTokenExpires: {
-    type: Number,
+    type: Date,
   },
   verificationToken: {
     type: String,
   },
   verificationTokenExpires: {
-    type: Number,
+    type: Date,
   },
   businessName: {
     type: String,
@@ -128,7 +128,7 @@ const userSchema = new Schema<IUser>({
   }
 }, { 
   timestamps: { 
-    currentTime: () => Date.now(),
+    currentTime: () => new Date(),
     createdAt: true,
     updatedAt: true
   }
