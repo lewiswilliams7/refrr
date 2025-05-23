@@ -7,7 +7,7 @@ import { getToken } from '../utils/auth';
 const api = axios.create({
   baseURL: process.env.NODE_ENV === 'development' 
     ? 'http://localhost:5000/api' 
-    : 'https://refrr-backend.onrender.com/api',
+    : 'https://refrr.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
