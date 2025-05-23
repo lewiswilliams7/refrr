@@ -17,7 +17,7 @@ const BUSINESS_TYPES = [
   'Other'
 ] as const;
 
-export interface IUser extends Document {
+interface IUserDocument extends Document {
   _id: Types.ObjectId;
   email: string;
   password: string;
@@ -26,14 +26,14 @@ export interface IUser extends Document {
   role: 'admin' | 'business' | 'customer';
   status: 'active' | 'inactive';
   isVerified: boolean;
-  lastLogin?: Schema.Types.Date;
-  createdAt: Schema.Types.Date;
-  updatedAt: Schema.Types.Date;
+  lastLogin?: Date;
+  createdAt: Date;
+  updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
   resetToken?: string;
-  resetTokenExpires?: Schema.Types.Date;
+  resetTokenExpires?: Date;
   verificationToken?: string;
-  verificationTokenExpires?: Schema.Types.Date;
+  verificationTokenExpires?: Date;
   businessName?: string;
   businessType?: string;
   location?: {
@@ -47,7 +47,7 @@ export interface IUser extends Document {
 
 const DEFAULT_AVATAR = 'https://ui-avatars.com/api/';
 
-const userSchema = new Schema<IUser>({
+const userSchema = new Schema({
   email: {
     type: String,
     required: true,
@@ -85,26 +85,26 @@ const userSchema = new Schema<IUser>({
     default: false,
   },
   lastLogin: {
-    type: Schema.Types.Date,
+    type: Date,
   },
   resetToken: String,
-  resetTokenExpires: Schema.Types.Date,
+  resetTokenExpires: Date,
   verificationToken: String,
-  verificationTokenExpires: Schema.Types.Date,
+  verificationTokenExpires: Date,
   businessName: {
     type: String,
-    required: function(this: IUser) { return this.role === 'business'; },
+    required: function(this: IUserDocument) { return this.role === 'business'; },
     trim: true,
   },
   businessType: {
     type: String,
     enum: BUSINESS_TYPES,
-    required: function(this: IUser) { return this.role === 'business'; },
+    required: function(this: IUserDocument) { return this.role === 'business'; },
   },
   location: {
-    address: { type: String, required: function(this: IUser) { return this.role === 'business'; } },
-    city: { type: String, required: function(this: IUser) { return this.role === 'business'; } },
-    postcode: { type: String, required: function(this: IUser) { return this.role === 'business'; } },
+    address: { type: String, required: function(this: IUserDocument) { return this.role === 'business'; } },
+    city: { type: String, required: function(this: IUserDocument) { return this.role === 'business'; } },
+    postcode: { type: String, required: function(this: IUserDocument) { return this.role === 'business'; } },
   },
   businessDescription: {
     type: String,
@@ -112,7 +112,7 @@ const userSchema = new Schema<IUser>({
   },
   avatar: {
     type: String,
-    default: function(this: IUser) {
+    default: function(this: IUserDocument) {
       const name = encodeURIComponent(`${this.firstName || ''} ${this.lastName || ''}`.trim());
       return `${DEFAULT_AVATAR}?name=${name}&background=random&size=128`;
     }
@@ -143,5 +143,6 @@ userSchema.methods.comparePassword = async function(candidatePassword: string): 
   return isMatch;
 };
 
-export const User = mongoose.model<IUser>('User', userSchema);
+export const User = mongoose.model<IUserDocument>('User', userSchema);
+export type IUser = IUserDocument;
 export { BUSINESS_TYPES };
