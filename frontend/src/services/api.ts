@@ -197,6 +197,18 @@ export const authApi = {
     const response = await api.post('/auth/resend-verification', { email });
     return response.data;
   },
+
+  deleteUser: async (email: string) => {
+    try {
+      console.log('Deleting user with email:', email);
+      const response = await api.post('/auth/delete-user', { email });
+      console.log('Delete user response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Delete user error:', error);
+      throw error;
+    }
+  },
 };
 
 export const businessApi = {
