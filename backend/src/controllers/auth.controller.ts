@@ -178,7 +178,7 @@ export const authController = {
 
       // Generate verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Schema.Types.Date(new Date(Date.now() + 24 * 60 * 60 * 1000)); // 24 hours
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
       savedUser.resetToken = verificationToken;
       savedUser.resetTokenExpires = expiresAt;
       await savedUser.save();
@@ -277,7 +277,7 @@ export const authController = {
 
       // Generate verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Schema.Types.Date(new Date(Date.now() + 24 * 60 * 60 * 1000)); // 24 hours
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
       user.resetToken = verificationToken;
       user.resetTokenExpires = expiresAt;
 
@@ -430,7 +430,7 @@ export const authController = {
 
       // Generate reset token
       const resetToken = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Schema.Types.Date(new Date(Date.now() + 24 * 60 * 60 * 1000)); // 24 hours
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
       user.resetToken = resetToken;
       user.resetTokenExpires = expiresAt;
       await user.save();
@@ -528,7 +528,7 @@ export const authController = {
 
       // Generate new verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Schema.Types.Date(new Date(Date.now() + 24 * 60 * 60 * 1000)); // 24 hours
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
       user.verificationToken = verificationToken;
       user.verificationTokenExpires = expiresAt;
       await user.save();

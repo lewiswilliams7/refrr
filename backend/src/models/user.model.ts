@@ -26,14 +26,14 @@ interface IUserDocument extends Document {
   role: 'admin' | 'business' | 'customer';
   status: 'active' | 'inactive';
   isVerified: boolean;
-  lastLogin?: Schema.Types.Date;
-  createdAt: Schema.Types.Date;
-  updatedAt: Schema.Types.Date;
+  lastLogin?: Date;
+  createdAt: Date;
+  updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
   resetToken?: string;
-  resetTokenExpires?: Schema.Types.Date;
+  resetTokenExpires?: Date;
   verificationToken?: string;
-  verificationTokenExpires?: Schema.Types.Date;
+  verificationTokenExpires?: Date;
   businessName?: string;
   businessType?: string;
   location?: {
@@ -47,7 +47,7 @@ interface IUserDocument extends Document {
 
 const DEFAULT_AVATAR = 'https://ui-avatars.com/api/';
 
-const userSchema = new Schema({
+const userSchema = new Schema<IUserDocument>({
   email: {
     type: String,
     required: true,
@@ -73,7 +73,7 @@ const userSchema = new Schema({
   role: {
     type: String,
     enum: ['admin', 'business', 'customer'],
-    required: true,
+    default: 'customer',
   },
   status: {
     type: String,
@@ -85,12 +85,20 @@ const userSchema = new Schema({
     default: false,
   },
   lastLogin: {
-    type: Schema.Types.Date,
+    type: Date,
   },
-  resetToken: String,
-  resetTokenExpires: Schema.Types.Date,
-  verificationToken: String,
-  verificationTokenExpires: Schema.Types.Date,
+  resetToken: {
+    type: String,
+  },
+  resetTokenExpires: {
+    type: Date,
+  },
+  verificationToken: {
+    type: String,
+  },
+  verificationTokenExpires: {
+    type: Date,
+  },
   businessName: {
     type: String,
     required: function(this: IUserDocument) { return this.role === 'business'; },

@@ -51,7 +51,7 @@ interface EmailOptions {
   subject: string;
   text?: string;
   html?: string;
-  date?: string | Date | Schema.Types.Date;
+  date?: string | Date;
 }
 
 export const sendEmail = async (options: EmailOptions): Promise<void> => {
@@ -62,7 +62,7 @@ export const sendEmail = async (options: EmailOptions): Promise<void> => {
       subject: options.subject,
       text: options.text,
       html: options.html,
-      date: options.date ? new Date(options.date.toString()).toISOString() : undefined
+      date: options.date ? new Date(options.date).toISOString() : undefined
     };
 
     await transporter.sendMail(mailOptions);
@@ -72,7 +72,7 @@ export const sendEmail = async (options: EmailOptions): Promise<void> => {
   }
 };
 
-export const sendVerificationEmail = async (email: string, token: string, expiresAt: string | Date | Schema.Types.Date): Promise<void> => {
+export const sendVerificationEmail = async (email: string, token: string, expiresAt: string | Date): Promise<void> => {
   const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
   const html = `
     <h1>Verify Your Email</h1>
@@ -88,7 +88,7 @@ export const sendVerificationEmail = async (email: string, token: string, expire
   });
 };
 
-export const sendPasswordResetEmail = async (email: string, token: string, expiresAt: string | Date | Schema.Types.Date): Promise<void> => {
+export const sendPasswordResetEmail = async (email: string, token: string, expiresAt: string | Date): Promise<void> => {
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
   const html = `
     <h1>Reset Your Password</h1>
