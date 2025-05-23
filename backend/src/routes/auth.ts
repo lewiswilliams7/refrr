@@ -14,13 +14,25 @@ const loggerMiddleware = async (req: Request, res: Response, next: NextFunction)
 // Apply logger middleware to all routes
 router.use(loggerMiddleware);
 
-// Public routes
-router.post('/register', asyncHandler(authController.register));
-router.post('/login', asyncHandler(authController.login));
+// Public routes (no authentication required)
+router.options('/customer/login', (req: Request, res: Response) => {
+  res.status(200).end();
+});
+router.options('/business/login', (req: Request, res: Response) => {
+  res.status(200).end();
+});
+router.post('/business/register', asyncHandler(authController.registerBusiness));
+router.post('/customer/register', asyncHandler(authController.registerCustomer));
+router.post('/business/login', asyncHandler(authController.loginBusiness));
+router.post('/customer/login', asyncHandler(authController.loginCustomer));
+router.post('/verify-email', asyncHandler(authController.verifyEmail));
+router.post('/resend-verification', asyncHandler(authController.resendVerificationEmail));
+router.post('/forgot-password', asyncHandler(authController.forgotPassword));
+router.post('/reset-password', asyncHandler(authController.resetPassword));
 
-// Protected routes
-router.get('/me', authenticate, asyncHandler(authController.getCurrentUser));
-router.post('/logout', authenticate, asyncHandler(authController.logout));
+// Protected routes (authentication required)
+router.use('/me', authenticate);
+router.get('/me', asyncHandler(authController.getCurrentUser));
 
 // 404 handler for undefined routes
 const notFoundHandler = async (req: Request, res: Response): Promise<void> => {
