@@ -178,15 +178,16 @@ export const authController = {
 
       // Generate verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Schema.Types.Date(new Date(Date.now() + 24 * 60 * 60 * 1000)); // 24 hours
       savedUser.resetToken = verificationToken;
-      savedUser.resetTokenExpires = new Schema.Types.Date(new Date(Date.now() + 24 * 60 * 60 * 1000)); // 24 hours
+      savedUser.resetTokenExpires = expiresAt;
       await savedUser.save();
       console.log('Verification token generated:', verificationToken);
 
       // Send verification email
       try {
         console.log('Attempting to send verification email to:', email);
-        await sendVerificationEmail(email, verificationToken);
+        await sendVerificationEmail(email, verificationToken, expiresAt);
         console.log('Verification email sent successfully');
       } catch (error) {
         console.error('Error sending verification email:', error);
@@ -276,8 +277,9 @@ export const authController = {
 
       // Generate verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Schema.Types.Date(new Date(Date.now() + 24 * 60 * 60 * 1000)); // 24 hours
       user.resetToken = verificationToken;
-      user.resetTokenExpires = new Schema.Types.Date(new Date(Date.now() + 24 * 60 * 60 * 1000)); // 24 hours
+      user.resetTokenExpires = expiresAt;
 
       // Save the user
       const savedUser = await user.save();
@@ -286,7 +288,7 @@ export const authController = {
       // Send verification email
       try {
         console.log('Attempting to send verification email to:', email);
-        await sendVerificationEmail(email, verificationToken);
+        await sendVerificationEmail(email, verificationToken, expiresAt);
         console.log('Verification email sent successfully');
       } catch (error) {
         console.error('Error sending verification email:', error);
@@ -428,13 +430,14 @@ export const authController = {
 
       // Generate reset token
       const resetToken = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Schema.Types.Date(new Date(Date.now() + 24 * 60 * 60 * 1000)); // 24 hours
       user.resetToken = resetToken;
-      user.resetTokenExpires = new Schema.Types.Date(new Date(Date.now() + 24 * 60 * 60 * 1000)); // 24 hours
+      user.resetTokenExpires = expiresAt;
       await user.save();
 
       // Send reset email
       try {
-        await sendPasswordResetEmail(email, resetToken);
+        await sendPasswordResetEmail(email, resetToken, expiresAt);
         console.log('Password reset email sent to:', email);
         res.json({ message: 'Password reset instructions sent to your email' });
       } catch (error) {
@@ -525,12 +528,13 @@ export const authController = {
 
       // Generate new verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Schema.Types.Date(new Date(Date.now() + 24 * 60 * 60 * 1000)); // 24 hours
       user.verificationToken = verificationToken;
-      user.verificationTokenExpires = new Schema.Types.Date(new Date(Date.now() + 24 * 60 * 60 * 1000)); // 24 hours
+      user.verificationTokenExpires = expiresAt;
       await user.save();
 
       // Send verification email
-      await sendVerificationEmail(user.email, verificationToken);
+      await sendVerificationEmail(user.email, verificationToken, expiresAt);
 
       res.json({ message: 'Verification email sent' });
     } catch (error) {

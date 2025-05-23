@@ -1,10 +1,35 @@
 import nodemailer from 'nodemailer';
 
+const emailUser = 'verify.refrr@gmail.com';
+// Replace this with your new app password from Google
+const emailPass = 'nuyy kvfe jhhc ytur';
+
+// Log email configuration (without sensitive data)
+console.log('Email configuration:', {
+  service: 'gmail',
+  user: emailUser,
+  frontendUrl: process.env.FRONTEND_URL || 'not configured'
+});
+
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD
+    user: emailUser,
+    pass: emailPass
+  }
+});
+
+// Verify transporter configuration
+transporter.verify(function(error, success) {
+  if (error) {
+    console.error('Email transporter verification failed:', error);
+    console.error('Email configuration:', {
+      service: 'gmail',
+      user: emailUser,
+      pass: emailPass ? 'configured' : 'not configured'
+    });
+  } else {
+    console.log('Email transporter is ready to send messages');
   }
 });
 
@@ -13,25 +38,39 @@ export const sendEmail = async (options: {
   subject: string;
   text: string;
   html?: string;
+  date?: Date | Schema.Types.Date;
 }) => {
   try {
+    console.log('Preparing to send email to:', options.to);
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: emailUser,
       to: options.to,
       subject: options.subject,
       text: options.text,
-      html: options.html
+      html: options.html,
+      date: options.date ? new Date(options.date).toISOString() : undefined
     };
 
-    await transporter.sendMail(mailOptions);
+    console.log('Sending email with options:', {
+      to: options.to,
+      subject: options.subject,
+      from: emailUser,
+      date: mailOptions.date
+    });
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent successfully:', info.messageId);
+    return info;
   } catch (error) {
     console.error('Error sending email:', error);
     throw new Error('Failed to send email');
   }
 };
 
-export const sendVerificationEmail = async (email: string, token: string) => {
-  const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+export const sendVerificationEmail = async (email: string, token: string, expiresAt?: Date | Schema.Types.Date) => {
+  const verificationUrl = `${process.env.FRONTEND_URL}/#/verify-email/${token}`;
+  console.log('Generated verification URL:', verificationUrl);
+  console.log('FRONTEND_URL:', process.env.FRONTEND_URL);
   
   await sendEmail({
     to: email,
@@ -50,12 +89,13 @@ export const sendVerificationEmail = async (email: string, token: string) => {
         margin: 20px 0;
       ">Verify Email</a>
       <p>If you did not create an account, please ignore this email.</p>
-    `
+    `,
+    date: expiresAt
   });
 };
 
-export const sendPasswordResetEmail = async (email: string, token: string) => {
-  const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+export const sendPasswordResetEmail = async (email: string, token: string, expiresAt?: Date | Schema.Types.Date) => {
+  const resetUrl = `${process.env.FRONTEND_URL}/#/reset-password/${token}`;
   
   await sendEmail({
     to: email,
@@ -74,6 +114,7 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
         margin: 20px 0;
       ">Reset Password</a>
       <p>If you did not request a password reset, please ignore this email.</p>
-    `
+    `,
+    date: expiresAt
   });
 }; 
