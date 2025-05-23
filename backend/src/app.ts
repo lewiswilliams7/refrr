@@ -1,5 +1,4 @@
 import express, { Request, Response, NextFunction } from 'express';
-import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
@@ -23,17 +22,6 @@ const app = express();
 // Trust proxy
 app.set('trust proxy', 1);
 
-// CORS configuration
-const corsOptions = {
-  origin: 'https://refrr-frontend.onrender.com',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  credentials: true,
-  maxAge: 86400, // 24 hours
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-};
-
 // Debug middleware - Log all incoming requests
 app.use((req: Request, res: Response, next: NextFunction) => {
   console.log('=== Incoming Request ===');
@@ -45,14 +33,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Apply CORS middleware
-app.use(cors(corsOptions));
-
 // Basic middleware
 app.use(morgan('dev'));
 app.use(express.json());
 
-// Setup security (includes rate limiting)
+// Setup security (includes CORS and rate limiting)
 setupSecurity(app);
 
 // Root route

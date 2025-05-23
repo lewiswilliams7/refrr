@@ -1,5 +1,6 @@
 import rateLimit from 'express-rate-limit';
 import { Express } from 'express';
+import cors from 'cors';
 
 const rateLimitOptions = {
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -13,9 +14,22 @@ const rateLimitOptions = {
   }
 };
 
+const corsOptions = {
+  origin: 'https://refrr-frontend.onrender.com',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  credentials: true,
+  maxAge: 86400, // 24 hours
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
+
 export const setupSecurity = (app: Express) => {
   // Enable trust proxy
   app.set('trust proxy', 1);
+
+  // Setup CORS
+  app.use(cors(corsOptions));
 
   // Setup rate limiting
   app.use(rateLimit(rateLimitOptions));
