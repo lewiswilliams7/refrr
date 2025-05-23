@@ -179,7 +179,7 @@ export const authController = {
       // Generate verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
       savedUser.resetToken = verificationToken;
-      savedUser.resetTokenExpires = new Schema.Types.Date(new Date(Date.now() + 24 * 60 * 60 * 1000)); // 24 hours
+      savedUser.resetTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
       await savedUser.save();
       console.log('Verification token generated:', verificationToken);
 
@@ -277,7 +277,7 @@ export const authController = {
       // Generate verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
       user.resetToken = verificationToken;
-      user.resetTokenExpires = new Schema.Types.Date(new Date(Date.now() + 24 * 60 * 60 * 1000)); // 24 hours
+      user.resetTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
       // Save the user
       const savedUser = await user.save();
@@ -429,7 +429,7 @@ export const authController = {
       // Generate reset token
       const resetToken = crypto.randomBytes(32).toString('hex');
       user.resetToken = resetToken;
-      user.resetTokenExpires = new Schema.Types.Date(new Date(Date.now() + 24 * 60 * 60 * 1000)); // 24 hours
+      user.resetTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
       await user.save();
 
       // Send reset email
@@ -455,7 +455,7 @@ export const authController = {
       // Find user with valid reset token
       const user = await User.findOne({
         resetToken: token,
-        resetTokenExpires: { $gt: Date.now() }
+        resetTokenExpires: { $gt: new Date() }
       });
 
       if (!user) {
@@ -484,7 +484,7 @@ export const authController = {
       console.log('Verifying email with token:', req.params.token);
       const user = await User.findOne({ 
         verificationToken: req.params.token,
-        verificationTokenExpires: { $gt: Date.now() }
+        verificationTokenExpires: { $gt: new Date() }
       });
       console.log('Found user:', user ? 'yes' : 'no');
 
@@ -526,7 +526,7 @@ export const authController = {
       // Generate new verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
       user.verificationToken = verificationToken;
-      user.verificationTokenExpires = new Schema.Types.Date(new Date(Date.now() + 24 * 60 * 60 * 1000)); // 24 hours
+      user.verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
       await user.save();
 
       // Send verification email
