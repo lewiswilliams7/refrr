@@ -9,7 +9,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 import PublicLayout from '../components/Layout/PublicLayout';
 
 export default function ResetPassword() {
@@ -37,7 +37,7 @@ export default function ResetPassword() {
     setLoading(true);
 
     try {
-      await axios.post('http://localhost:5000/api/auth/reset-password', {
+      await api.post('/auth/reset-password', {
         token,
         password,
       });

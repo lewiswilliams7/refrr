@@ -10,7 +10,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 import PublicLayout from '../components/Layout/PublicLayout';
 
 export default function ForgotPassword() {
@@ -26,7 +26,7 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+      await api.post('/auth/forgot-password', { email });
       setSuccess(true);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to send reset email');
