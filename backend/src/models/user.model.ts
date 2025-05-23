@@ -25,14 +25,14 @@ interface IUser {
   role: 'admin' | 'business' | 'customer';
   status: 'active' | 'inactive';
   isVerified: boolean;
-  lastLogin?: Schema.Types.Date;
-  createdAt: Schema.Types.Date;
-  updatedAt: Schema.Types.Date;
+  lastLogin?: Date;
+  createdAt: Date;
+  updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
   resetToken?: string;
-  resetTokenExpires?: Schema.Types.Date;
+  resetTokenExpires?: Date;
   verificationToken?: string;
-  verificationTokenExpires?: Schema.Types.Date;
+  verificationTokenExpires?: Date;
   businessName?: string;
   businessType?: string;
   location?: {
@@ -86,19 +86,19 @@ const userSchema = new Schema<IUser>({
     default: false,
   },
   lastLogin: {
-    type: Schema.Types.Date,
+    type: Date,
   },
   resetToken: {
     type: String,
   },
   resetTokenExpires: {
-    type: Schema.Types.Date,
+    type: Date,
   },
   verificationToken: {
     type: String,
   },
   verificationTokenExpires: {
-    type: Schema.Types.Date,
+    type: Date,
   },
   businessName: {
     type: String,
@@ -127,11 +127,7 @@ const userSchema = new Schema<IUser>({
     }
   }
 }, { 
-  timestamps: { 
-    currentTime: () => new Schema.Types.Date(),
-    createdAt: true,
-    updatedAt: true
-  }
+  timestamps: true
 });
 
 // Hash password before saving
