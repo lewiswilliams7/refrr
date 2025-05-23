@@ -8,11 +8,11 @@ const api = axios.create({
   baseURL: process.env.NODE_ENV === 'development' 
     ? 'http://localhost:5000/api' 
     : 'https://refrr.onrender.com/api',
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   },
-  timeout: 10000,
   withCredentials: true
 });
 
