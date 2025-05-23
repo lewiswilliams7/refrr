@@ -17,10 +17,9 @@ const rateLimitOptions = {
 const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     const allowedOrigins = [
-      'https://refrr-frontend.onrender.com',
       'http://localhost:3000',
       'https://refrr.onrender.com',
-      'https://refrr-backend.onrender.com'
+      'https://refrr-frontend.onrender.com'
     ];
     
     // Allow requests with no origin (like mobile apps or curl requests)
