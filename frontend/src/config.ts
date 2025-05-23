@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 interface Config {
   apiUrl: string;
   environment: 'development' | 'production';
@@ -11,7 +13,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 const config: Config = {
   apiUrl: isDevelopment 
     ? 'http://localhost:5000'
-    : 'https://refrr-backend.onrender.com',
+    : 'https://refrr.onrender.com',
   environment: isDevelopment ? 'development' : 'production',
   isDevelopment,
 };
@@ -25,7 +27,6 @@ console.log('API Configuration:', {
 });
 
 // Configure axios defaults
-import axios from 'axios';
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
