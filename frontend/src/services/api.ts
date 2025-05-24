@@ -159,10 +159,10 @@ export const authApi = {
     try {
       console.log('Registering business with data:', data);
       // Log the full URL we're about to use
-      console.log('Making request to:', `${getConfig().apiUrl}/api/auth/register/business`);
+      console.log('Making request to:', `${getConfig().apiUrl}/auth/register/business`);
       console.log('Request config:', {
         baseURL: getConfig().apiUrl,
-        url: '/api/auth/register/business',
+        url: '/auth/register/business',
         method: 'post',
         headers: {
           'Content-Type': 'application/json',
