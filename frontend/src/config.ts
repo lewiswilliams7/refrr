@@ -12,8 +12,8 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 // Force the API URL to be the correct one
 const config: Config = {
   apiUrl: isDevelopment 
-    ? 'http://localhost:5000/api' 
-    : 'https://refrr.onrender.com/api', // Ensure /api is included
+    ? 'http://localhost:5000' 
+    : 'https://refrr.onrender.com', // Remove /api from base URL
   environment: isDevelopment ? 'development' : 'production',
   isDevelopment,
 };
