@@ -137,8 +137,15 @@ export const authApi = {
   },
 
   registerBusiness: async (data: RegisterData): Promise<AuthResponse> => {
-    const response = await api.post('/auth/register/business', data);
-    return response.data;
+    try {
+      console.log('Registering business with data:', data);
+      const response = await api.post('/api/auth/register/business', data);
+      console.log('Business registration response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Business registration error:', error);
+      throw error;
+    }
   },
 
   registerCustomer: async (data: RegisterCustomerData) => {
