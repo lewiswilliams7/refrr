@@ -18,7 +18,10 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   },
-  withCredentials: true
+  withCredentials: true,
+  validateStatus: (status) => {
+    return status >= 200 && status < 500; // Accept all responses except 5xx errors
+  }
 });
 
 // Add request interceptor to add auth token and handle URLs
@@ -28,6 +31,11 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Add CORS headers
+    config.headers['Access-Control-Allow-Origin'] = '*';
+    config.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, PATCH';
+    config.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin';
 
     // Log the request details before any modifications
     console.log('Making API Request:', {

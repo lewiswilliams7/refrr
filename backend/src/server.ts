@@ -11,6 +11,7 @@ import dashboardRoutes from './routes/dashboard';
 import healthRoutes from './routes/health';
 import referralRoutes from './routes/referral';
 import { setupSecurity } from './config/security';
+import cors from 'cors';
 
 // Load environment variables
 dotenv.config();
@@ -24,6 +25,9 @@ app.set('trust proxy', 1);
 app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Handle preflight requests
+app.options('*', cors());
 
 // Setup security (includes CORS)
 setupSecurity(app);
