@@ -24,11 +24,16 @@ console.log('API Configuration:', {
   environment: config.environment,
   isDevelopment,
   nodeEnv: process.env.NODE_ENV,
-  fullUrl: `${config.apiUrl}/auth/register/business` // Log a sample URL
+  fullUrl: `${config.apiUrl}/auth/register/business`, // Log a sample URL
+  windowLocation: window.location.href, // Log the current URL
+  windowOrigin: window.location.origin, // Log the origin
 });
 
 // Configure axios defaults
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
+
+// Export a function to get the config to ensure it's always fresh
+export const getConfig = () => config;
 
 export default config; 

@@ -1,11 +1,11 @@
 import axios from 'axios';
-import config from '../config';
+import config, { getConfig } from '../config';
 import { RegisterData, LoginData, AuthResponse } from '../types/auth';
 import { getToken } from '../utils/auth';
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: config.apiUrl,
+  baseURL: getConfig().apiUrl,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -21,6 +21,17 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Log the current config
+    console.log('Request Config:', {
+      baseURL: config.baseURL,
+      url: config.url,
+      method: config.method,
+      headers: config.headers,
+      fullUrl: `${config.baseURL}${config.url}`,
+      currentConfig: getConfig(),
+    });
+
     return config;
   },
   (error) => {
