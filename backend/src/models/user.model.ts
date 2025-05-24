@@ -25,8 +25,8 @@ interface IUser {
   role: 'admin' | 'business' | 'customer';
   status: 'active' | 'inactive';
   isVerified: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Schema.Types.Date;
+  updatedAt: Schema.Types.Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
   resetToken?: string;
   verificationToken?: string;
@@ -120,26 +120,52 @@ const userSchema = new Schema<IUser>({
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password')) {
+    console.log('Password not modified, skipping hash');
+    return next();
+  }
   
   try {
-    console.log('Hashing password in pre-save hook');
+    console.log('Starting password hash in pre-save hook');
+    console.log('Password length:', this.password.length);
+    
+    // Validate password length
+    if (this.password.length < 6) {
+      console.error('Password too short:', this.password.length);
+      return next(new Error('Password must be at least 6 characters long'));
+    }
+    
     const salt = await bcrypt.genSalt(10);
+    console.log('Salt generated');
+    
     this.password = await bcrypt.hash(this.password, salt);
     console.log('Password hashed successfully');
+    
     next();
   } catch (error) {
-    console.error('Error hashing password:', error);
+    console.error('Error in password hashing:', error);
     next(error as Error);
   }
 });
 
 // Method to compare password for login
 userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
-  console.log('Comparing passwords in comparePassword method');
-  const isMatch = await bcrypt.compare(candidatePassword, this.password);
-  console.log('Password comparison result:', isMatch);
-  return isMatch;
+  try {
+    console.log('Starting password comparison');
+    console.log('Candidate password length:', candidatePassword.length);
+    
+    if (!candidatePassword || candidatePassword.length < 6) {
+      console.error('Invalid candidate password');
+      return false;
+    }
+    
+    const isMatch = await bcrypt.compare(candidatePassword, this.password);
+    console.log('Password comparison result:', isMatch);
+    return isMatch;
+  } catch (error) {
+    console.error('Error comparing passwords:', error);
+    return false;
+  }
 };
 
 export const User = mongoose.model<IUser>('User', userSchema);
