@@ -17,67 +17,65 @@ import { setupSecurity } from './config/security';
 // Load environment variables
 dotenv.config();
 
+// Create Express app
 const app = express();
 
-// Trust proxy
-app.set('trust proxy', 1);
+// Security middleware
+setupSecurity(app);
 
-// Debug middleware - Log all incoming requests
+// Logging middleware
+app.use(morgan('dev'));
+
+// Body parsing middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// CORS middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
-  console.log('=== Incoming Request ===');
-  console.log('Method:', req.method);
-  console.log('URL:', req.url);
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body);
-  console.log('=====================');
+  res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:3000');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+    return;
+  }
+  
   next();
 });
 
-// Basic middleware
-app.use(morgan('dev'));
-app.use(express.json());
-
-// Setup security (includes CORS and rate limiting)
-setupSecurity(app);
-
-// Root route
+// Root route handler
 app.get('/', (req: Request, res: Response) => {
-  console.log('=== Root Route Handler ===');
   res.json({
     message: 'Welcome to Refrr API',
     version: '1.0.0',
     status: 'operational',
-    documentation: '/api/docs'
+    endpoints: {
+      auth: '/api/auth',
+      business: '/api/business',
+      campaign: '/api/campaign',
+      customer: '/api/customer',
+      admin: '/api/admin',
+      dashboard: '/api/dashboard',
+      referral: '/api/referral',
+      health: '/health'
+    }
   });
 });
+
+// Health check route
+app.use('/health', healthRoutes);
 
 // API Routes - Order matters!
 app.use('/api/auth', authRoutes);
-app.use('/api/referrals', referralRoutes);
 app.use('/api/business', businessRoutes);
-app.use('/api/campaigns', campaignRoutes);
+app.use('/api/campaign', campaignRoutes);
 app.use('/api/customer', customerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/health', healthRoutes);
-
-// 404 handler
-app.use((req: Request, res: Response) => {
-  console.log('404 - Route not found:', {
-    method: req.method,
-    url: req.url,
-    path: req.path,
-    baseUrl: req.baseUrl,
-    originalUrl: req.originalUrl,
-    headers: req.headers,
-    body: req.body,
-    params: req.params,
-    query: req.query
-  });
-  res.status(404).json({
-    message: 'Route not found'
-  });
-});
+app.use('/api/referral', referralRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
