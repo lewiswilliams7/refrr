@@ -19,7 +19,9 @@ const corsOptions = {
     const allowedOrigins = [
       'http://localhost:3000',
       'https://refrr.onrender.com',
-      'https://refrr-frontend.onrender.com'
+      'https://refrr-frontend.onrender.com',
+      'https://refrr.vercel.app',
+      'https://refrr-git-main-lewiswilliams7.vercel.app'
     ];
     
     // Allow requests with no origin (like mobile apps or curl requests)
@@ -30,6 +32,15 @@ const corsOptions = {
     }
 
     console.log('Checking CORS for origin:', origin);
+    console.log('Allowed origins:', allowedOrigins);
+    
+    // Allow all origins in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Development environment, allowing all origins');
+      callback(null, true);
+      return;
+    }
+
     if (allowedOrigins.indexOf(origin) !== -1) {
       console.log('Allowed CORS origin:', origin);
       callback(null, true);
@@ -39,7 +50,8 @@ const corsOptions = {
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'Access-Control-Allow-Origin'],
+  exposedHeaders: ['Access-Control-Allow-Origin'],
   credentials: true,
   maxAge: 86400, // 24 hours
   preflightContinue: false,
