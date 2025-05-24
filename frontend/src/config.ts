@@ -13,7 +13,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 const config: Config = {
   apiUrl: isDevelopment 
     ? 'http://localhost:5000/api' 
-    : 'https://refrr.onrender.com/api',
+    : 'https://refrr.onrender.com/api', // Ensure /api is included
   environment: isDevelopment ? 'development' : 'production',
   isDevelopment,
 };
