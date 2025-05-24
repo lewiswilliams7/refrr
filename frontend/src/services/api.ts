@@ -29,8 +29,8 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Ensure all API routes have /api prefix
-    if (config.url && !config.url.startsWith('/api/')) {
+    // Only add /api prefix for non-auth routes
+    if (config.url && !config.url.startsWith('/api/') && !config.url.startsWith('/auth/')) {
       config.url = `/api${config.url}`;
     }
 
@@ -158,18 +158,6 @@ export const authApi = {
   registerBusiness: async (data: RegisterData): Promise<AuthResponse> => {
     try {
       console.log('Registering business with data:', data);
-      // Log the full URL we're about to use
-      console.log('Making request to:', `${getConfig().apiUrl}/auth/register/business`);
-      console.log('Request config:', {
-        baseURL: getConfig().apiUrl,
-        url: '/auth/register/business',
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        withCredentials: true
-      });
       const response = await api.post('/auth/register/business', data);
       console.log('Business registration response:', response.data);
       return response.data;
