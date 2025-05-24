@@ -153,7 +153,9 @@ export const authApi = {
   registerBusiness: async (data: RegisterData): Promise<AuthResponse> => {
     try {
       console.log('Registering business with data:', data);
-      const response = await api.post('auth/register/business', data);
+      // Log the full URL we're about to use
+      console.log('Making request to:', `${getConfig().apiUrl}/auth/register/business`);
+      const response = await api.post('/auth/register/business', data);
       console.log('Business registration response:', response.data);
       return response.data;
     } catch (error) {
