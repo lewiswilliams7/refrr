@@ -34,6 +34,8 @@ api.interceptors.request.use(
       const baseUrl = config.baseURL.endsWith('/') ? config.baseURL.slice(0, -1) : config.baseURL;
       const url = config.url?.startsWith('/') ? config.url.slice(1) : config.url;
       config.url = `${baseUrl}/${url}`;
+      // Clear the baseURL to prevent double prefixing
+      config.baseURL = '';
     }
 
     // Log the request details
