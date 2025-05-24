@@ -191,18 +191,14 @@ export const authController = {
         await session.commitTransaction();
         console.log('Transaction committed successfully');
 
-        // Send verification email
-        try {
-          console.log('Attempting to send verification email to:', email);
-          await sendVerificationEmail(email, verificationToken);
-          console.log('Verification email sent successfully');
-        } catch (error) {
-          console.error('Error sending verification email:', error);
-          // Don't fail the registration if email fails
-        }
-
         // Generate JWT token
         const token = generateToken(savedUser._id as Types.ObjectId);
+
+        // Send verification email in the background
+        sendVerificationEmail(email, verificationToken).catch(error => {
+          console.error('Error sending verification email:', error);
+          // Don't fail the registration if email fails
+        });
 
         res.status(201).json({
           message: 'Business registered successfully',

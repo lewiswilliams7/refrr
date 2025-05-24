@@ -13,7 +13,7 @@ console.log('Initial API Config:', {
 // Create axios instance with base URL
 const api = axios.create({
   baseURL: getConfig().apiUrl,
-  timeout: 30000,
+  timeout: 60000, // Increase timeout to 60 seconds
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -45,6 +45,7 @@ api.interceptors.request.use(
       finalUrl: config.url,
       headers: config.headers,
       data: config.data,
+      timeout: config.timeout
     });
 
     return config;
@@ -55,13 +56,13 @@ api.interceptors.request.use(
   }
 );
 
-// Add response interceptor for debugging
+// Add response interceptor for better error handling
 api.interceptors.response.use(
   (response) => {
     console.log('API Response:', {
       status: response.status,
       data: response.data,
-      headers: response.headers,
+      headers: response.headers
     });
     return response;
   },
@@ -70,12 +71,27 @@ api.interceptors.response.use(
       status: error.response?.status,
       data: error.response?.data,
       message: error.message,
-      config: {
-        url: error.config?.url,
-        baseURL: error.config?.baseURL,
-        method: error.config?.method,
-      },
+      config: error.config
     });
+
+    // Handle timeout errors
+    if (error.code === 'ECONNABORTED') {
+      console.error('Request timed out. Please try again.');
+      return Promise.reject({
+        message: 'Request timed out. Please try again.',
+        originalError: error
+      });
+    }
+
+    // Handle network errors
+    if (!error.response) {
+      console.error('Network error. Please check your connection.');
+      return Promise.reject({
+        message: 'Network error. Please check your connection.',
+        originalError: error
+      });
+    }
+
     return Promise.reject(error);
   }
 );
