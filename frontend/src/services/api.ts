@@ -29,8 +29,8 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Only add /api prefix for non-auth routes
-    if (config.url && !config.url.startsWith('/api/') && !config.url.startsWith('/auth/')) {
+    // Always add /api prefix for all routes
+    if (config.url && !config.url.startsWith('/api/')) {
       config.url = `/api${config.url}`;
     }
 
