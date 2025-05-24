@@ -34,26 +34,61 @@ app.use((req, res, next) => {
 // Basic middleware
 app.use(morgan('dev'));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Setup security (includes CORS)
 setupSecurity(app);
 
-// Routes
-app.use('/api/health', healthRoutes);
+// Root route handler
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Welcome to Refrr API',
+    version: '1.0.0',
+    status: 'operational',
+    endpoints: {
+      auth: '/api/auth',
+      business: '/api/business',
+      campaign: '/api/campaign',
+      customer: '/api/customer',
+      dashboard: '/api/dashboard',
+      referral: '/api/referral',
+      health: '/health'
+    }
+  });
+});
+
+// Health check route (no /api prefix)
+app.use('/health', healthRoutes);
+
+// API Routes (with /api prefix)
 app.use('/api/auth', authRoutes);
 app.use('/api/business', businessRoutes);
-app.use('/api/campaigns', campaignRoutes);
+app.use('/api/campaign', campaignRoutes);
 app.use('/api/customer', customerRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/referrals', referralRoutes);
+app.use('/api/referral', referralRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
 
-// 404 handler
+// 404 handler - must be after all routes
 app.use((req, res) => {
   console.log(`404 - Route not found: ${req.method} ${req.url}`);
-  res.status(404).json({ message: 'Route not found' });
+  res.status(404).json({ 
+    message: 'Route not found',
+    requestedUrl: req.url,
+    method: req.method,
+    availableEndpoints: {
+      root: '/',
+      health: '/health',
+      auth: '/api/auth',
+      business: '/api/business',
+      campaign: '/api/campaign',
+      customer: '/api/customer',
+      dashboard: '/api/dashboard',
+      referral: '/api/referral'
+    }
+  });
 });
 
 // Connect to MongoDB
