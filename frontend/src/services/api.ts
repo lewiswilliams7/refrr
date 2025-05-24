@@ -3,11 +3,9 @@ import config from '../config';
 import { RegisterData, LoginData, AuthResponse } from '../types/auth';
 import { getToken } from '../utils/auth';
 
-// Create axios instance with base configuration
+// Create axios instance with base URL
 const api = axios.create({
-  baseURL: process.env.NODE_ENV === 'development' 
-    ? 'http://localhost:5000/api' 
-    : 'https://refrr.onrender.com/api',
+  baseURL: config.apiUrl,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -16,10 +14,10 @@ const api = axios.create({
   withCredentials: true
 });
 
-// Add auth token to all requests
+// Add request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = getToken();
+    const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -30,67 +28,39 @@ api.interceptors.request.use(
   }
 );
 
-// Request interceptor for debugging
+// Add request interceptor for debugging
 api.interceptors.request.use(
   (config) => {
-    const fullUrl = `${config.baseURL}${config.url}`;
-    console.log('Request:', {
+    console.log('API Request:', {
       method: config.method,
       url: config.url,
-      baseURL: config.baseURL,
-      fullUrl,
+      data: config.data,
       headers: config.headers,
-      data: config.data
     });
     return config;
   },
   (error) => {
-    console.error('Request error:', error);
+    console.error('API Request Error:', error);
     return Promise.reject(error);
   }
 );
 
-// Response interceptor for debugging
+// Add response interceptor for debugging
 api.interceptors.response.use(
   (response) => {
-    console.log('Response:', {
+    console.log('API Response:', {
       status: response.status,
-      statusText: response.statusText,
-      headers: response.headers,
       data: response.data,
-      config: {
-        url: response.config.url,
-        baseURL: response.config.baseURL,
-        method: response.config.method
-      }
+      headers: response.headers,
     });
     return response;
   },
   (error) => {
-    if (error.response) {
-      console.error('Response error:', {
-        status: error.response.status,
-        statusText: error.response.statusText,
-        headers: error.response.headers,
-        data: error.response.data,
-        config: {
-          url: error.config.url,
-          baseURL: error.config.baseURL,
-          method: error.config.method
-        }
-      });
-    } else if (error.request) {
-      console.error('Request error (No Response):', {
-        request: error.request,
-        config: {
-          url: error.config.url,
-          baseURL: error.config.baseURL,
-          method: error.config.method
-        }
-      });
-    } else {
-      console.error('Error:', error.message);
-    }
+    console.error('API Response Error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
     return Promise.reject(error);
   }
 );
@@ -142,7 +112,7 @@ export const authApi = {
   login: async (data: LoginData) => {
     console.log('Making login API call with data:', { email: data.email });
     try {
-      const response = await api.post('/customer/login', data);
+      const response = await api.post('/auth/customer/login', data);
       console.log('Login API response:', {
         status: response.status,
         statusText: response.statusText,
@@ -189,7 +159,7 @@ export const authApi = {
   },
 
   verifyEmail: async (token: string) => {
-    const response = await api.get(`/auth/verify-email/${token}`);
+    const response = await api.get(`/auth/verify-email?token=${token}`);
     return response.data;
   },
 
