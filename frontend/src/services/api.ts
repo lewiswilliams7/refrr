@@ -268,42 +268,42 @@ export const businessApi = {
 
 export const campaignApi = {
   create: async (data: Partial<Campaign>) => {
-    const response = await api.post('/campaigns', data);
+    const response = await api.post('/campaign', data);
     return response.data;
   },
 
   list: async () => {
-    const response = await api.get('/campaigns/business');
+    const response = await api.get('/campaign/business');
     return response.data;
   },
 
   listPublic: async () => {
-    const response = await api.get('/campaigns/public');
+    const response = await api.get('/campaign/public');
     return response.data;
   },
 
   getPublic: async (id: string) => {
-    const response = await api.get(`/campaigns/public/${id}`);
+    const response = await api.get(`/campaign/public/${id}`);
     return response.data;
   },
 
   getById: async (id: string) => {
-    const response = await api.get(`/campaigns/${id}`);
+    const response = await api.get(`/campaign/${id}`);
     return response.data;
   },
 
   update: async (id: string, data: Partial<Campaign>) => {
-    const response = await api.put(`/campaigns/${id}`, data);
+    const response = await api.put(`/campaign/${id}`, data);
     return response.data;
   },
 
   delete: async (id: string) => {
-    const response = await api.delete(`/campaigns/${id}`);
+    const response = await api.delete(`/campaign/${id}`);
     return response.data;
   },
 
   toggleActive: async (id: string) => {
-    const response = await api.put(`/campaigns/${id}/toggle`);
+    const response = await api.put(`/campaign/${id}/toggle`);
     return response.data;
   },
 
@@ -324,7 +324,7 @@ export const campaignApi = {
     });
 
     try {
-      const response = await api.post(`/referrals/generate/${campaignId}`, {
+      const response = await api.post(`/referral/generate/${campaignId}`, {
         referrerEmail: data.referrerEmail
       }, {
         headers: {
