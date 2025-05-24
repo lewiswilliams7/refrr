@@ -112,7 +112,7 @@ export const authApi = {
   login: async (data: LoginData) => {
     console.log('Making login API call with data:', { email: data.email });
     try {
-      const response = await api.post('/auth/customer/login', data);
+      const response = await api.post(`${config.apiUrl}/auth/customer/login`, data);
       console.log('Login API response:', {
         status: response.status,
         statusText: response.statusText,
@@ -134,7 +134,7 @@ export const authApi = {
   register: async (data: RegisterData): Promise<AuthResponse> => {
     try {
       console.log('Registering user with data:', data);
-      const response = await api.post('/auth/register', data);
+      const response = await api.post(`${config.apiUrl}/auth/register`, data);
       console.log('Registration response:', response.data);
       return response.data;
     } catch (error) {
@@ -146,7 +146,7 @@ export const authApi = {
   registerBusiness: async (data: RegisterData): Promise<AuthResponse> => {
     try {
       console.log('Registering business with data:', data);
-      const response = await api.post('/auth/register/business', data);
+      const response = await api.post(`${config.apiUrl}/auth/register/business`, data);
       console.log('Business registration response:', response.data);
       return response.data;
     } catch (error) {
@@ -158,7 +158,7 @@ export const authApi = {
   registerCustomer: async (data: RegisterCustomerData) => {
     try {
       console.log('Registering customer with data:', data);
-      const response = await api.post('/auth/customer/register', data);
+      const response = await api.post(`${config.apiUrl}/auth/customer/register`, data);
       console.log('Registration response:', response.data);
       return response.data;
     } catch (error) {
@@ -169,7 +169,7 @@ export const authApi = {
 
   getCurrentUser: async () => {
     try {
-      const response = await api.get('/auth/me');
+      const response = await api.get(`${config.apiUrl}/auth/me`);
       return response.data;
     } catch (error) {
       console.error('Get current user error:', error);
@@ -179,7 +179,7 @@ export const authApi = {
 
   verifyEmail: async (token: string) => {
     try {
-      const response = await api.get(`/auth/verify-email?token=${token}`);
+      const response = await api.get(`${config.apiUrl}/auth/verify-email?token=${token}`);
       return response.data;
     } catch (error) {
       console.error('Verify email error:', error);
@@ -189,7 +189,7 @@ export const authApi = {
 
   resendVerification: async (email: string) => {
     try {
-      const response = await api.post('/auth/resend-verification', { email });
+      const response = await api.post(`${config.apiUrl}/auth/resend-verification`, { email });
       return response.data;
     } catch (error) {
       console.error('Resend verification error:', error);
@@ -200,7 +200,7 @@ export const authApi = {
   deleteUser: async (email: string) => {
     try {
       console.log('Deleting user with email:', email);
-      const response = await api.post('/auth/delete-user', { email });
+      const response = await api.post(`${config.apiUrl}/auth/delete-user`, { email });
       console.log('Delete user response:', response.data);
       return response.data;
     } catch (error) {
