@@ -52,13 +52,13 @@ app.get('/', (req, res) => {
       customer: '/api/customer',
       dashboard: '/api/dashboard',
       referral: '/api/referral',
-      health: '/health'
+      health: '/api/health'
     }
   });
 });
 
-// Health check route (no /api prefix)
-app.use('/health', healthRoutes);
+// Health check route (with /api prefix to match Render's expectations)
+app.use('/api/health', healthRoutes);
 
 // API Routes (with /api prefix)
 app.use('/api/auth', authRoutes);
@@ -80,7 +80,7 @@ app.use((req, res) => {
     method: req.method,
     availableEndpoints: {
       root: '/',
-      health: '/health',
+      health: '/api/health',
       auth: '/api/auth',
       business: '/api/business',
       campaign: '/api/campaign',
