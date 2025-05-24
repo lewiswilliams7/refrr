@@ -141,74 +141,90 @@ export const authController = {
         return;
       }
 
-      // Create new business user with explicit role
-      console.log('Creating new business user...');
-      const user = new User({
-        email,
-        password, // Don't hash here, let the pre-save hook handle it
-        firstName,
-        lastName,
-        role: 'business', // Explicitly set role as business
-        businessName,
-        businessType,
-        location: {
-          address: location.address,
-          city: location.city,
-          postcode: location.postcode
-        }
-      });
+      // Start a session for transaction
+      const session = await mongoose.startSession();
+      session.startTransaction();
 
-      // Save the user
-      const savedUser = await user.save();
-      console.log('Business user saved:', savedUser);
-
-      // Create business profile
-      const business = new Business({
-        userId: savedUser._id as Types.ObjectId,
-        email: email,
-        businessName,
-        businessType,
-        location,
-        status: 'pending'
-      });
-
-      // Save the business profile
-      const savedBusiness = await business.save();
-      console.log('Business profile saved:', savedBusiness);
-
-      // Generate verification token
-      const verificationToken = crypto.randomBytes(32).toString('hex');
-      savedUser.resetToken = verificationToken;
-      await savedUser.save();
-      console.log('Verification token generated:', verificationToken);
-
-      // Send verification email
       try {
-        console.log('Attempting to send verification email to:', email);
-        await sendVerificationEmail(email, verificationToken);
-        console.log('Verification email sent successfully');
-      } catch (error) {
-        console.error('Error sending verification email:', error);
-        // Don't fail the registration if email fails
-      }
+        // Create new business user with explicit role
+        console.log('Creating new business user...');
+        const user = new User({
+          email,
+          password, // Don't hash here, let the pre-save hook handle it
+          firstName,
+          lastName,
+          role: 'business', // Explicitly set role as business
+          businessName,
+          businessType,
+          location: {
+            address: location.address,
+            city: location.city,
+            postcode: location.postcode
+          }
+        });
 
-      // Generate JWT token
-      const token = generateToken(savedUser._id as Types.ObjectId);
+        // Save the user
+        const savedUser = await user.save({ session });
+        console.log('Business user saved:', savedUser);
 
-      res.status(201).json({
-        message: 'Business registered successfully',
-        token,
-        user: { ...savedUser.toObject(), password: undefined },
-        business: {
+        // Create business profile
+        const business = new Business({
+          userId: savedUser._id as Types.ObjectId,
+          email: email,
           businessName,
           businessType,
           location,
           status: 'pending'
+        });
+
+        // Save the business profile
+        const savedBusiness = await business.save({ session });
+        console.log('Business profile saved:', savedBusiness);
+
+        // Generate verification token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        savedUser.resetToken = verificationToken;
+        await savedUser.save({ session });
+        console.log('Verification token generated:', verificationToken);
+
+        // Commit the transaction
+        await session.commitTransaction();
+        console.log('Transaction committed successfully');
+
+        // Send verification email
+        try {
+          console.log('Attempting to send verification email to:', email);
+          await sendVerificationEmail(email, verificationToken);
+          console.log('Verification email sent successfully');
+        } catch (error) {
+          console.error('Error sending verification email:', error);
+          // Don't fail the registration if email fails
         }
-      });
+
+        // Generate JWT token
+        const token = generateToken(savedUser._id as Types.ObjectId);
+
+        res.status(201).json({
+          message: 'Business registered successfully',
+          token,
+          user: { ...savedUser.toObject(), password: undefined },
+          business: savedBusiness
+        });
+      } catch (error) {
+        // If an error occurred, abort the transaction
+        await session.abortTransaction();
+        console.error('Transaction aborted:', error);
+        throw error;
+      } finally {
+        // End the session
+        session.endSession();
+      }
     } catch (error) {
       console.error('Business registration error:', error);
-      res.status(500).json({ message: 'Server error' });
+      res.status(500).json({ 
+        message: 'Error registering business',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   },
 
@@ -474,14 +490,22 @@ export const authController = {
   // Verify email
   verifyEmail: async (req: Request, res: Response): Promise<void> => {
     try {
-      console.log('Verifying email with token:', req.params.token);
+      const { token } = req.query;
+      console.log('Verifying email with token:', token);
+
+      if (!token || typeof token !== 'string') {
+        console.log('No token provided');
+        res.status(400).json({ message: 'Verification token is required' });
+        return;
+      }
+
       const user = await User.findOne({ 
-        verificationToken: req.params.token
+        verificationToken: token
       });
       console.log('Found user:', user ? 'yes' : 'no');
 
       if (!user) {
-        console.log('No user found with token:', req.params.token);
+        console.log('No user found with token:', token);
         res.status(400).json({ message: 'Invalid or expired verification token' });
         return;
       }

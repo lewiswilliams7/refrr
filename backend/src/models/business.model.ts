@@ -37,7 +37,7 @@ export interface IBusiness extends Document {
 
 const businessSchema = new Schema<IBusiness>({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true },
   businessName: { type: String, required: true },
   businessType: { type: String, required: true },
   location: {
