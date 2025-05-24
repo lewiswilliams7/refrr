@@ -29,11 +29,6 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Always add /api prefix for all routes
-    if (config.url && !config.url.startsWith('/api/')) {
-      config.url = `/api${config.url}`;
-    }
-
     // Log the request details before any modifications
     console.log('Making API Request:', {
       method: config.method,
@@ -158,7 +153,7 @@ export const authApi = {
   registerBusiness: async (data: RegisterData): Promise<AuthResponse> => {
     try {
       console.log('Registering business with data:', data);
-      const response = await api.post('/auth/register/business', data);
+      const response = await api.post('/api/auth/register/business', data);
       console.log('Business registration response:', response.data);
       return response.data;
     } catch (error) {
