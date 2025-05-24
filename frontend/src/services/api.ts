@@ -3,6 +3,13 @@ import config, { getConfig } from '../config';
 import { RegisterData, LoginData, AuthResponse } from '../types/auth';
 import { getToken } from '../utils/auth';
 
+// Log the initial config
+console.log('Initial API Config:', {
+  apiUrl: getConfig().apiUrl,
+  environment: getConfig().environment,
+  isDevelopment: getConfig().isDevelopment,
+});
+
 // Create axios instance with base URL
 const api = axios.create({
   baseURL: getConfig().apiUrl,
@@ -14,7 +21,7 @@ const api = axios.create({
   withCredentials: true
 });
 
-// Add request interceptor to add auth token
+// Add request interceptor to add auth token and handle URLs
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -22,38 +29,27 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Log the current config
-    console.log('Request Config:', {
-      baseURL: config.baseURL,
-      url: config.url,
+    // Force the URL to include the baseURL
+    if (config.baseURL && !config.url?.startsWith('http')) {
+      const baseUrl = config.baseURL.endsWith('/') ? config.baseURL.slice(0, -1) : config.baseURL;
+      const url = config.url?.startsWith('/') ? config.url.slice(1) : config.url;
+      config.url = `${baseUrl}/${url}`;
+    }
+
+    // Log the request details
+    console.log('Making API Request:', {
       method: config.method,
+      originalUrl: config.url,
+      baseURL: config.baseURL,
+      finalUrl: config.url,
       headers: config.headers,
-      fullUrl: `${config.baseURL}${config.url}`,
-      currentConfig: getConfig(),
-    });
-
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Add request interceptor for debugging
-api.interceptors.request.use(
-  (config) => {
-    console.log('API Request:', {
-      method: config.method,
-      url: config.url,
-      baseURL: config.baseURL,
-      fullUrl: `${config.baseURL}${config.url}`,
       data: config.data,
-      headers: config.headers,
     });
+
     return config;
   },
   (error) => {
-    console.error('API Request Error:', error);
+    console.error('Request Interceptor Error:', error);
     return Promise.reject(error);
   }
 );
@@ -73,6 +69,11 @@ api.interceptors.response.use(
       status: error.response?.status,
       data: error.response?.data,
       message: error.message,
+      config: {
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        method: error.config?.method,
+      },
     });
     return Promise.reject(error);
   }
