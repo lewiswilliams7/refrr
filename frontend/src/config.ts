@@ -12,8 +12,8 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 // Force the API URL to be the correct one
 const config: Config = {
   apiUrl: isDevelopment 
-    ? 'http://localhost:5000'
-    : 'https://refrr.onrender.com',
+    ? 'http://localhost:5000/api' 
+    : 'https://refrr.onrender.com/api',
   environment: isDevelopment ? 'development' : 'production',
   isDevelopment,
 };
@@ -24,6 +24,7 @@ console.log('API Configuration:', {
   environment: config.environment,
   isDevelopment,
   nodeEnv: process.env.NODE_ENV,
+  fullUrl: `${config.apiUrl}/auth/register/business` // Log a sample URL
 });
 
 // Configure axios defaults

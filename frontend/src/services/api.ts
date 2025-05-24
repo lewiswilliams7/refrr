@@ -21,6 +21,10 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // Ensure baseURL is used
+    if (config.baseURL && !config.url?.startsWith('http')) {
+      config.url = `${config.baseURL}${config.url}`;
+    }
     return config;
   },
   (error) => {
@@ -34,6 +38,7 @@ api.interceptors.request.use(
     console.log('API Request:', {
       method: config.method,
       url: config.url,
+      baseURL: config.baseURL,
       data: config.data,
       headers: config.headers,
     });
