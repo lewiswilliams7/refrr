@@ -20,6 +20,14 @@ const app = express();
 // Trust proxy
 app.set('trust proxy', 1);
 
+// Basic middleware
+app.use(morgan('dev'));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Setup security (includes CORS)
+setupSecurity(app);
+
 // Debug middleware - Log all incoming requests
 app.use((req, res, next) => {
   console.log('=== Incoming Request ===');
@@ -30,14 +38,6 @@ app.use((req, res, next) => {
   console.log('=====================');
   next();
 });
-
-// Basic middleware
-app.use(morgan('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Setup security (includes CORS)
-setupSecurity(app);
 
 // Root route handler
 app.get('/', (req, res) => {
@@ -91,10 +91,40 @@ app.use((req, res) => {
   });
 });
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/refrr')
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+// MongoDB connection options
+const mongooseOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+  socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+  family: 4 // Use IPv4, skip trying IPv6
+};
+
+// Connect to MongoDB with retry logic
+const connectWithRetry = async () => {
+  try {
+    console.log('Attempting to connect to MongoDB...');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/refrr', mongooseOptions);
+    console.log('Connected to MongoDB successfully');
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
+    console.log('Retrying in 5 seconds...');
+    setTimeout(connectWithRetry, 5000);
+  }
+};
+
+// Initial connection attempt
+connectWithRetry();
+
+// Handle MongoDB connection errors
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected. Attempting to reconnect...');
+  connectWithRetry();
+});
 
 // Only start the server if this file is run directly
 if (require.main === module) {
