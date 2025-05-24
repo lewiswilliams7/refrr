@@ -29,16 +29,7 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Force the URL to include the baseURL
-    if (config.baseURL && !config.url?.startsWith('http')) {
-      const baseUrl = config.baseURL.endsWith('/') ? config.baseURL.slice(0, -1) : config.baseURL;
-      const url = config.url?.startsWith('/') ? config.url.slice(1) : config.url;
-      config.url = `${baseUrl}/${url}`;
-      // Clear the baseURL to prevent double prefixing
-      config.baseURL = '';
-    }
-
-    // Log the request details
+    // Log the request details before any modifications
     console.log('Making API Request:', {
       method: config.method,
       originalUrl: config.url,
