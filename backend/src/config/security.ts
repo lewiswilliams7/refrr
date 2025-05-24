@@ -4,7 +4,7 @@ import cors from 'cors';
 
 const rateLimitOptions = {
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 500, // Increase limit to 500 requests per windowMs
   standardHeaders: true,
   legacyHeaders: false,
   trustProxy: true,
@@ -24,10 +24,12 @@ const corsOptions = {
     
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) {
+      console.log('No origin provided, allowing request');
       callback(null, true);
       return;
     }
 
+    console.log('Checking CORS for origin:', origin);
     if (allowedOrigins.indexOf(origin) !== -1) {
       console.log('Allowed CORS origin:', origin);
       callback(null, true);
