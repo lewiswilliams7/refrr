@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&amp;display=swap');
+    .text { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 40px; fill: #000000; }
+    .dot { fill: #2196f3; }
+  </style>
+  <text x="10" y="45" class="text">Refrr<tspan class="dot">.</tspan></text>
+</svg> 

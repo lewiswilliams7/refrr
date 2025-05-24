@@ -172,7 +172,7 @@ export const authApi = {
   registerBusiness: async (data: RegisterData): Promise<AuthResponse> => {
     try {
       console.log('Registering business with data:', data);
-      const response = await api.post('/auth/register/business', data);
+      const response = await api.post('/api/auth/register/business', data);
       console.log('Business registration response:', response.data);
       return response.data;
     } catch (error) {
@@ -238,32 +238,32 @@ export const authApi = {
 
 export const businessApi = {
   getPublicBusinesses: async () => {
-    const response = await api.get('/business/public');
+    const response = await api.get('/api/business/public');
     return response.data;
   },
 
   getPublicBusiness: async (id: string) => {
-    const response = await api.get(`/business/public/${id}`);
+    const response = await api.get(`/api/business/public/${id}`);
     return response.data;
   },
 
   getBusinessProfile: async () => {
-    const response = await api.get('/business/profile');
+    const response = await api.get('/api/business/profile');
     return response.data;
   },
 
   updateBusinessProfile: async (data: any) => {
-    const response = await api.put('/business/profile', data);
+    const response = await api.put('/api/business/profile', data);
     return response.data;
   },
 
   getBusinessCampaigns: async () => {
-    const response = await api.get('/business/campaigns');
+    const response = await api.get('/api/business/campaigns');
     return response.data;
   },
 
   getBusinessAnalytics: async () => {
-    const response = await api.get('/business/analytics');
+    const response = await api.get('/api/business/analytics');
     return response.data;
   }
 };

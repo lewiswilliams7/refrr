@@ -23,22 +23,22 @@ export interface ICampaign extends Document {
     rewardRedemptions: number;
     conversionRate: number;
   };
-  expirationDate?: Date;
-  startDate: Date;
-  endDate: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  expirationDate?: Schema.Types.Date;
+  startDate: Schema.Types.Date;
+  endDate: Schema.Types.Date;
+  createdAt: Schema.Types.Date;
+  updatedAt: Schema.Types.Date;
 }
 
 const campaignSchema = new Schema<ICampaign>(
   {
-    title: { type: String, required: true },
-    description: { type: String, required: false, default: '' },
+    title: { type: String, required: true, trim: true },
+    description: { type: String, required: true, trim: true },
     businessId: { type: Schema.Types.ObjectId, ref: 'Business', required: true },
     status: { type: String, enum: ['draft', 'active', 'inactive', 'completed', 'paused'], default: 'draft' },
     rewardType: { type: String, enum: ['percentage', 'fixed'], required: true },
-    rewardValue: { type: Number, required: true },
-    rewardDescription: { type: String, required: true },
+    rewardValue: { type: Number, required: true, min: 0 },
+    rewardDescription: { type: String, trim: true },
     showRewardDisclaimer: { type: Boolean, default: false },
     rewardDisclaimerText: { type: String },
     tags: [{ type: String }],
@@ -51,9 +51,9 @@ const campaignSchema = new Schema<ICampaign>(
       rewardRedemptions: { type: Number, default: 0 },
       conversionRate: { type: Number, default: 0 }
     },
-    expirationDate: { type: Date },
-    startDate: { type: Date, required: true },
-    endDate: { type: Date, required: true }
+    expirationDate: { type: Schema.Types.Date },
+    startDate: { type: Schema.Types.Date, required: true },
+    endDate: { type: Schema.Types.Date, required: true }
   },
   { timestamps: true }
 );

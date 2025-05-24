@@ -8,14 +8,13 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { authApi } from '../services/api';
 import PublicLayout from '../components/Layout/PublicLayout';
 
 export default function VerifyEmail() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { token } = useParams();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -26,7 +25,12 @@ export default function VerifyEmail() {
     // Debug logging
     console.log('VerifyEmail mounted');
     console.log('Location state:', location.state);
-    console.log('Token from params:', token);
+    console.log('Location search:', location.search);
+    
+    // Get token from query parameters
+    const searchParams = new URLSearchParams(location.search);
+    const token = searchParams.get('token');
+    console.log('Token from query:', token);
     
     // Try to get email from location state or localStorage
     const emailFromState = location.state?.email;
@@ -48,16 +52,11 @@ export default function VerifyEmail() {
 
     // If we have a token and haven't already verified, verify the email
     if (token && !verificationSuccess && !loading && !error) {
-      verifyEmail();
+      verifyEmail(token);
     }
-  }, [location.state, navigate, token, verificationSuccess, loading, error]);
+  }, [location.state, location.search, navigate, verificationSuccess, loading, error]);
 
-  const verifyEmail = async () => {
-    if (!token) {
-      setError('No verification token found');
-      return;
-    }
-
+  const verifyEmail = async (token: string) => {
     try {
       setLoading(true);
       setError('');
