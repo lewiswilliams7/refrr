@@ -154,10 +154,10 @@ export const authApi = {
     try {
       console.log('Registering business with data:', data);
       // Log the full URL we're about to use
-      console.log('Making request to:', `${getConfig().apiUrl}/auth/register/business`);
+      console.log('Making request to:', `${getConfig().apiUrl}/api/auth/register/business`);
       console.log('Request config:', {
         baseURL: getConfig().apiUrl,
-        url: '/auth/register/business',
+        url: '/api/auth/register/business',
         method: 'post',
         headers: {
           'Content-Type': 'application/json',
@@ -165,7 +165,7 @@ export const authApi = {
         },
         withCredentials: true
       });
-      const response = await api.post('/auth/register/business', data);
+      const response = await api.post('/api/auth/register/business', data);
       console.log('Business registration response:', response.data);
       return response.data;
     } catch (error) {
