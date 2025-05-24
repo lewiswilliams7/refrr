@@ -14,7 +14,7 @@ const api = axios.create({
   withCredentials: true
 });
 
-// Add request interceptor to add auth token and ensure baseURL
+// Add request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -22,13 +22,16 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Ensure baseURL is used
-    if (config.baseURL && !config.url?.startsWith('http')) {
+    // Force the baseURL to be used
+    if (config.baseURL) {
       // Remove any leading slashes from the URL
       const cleanUrl = config.url?.replace(/^\/+/, '');
       // Remove any trailing slashes from the baseURL
       const cleanBaseUrl = config.baseURL.replace(/\/+$/, '');
+      // Set the full URL
       config.url = `${cleanBaseUrl}/${cleanUrl}`;
+      // Clear the baseURL to prevent double prefixing
+      config.baseURL = '';
     }
 
     return config;
