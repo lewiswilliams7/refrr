@@ -77,8 +77,8 @@ export default function CampaignDetails() {
     
     try {
       const response = await axios.post(
-        `${config.apiUrl}/api/referrals/generate/${campaign.id}`,
-        {},
+        `${config.apiUrl}/api/referral/generate/${campaign.id}`,
+        { referrerEmail: userEmail },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`

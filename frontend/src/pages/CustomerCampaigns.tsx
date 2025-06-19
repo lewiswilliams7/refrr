@@ -124,7 +124,7 @@ export default function CustomerCampaigns() {
 
         // Try to fetch analytics, but don't fail if it's not available
         try {
-          const analyticsRes = await axios.get(`${config.apiUrl}/api/campaign/analytics`);
+          const analyticsRes = await axios.get(`${config.apiUrl}/api/customer/analytics`);
           console.log('Analytics response:', analyticsRes.data);
           setAnalytics(analyticsRes.data);
         } catch (analyticsError) {
@@ -169,7 +169,7 @@ export default function CustomerCampaigns() {
       }
 
       const response = await axios.post(
-        `${config.apiUrl}/api/referrals/generate/${campaignId}`,
+        `${config.apiUrl}/api/referral/generate/${campaignId}`,
         { referrerEmail: userEmail },
         {
           headers: {
