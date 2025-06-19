@@ -70,7 +70,7 @@ app.use('/api/business', businessRoutes);
 app.use('/api/campaign', campaignRoutes);
 app.use('/api/customer', customerRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/referral', referralRoutes);
+app.use('/api/referrals', referralRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
@@ -90,7 +90,7 @@ app.use((req, res) => {
       campaign: '/api/campaign',
       customer: '/api/customer',
       dashboard: '/api/dashboard',
-      referral: '/api/referral'
+      referral: '/api/referrals'
     }
   });
 });
