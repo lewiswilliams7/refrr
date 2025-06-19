@@ -46,10 +46,12 @@ import Logo from '../components/common/Logo';
 
 interface Campaign {
   id: string;
-  name: string;
+  title: string;
   description: string;
   businessName: string;
-  reward: string;
+  rewardType: 'percentage' | 'fixed';
+  rewardValue: number;
+  rewardDescription: string;
   status: string;
   location: {
     address: string;
@@ -57,9 +59,12 @@ interface Campaign {
     postcode: string;
   } | string;
   businessType: string;
-  rewardType: 'percentage' | 'fixed';
-  rewardValue: number;
   tags?: string[];
+  startDate?: string;
+  endDate?: string;
+  showRewardDisclaimer?: boolean;
+  rewardDisclaimerText?: string;
+  maxReferrals?: number;
 }
 
 interface Analytics {
@@ -230,7 +235,7 @@ export default function CustomerCampaigns() {
 
   const filteredCampaigns = campaigns.filter(campaign => {
     const matchesSearch = 
-      (campaign.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (campaign.title?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
       (campaign.businessName?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     const matchesType = !filters.businessType || campaign.businessType === filters.businessType;
     
@@ -257,7 +262,7 @@ export default function CustomerCampaigns() {
       case 'businessName':
         return a.businessName.localeCompare(b.businessName);
       default:
-        return a.name.localeCompare(b.name);
+        return a.title.localeCompare(b.title);
     }
   });
 
@@ -477,7 +482,7 @@ export default function CustomerCampaigns() {
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
-                  {campaign.name}
+                  {campaign.title}
                 </Typography>
                 <Typography color="textSecondary" paragraph>
                   {campaign.description}
@@ -486,12 +491,31 @@ export default function CustomerCampaigns() {
                   Business: {campaign.businessName}
                 </Typography>
                 <Typography variant="subtitle1" gutterBottom>
-                  Reward: {campaign.reward}
+                  Business Type: {campaign.businessType}
+                </Typography>
+                <Typography variant="subtitle1" gutterBottom>
+                  Reward: {campaign.rewardValue}{campaign.rewardType === 'percentage' ? '%' : ' points'} - {campaign.rewardDescription}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
                   <LocationIcon fontSize="small" sx={{ mr: 1 }} />
                   {formatLocation(campaign.location)}
                 </Typography>
+                {campaign.startDate && campaign.endDate && (
+                  <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                    <AccessTimeIcon fontSize="small" sx={{ mr: 1 }} />
+                    {new Date(campaign.startDate).toLocaleDateString()} - {new Date(campaign.endDate).toLocaleDateString()}
+                  </Typography>
+                )}
+                {campaign.maxReferrals && (
+                  <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                    Max Referrals: {campaign.maxReferrals}
+                  </Typography>
+                )}
+                {campaign.showRewardDisclaimer && campaign.rewardDisclaimerText && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1, fontStyle: 'italic' }}>
+                    {campaign.rewardDisclaimerText}
+                  </Typography>
+                )}
                 {campaign.tags && campaign.tags.length > 0 && (
                   <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
                     {campaign.tags.map((tag, index) => (

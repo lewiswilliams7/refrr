@@ -26,10 +26,12 @@ import config from '../config';
 
 interface Campaign {
   id: string;
-  name: string;
+  title: string;
   description: string;
   businessName: string;
-  reward: string;
+  rewardType: 'percentage' | 'fixed';
+  rewardValue: number;
+  rewardDescription: string;
   status: string;
   location: {
     address: string;
@@ -37,13 +39,12 @@ interface Campaign {
     postcode: string;
   } | string;
   businessType: string;
-  rewardType: 'percentage' | 'fixed';
-  rewardValue: number;
   tags?: string[];
   startDate?: string;
   endDate?: string;
-  terms?: string;
-  requirements?: string[];
+  showRewardDisclaimer?: boolean;
+  rewardDisclaimerText?: string;
+  maxReferrals?: number;
 }
 
 export default function CampaignDetails() {
@@ -76,6 +77,12 @@ export default function CampaignDetails() {
     if (!campaign) return;
     
     try {
+      const userEmail = localStorage.getItem('userEmail');
+      if (!userEmail) {
+        alert('Please log in to generate a referral link');
+        return;
+      }
+
       const response = await axios.post(
         `${config.apiUrl}/api/referral/generate/${campaign.id}`,
         { referrerEmail: userEmail },
@@ -154,7 +161,7 @@ export default function CampaignDetails() {
       <Card>
         <CardContent>
           <Typography variant="h4" gutterBottom>
-            {campaign.name}
+            {campaign.title}
           </Typography>
           
           <Typography variant="h6" color="primary" gutterBottom>
@@ -171,7 +178,7 @@ export default function CampaignDetails() {
                 Reward
               </Typography>
               <Typography variant="h5" color="primary">
-                {campaign.reward}
+                {campaign.rewardDescription}
               </Typography>
             </Grid>
 
@@ -220,29 +227,14 @@ export default function CampaignDetails() {
             </Box>
           )}
 
-          {campaign.terms && (
+          {campaign.showRewardDisclaimer && (
             <Box sx={{ mt: 3 }}>
               <Typography variant="subtitle1" gutterBottom>
-                Terms & Conditions
+                Reward Disclaimer
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {campaign.terms}
+                {campaign.rewardDisclaimerText}
               </Typography>
-            </Box>
-          )}
-
-          {campaign.requirements && campaign.requirements.length > 0 && (
-            <Box sx={{ mt: 3 }}>
-              <Typography variant="subtitle1" gutterBottom>
-                Requirements
-              </Typography>
-              <Stack spacing={1}>
-                {campaign.requirements.map((requirement, index) => (
-                  <Typography key={index} variant="body2" color="text.secondary">
-                    • {requirement}
-                  </Typography>
-                ))}
-              </Stack>
             </Box>
           )}
 
