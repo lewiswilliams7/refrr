@@ -368,7 +368,7 @@ export const referralController = {
         await sendEmail({
           to: referrerEmail,
           subject: 'Your Referral Link',
-          text: `Here's your referral link: ${frontendUrl}/#/refer/${code}`
+          text: `Here's your referral link: ${frontendUrl}/referral/${code}`
         });
       } catch (emailError) {
         console.error('Error sending referral email:', emailError);
@@ -377,7 +377,7 @@ export const referralController = {
       const frontendUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://refrr-frontend.onrender.com');
       res.status(201).json({
         code,
-        referralLink: `${frontendUrl}/#/refer/${code}`
+        referralLink: `${frontendUrl}/referral/${code}`
       });
     } catch (error) {
       console.error('Error generating referral link:', error);
