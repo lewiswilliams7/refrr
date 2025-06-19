@@ -23,9 +23,8 @@ export interface ICampaign extends Document {
     rewardRedemptions: number;
     conversionRate: number;
   };
-  expirationDate?: Schema.Types.Date;
   startDate: Schema.Types.Date;
-  endDate: Schema.Types.Date;
+  endDate?: Schema.Types.Date;
   createdAt: Schema.Types.Date;
   updatedAt: Schema.Types.Date;
 }
@@ -51,9 +50,8 @@ const campaignSchema = new Schema<ICampaign>(
       rewardRedemptions: { type: Number, default: 0 },
       conversionRate: { type: Number, default: 0 }
     },
-    expirationDate: { type: Schema.Types.Date },
     startDate: { type: Schema.Types.Date, required: true },
-    endDate: { type: Schema.Types.Date, required: true }
+    endDate: { type: Schema.Types.Date, required: false }
   },
   { timestamps: true }
 );
