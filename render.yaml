@@ -27,8 +27,6 @@ services:
         value: "true"
       - key: REACT_APP_BASE_URL
         value: "."
-      - key: REACT_APP_USE_HASH_ROUTER
-        value: "true"
       - key: REACT_APP_DISABLE_STRICT_MODE
         value: "true"
       - key: BACKEND_URL
