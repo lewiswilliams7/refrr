@@ -54,22 +54,55 @@ export default function ReferralLanding() {
   const [success, setSuccess] = useState(false);
   const [campaignDetails, setCampaignDetails] = useState<CampaignDetails | null>(null);
 
+  console.log('ReferralLanding component state:', {
+    code,
+    loading,
+    error,
+    success,
+    hasCampaignDetails: !!campaignDetails
+  });
+
   const fetchReferralDetails = useCallback(async () => {
     if (!code) {
+      console.log('No referral code provided');
       setError('Invalid referral code');
       setLoading(false);
       return;
     }
 
+    console.log('Fetching referral details for code:', code);
+    console.log('API URL:', config.apiUrl);
+
     try {
       setLoading(true);
       setError('');
-      const response = await axios.get(`${config.apiUrl}/api/referrals/code/${code}`);
+      const url = `${config.apiUrl}/api/referrals/code/${code}`;
+      console.log('Making API call to:', url);
+      
+      const response = await axios.get(url);
+      console.log('API response:', response.data);
+      
       const referral = response.data;
       
       if (!referral || !referral.campaignId) {
+        console.error('Invalid referral data:', referral);
         throw new Error('Invalid referral data received');
       }
+
+      console.log('Setting campaign details:', {
+        title: referral.campaignId.title,
+        description: referral.campaignId.description || '',
+        rewardType: referral.campaignId.rewardType,
+        rewardValue: referral.campaignId.rewardValue,
+        rewardDescription: referral.campaignId.rewardDescription || '',
+        businessName: referral.businessId?.businessName || 'Unknown Business',
+        businessType: referral.businessId?.businessType || 'Unknown Type',
+        location: {
+          address: referral.businessId?.location?.address || '',
+          city: referral.businessId?.location?.city || '',
+          postcode: referral.businessId?.location?.postcode || ''
+        }
+      });
 
       setCampaignDetails({
         title: referral.campaignId.title,
@@ -87,6 +120,8 @@ export default function ReferralLanding() {
       });
     } catch (err: any) {
       console.error('Error fetching referral:', err);
+      console.error('Error response:', err.response);
+      console.error('Error message:', err.message);
       setError(err.response?.data?.message || 'Invalid or expired referral link');
       // Don't navigate away, just show the error
     } finally {
