@@ -57,7 +57,7 @@ export default function CampaignDetails() {
     const fetchCampaign = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get(`${config.apiUrl}/api/campaigns/public/${id}`);
+        const response = await axios.get(`${config.apiUrl}/api/campaign/public/${id}`);
         setCampaign(response.data);
       } catch (err: any) {
         console.error('Error fetching campaign:', err);

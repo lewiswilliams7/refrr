@@ -95,7 +95,7 @@ const Home: React.FC = () => {
       }
       
       // Fetch campaigns
-      const campaignsRes = await axios.get(`${config.apiUrl}/api/campaigns/public`);
+      const campaignsRes = await axios.get(`${config.apiUrl}/api/campaign/public`);
       setCampaigns(campaignsRes.data);
     } catch (err: any) {
       console.error('Error fetching data:', err);

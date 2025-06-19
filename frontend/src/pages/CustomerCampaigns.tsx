@@ -117,7 +117,7 @@ export default function CustomerCampaigns() {
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
         console.log('Fetching campaigns...');
-        const campaignsRes = await axios.get(`${config.apiUrl}/api/campaigns/public`);
+        const campaignsRes = await axios.get(`${config.apiUrl}/api/campaign/public`);
         console.log('Campaigns response:', campaignsRes.data);
         setCampaigns(campaignsRes.data);
 
