@@ -123,7 +123,7 @@ export default function CustomerCampaigns() {
 
         // Try to fetch analytics, but don't fail if it's not available
         try {
-          const analyticsRes = await axios.get(`${config.apiUrl}/api/campaigns/analytics`);
+          const analyticsRes = await axios.get(`${config.apiUrl}/api/campaign/analytics`);
           console.log('Analytics response:', analyticsRes.data);
           setAnalytics(analyticsRes.data);
         } catch (analyticsError) {

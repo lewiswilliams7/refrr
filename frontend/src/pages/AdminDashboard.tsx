@@ -99,7 +99,7 @@ export default function AdminDashboard() {
         axios.get(`${config.apiUrl}/api/users`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get(`${config.apiUrl}/api/campaigns`, {
+        axios.get(`${config.apiUrl}/api/campaign`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
         axios.get(`${config.apiUrl}/api/referrals`, {
