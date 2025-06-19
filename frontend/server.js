@@ -42,20 +42,33 @@ try {
   console.error('Error reading build directory:', error);
 }
 
-// Serve static files with explicit MIME types
+// Serve static files with explicit MIME types and caching headers
 app.use(express.static(buildPath, {
+  maxAge: '1y',
+  etag: true,
+  lastModified: true,
   setHeaders: (res, filePath) => {
     console.log('Serving static file:', filePath);
+    
+    // Set explicit content types
     if (filePath.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
+      res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
       console.log('Set JS content type for:', filePath);
     } else if (filePath.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
+      res.setHeader('Content-Type', 'text/css; charset=utf-8');
       console.log('Set CSS content type for:', filePath);
     } else if (filePath.endsWith('.json')) {
-      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
       console.log('Set JSON content type for:', filePath);
+    } else if (filePath.endsWith('.html')) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      console.log('Set HTML content type for:', filePath);
     }
+    
+    // Set CORS headers for all static files
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   }
 }));
 
@@ -66,7 +79,8 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     port: process.env.PORT || 3000,
     buildPath: buildPath,
-    buildExists: fs.existsSync(buildPath)
+    buildExists: fs.existsSync(buildPath),
+    nodeEnv: process.env.NODE_ENV
   });
 });
 
@@ -76,39 +90,32 @@ app.get('*', (req, res) => {
   const indexPath = path.join(buildPath, 'index.html');
   console.log('Index file path:', indexPath);
   console.log('Index file exists:', fs.existsSync(indexPath));
+  
+  if (!fs.existsSync(indexPath)) {
+    console.error('Index.html not found!');
+    res.status(404).send('Index.html not found');
+    return;
+  }
+  
   res.sendFile(indexPath);
 });
 
 // Enhanced port handling
 const port = parseInt(process.env.PORT || '3000', 10);
 console.log(`Attempting to start server on port ${port}`);
-console.log('Process environment:', process.env);
 
 // Start the server with enhanced error handling
 const server = app.listen(port, '0.0.0.0', () => {
   const address = server.address();
   console.log(`Server is running and bound to ${address.address}:${address.port}`);
-  console.log('Server address details:', {
-    address: address.address,
-    port: address.port,
-    family: address.family
-  });
-  
-  // Log that we're ready to accept connections
   console.log('Server is ready to accept connections');
 });
 
 // Handle server errors with more detailed logging
 server.on('error', (error) => {
   console.error('Server error:', error);
-  console.error('Error details:', {
-    code: error.code,
-    message: error.message,
-    stack: error.stack
-  });
   if (error.code === 'EADDRINUSE') {
     console.error(`Port ${port} is already in use`);
-    console.error('Current process:', process.pid);
     process.exit(1);
   }
 });

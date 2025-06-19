@@ -20,13 +20,13 @@ services:
       - key: TSC_COMPILE_ON_ERROR
         value: "true"
       - key: PUBLIC_URL
-        value: "."
+        value: "/"
       - key: BROWSER
         value: "none"
       - key: SKIP_PREFLIGHT_CHECK
         value: "true"
       - key: REACT_APP_BASE_URL
-        value: "."
+        value: "/"
       - key: REACT_APP_DISABLE_STRICT_MODE
         value: "true"
       - key: BACKEND_URL
