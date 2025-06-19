@@ -58,16 +58,14 @@ const corsOptions = {
     'Origin',
     'Access-Control-Allow-Origin',
     'Access-Control-Allow-Methods',
-    'Access-Control-Allow-Headers',
-    'Access-Control-Allow-Credentials'
+    'Access-Control-Allow-Headers'
   ],
   exposedHeaders: [
     'Access-Control-Allow-Origin',
     'Access-Control-Allow-Methods',
-    'Access-Control-Allow-Headers',
-    'Access-Control-Allow-Credentials'
+    'Access-Control-Allow-Headers'
   ],
-  credentials: true,
+  credentials: false,
   maxAge: 86400, // 24 hours
   preflightContinue: false,
   optionsSuccessStatus: 204
@@ -100,7 +98,6 @@ export const setupSecurity = (app: Express) => {
     const origin = req.headers.origin;
     if (origin && corsOptions.origin(origin, (err, allow) => allow)) {
       res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
     }
