@@ -40,7 +40,7 @@ export default function ReferralShare({ campaignId }: Props) {
       }
 
       const response = await axios.post(
-        `${config.apiUrl}/api/referral/generate/${campaignId}`,
+        `${config.apiUrl}/api/referrals/generate/${campaignId}`,
         { referrerEmail: email },
         {
           headers: {

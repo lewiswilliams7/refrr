@@ -84,7 +84,7 @@ export default function CampaignDetails() {
       }
 
       const response = await axios.post(
-        `${config.apiUrl}/api/referral/generate/${campaign.id}`,
+        `${config.apiUrl}/api/referrals/generate/${campaign.id}`,
         { referrerEmail: userEmail },
         {
           headers: {

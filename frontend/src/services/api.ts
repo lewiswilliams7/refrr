@@ -325,7 +325,7 @@ export const campaignApi = {
     });
 
     try {
-      const response = await api.post(`/api/referral/generate/${campaignId}`, {
+      const response = await api.post(`/api/referrals/generate/${campaignId}`, {
         referrerEmail: data.referrerEmail
       }, {
         headers: {
