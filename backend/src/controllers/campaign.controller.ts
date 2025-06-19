@@ -256,7 +256,7 @@ export const campaignController = {
         status: campaign.status,
         tags: campaign.tags,
         referralCount: campaign.analytics?.totalReferrals,
-        expirationDate: campaign.expirationDate,
+        endDate: campaign.endDate,
         popularity: campaign.analytics?.conversionRate
       };
 
@@ -302,7 +302,7 @@ export const campaignController = {
           status: campaign.status,
           tags: campaign.tags,
           referralCount: campaign.analytics?.totalReferrals,
-          expirationDate: campaign.expirationDate,
+          endDate: campaign.endDate,
           popularity: campaign.analytics?.conversionRate
         };
       });
