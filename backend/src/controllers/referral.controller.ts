@@ -17,7 +17,7 @@ interface ReferralDocument extends IReferral {
   campaignId: Types.ObjectId;
   referrerEmail: string;
   code: string;
-  referredEmail?: string;
+  referredEmail: string;
   status: 'pending' | 'approved' | 'rejected';
   trackingData?: {
     lastViewed: Date;
