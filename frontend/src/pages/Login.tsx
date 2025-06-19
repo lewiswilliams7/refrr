@@ -77,8 +77,8 @@ const Login: React.FC = () => {
 
     try {
       const userType = tabValue === 0 ? 'business' : 'customer';
-      await login(email, password, userType);
-      navigate(userType === 'business' ? '/dashboard' : '/customer/campaigns');
+      const user = await login(email, password, userType);
+      navigate(user.role === 'business' ? '/dashboard' : '/customer/campaigns');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to login. Please check your credentials.');
     } finally {

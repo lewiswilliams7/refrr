@@ -36,6 +36,7 @@ import {
   TrendingUp as TrendingUpIcon,
   AccessTime as AccessTimeIcon,
   LocationOn as LocationIcon,
+  Add as AddIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -312,6 +313,25 @@ export default function CustomerCampaigns() {
       <Typography variant="h4" component="h1" gutterBottom>
         Available Campaigns
       </Typography>
+
+      {/* Show Create Campaign button for business users */}
+      {user?.role === 'business' && (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => navigate('/campaigns')}
+            sx={{ 
+              backgroundColor: 'primary.main',
+              '&:hover': {
+                backgroundColor: 'primary.dark',
+              }
+            }}
+          >
+            Create Campaign
+          </Button>
+        </Box>
+      )}
 
       {analytics && (
         <Grid container spacing={3} sx={{ mb: 4 }}>
