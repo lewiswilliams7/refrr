@@ -1,28 +1,31 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
 
 export interface IReferral {
+  businessId: Types.ObjectId;
   campaignId: Types.ObjectId;
-  referrerId: Types.ObjectId;
   referrerEmail: string;
+  code: string;
   referredEmail: string;
   referredName?: string;
   referredPhone?: string;
   status: 'pending' | 'completed' | 'expired';
-  lastViewed: Schema.Types.Date;
-  rewardClaimed: boolean;
+  trackingData?: {
+    lastViewed: Date;
+    viewCount: number;
+  };
   createdAt: Schema.Types.Date;
   updatedAt: Schema.Types.Date;
 }
 
 const referralSchema = new Schema<IReferral>({
+  businessId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Business',
+    required: true
+  },
   campaignId: {
     type: Schema.Types.ObjectId,
     ref: 'Campaign',
-    required: true
-  },
-  referrerId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
     required: true
   },
   referrerEmail: {
@@ -31,9 +34,14 @@ const referralSchema = new Schema<IReferral>({
     trim: true,
     lowercase: true
   },
-  referredEmail: {
+  code: {
     type: String,
     required: true,
+    unique: true,
+    trim: true
+  },
+  referredEmail: {
+    type: String,
     trim: true,
     lowercase: true
   },
@@ -50,10 +58,9 @@ const referralSchema = new Schema<IReferral>({
     enum: ['pending', 'completed', 'expired'],
     default: 'pending'
   },
-  lastViewed: { type: Schema.Types.Date, default: Date.now },
-  rewardClaimed: {
-    type: Boolean,
-    default: false
+  trackingData: {
+    lastViewed: { type: Date, default: Date.now },
+    viewCount: { type: Number, default: 0 }
   }
 }, { timestamps: true });
 
