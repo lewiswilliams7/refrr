@@ -18,7 +18,7 @@ interface ReferralDocument extends IReferral {
   referrerEmail: string;
   code: string;
   referredEmail: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'completed' | 'expired';
   trackingData?: {
     lastViewed: Date;
     viewCount: number;
@@ -149,7 +149,7 @@ export const referralController = {
       }
 
       const { status } = req.body;
-      if (!['pending', 'approved', 'rejected'].includes(status)) {
+      if (!['pending', 'completed', 'expired'].includes(status)) {
         res.status(400).json({ message: 'Invalid status' });
         return;
       }
@@ -278,7 +278,7 @@ export const referralController = {
       }
 
       referral.referredEmail = referredEmail;
-      referral.status = 'approved';
+      referral.status = 'completed';
       await referral.save();
 
       // Send completion notifications
@@ -287,13 +287,13 @@ export const referralController = {
         await sendEmail({
           to: referral.referrerEmail,
           subject: 'Referral Completed',
-          text: `Your referral has been completed by ${referredEmail}. You can view the status in your dashboard.`
+          text: 'Your referral has been completed!'
         });
 
         await sendEmail({
           to: referredEmail,
           subject: 'Welcome to Our Platform',
-          text: `Thank you for completing the referral process. You can now enjoy the benefits of our platform.`
+          text: 'Your referral has been completed. Welcome aboard!'
         });
       } catch (emailError) {
         console.error('Error sending completion emails:', emailError);
@@ -457,22 +457,22 @@ export const referralController = {
       }
 
       // Update referral status
-      referral.status = 'approved';
+      referral.status = 'completed';
       await referral.save();
 
       // Send email notifications
       try {
         await sendEmail({
           to: referral.referrerEmail,
-          subject: 'Referral Approved',
-          text: 'Your referral has been approved!'
+          subject: 'Referral Completed',
+          text: 'Your referral has been completed!'
         });
 
         if (referral.referredEmail) {
           await sendEmail({
             to: referral.referredEmail,
             subject: 'Welcome to Our Platform',
-            text: 'Your referral has been approved. Welcome aboard!'
+            text: 'Your referral has been completed. Welcome aboard!'
           });
         }
       } catch (emailError) {
@@ -519,15 +519,15 @@ export const referralController = {
       }
 
       // Update referral status
-      referral.status = 'rejected';
+      referral.status = 'expired';
       await referral.save();
 
       // Send email notification
       try {
         await sendEmail({
           to: referral.referrerEmail,
-          subject: 'Referral Status Update',
-          text: 'Unfortunately, your referral has been rejected.'
+          subject: 'Referral Expired',
+          text: 'Unfortunately, your referral has expired.'
         });
       } catch (emailError) {
         console.error('Error sending rejection email:', emailError);
