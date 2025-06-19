@@ -18,7 +18,6 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   },
-  withCredentials: true,
   validateStatus: (status) => {
     return status >= 200 && status < 500; // Accept all responses except 5xx errors
   }

@@ -183,7 +183,7 @@ export const authController = {
 
         // Generate verification token
         const verificationToken = crypto.randomBytes(32).toString('hex');
-        savedUser.resetToken = verificationToken;
+        savedUser.verificationToken = verificationToken;
         await savedUser.save({ session });
         console.log('Verification token generated:', verificationToken);
 
@@ -282,12 +282,13 @@ export const authController = {
         firstName,
         lastName,
         role: 'customer', // Explicitly set role as customer
-        isVerified: false // Explicitly set as unverified
+        isVerified: false, // Explicitly set as unverified
+        verificationToken: crypto.randomBytes(32).toString('hex')
       });
 
       // Generate verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
-      user.resetToken = verificationToken;
+      user.verificationToken = verificationToken;
       await user.save();
       console.log('Customer user saved:', user);
 
