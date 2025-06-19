@@ -10,6 +10,19 @@ export default function CampaignPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const navigate = useNavigate();
 
+  const handleSubmit = async (data: any) => {
+    try {
+      console.log('Creating campaign with data:', data);
+      await campaignApi.create(data);
+      console.log('Campaign created successfully');
+      setIsFormOpen(false);
+      // The CampaignList component will automatically refresh
+    } catch (error) {
+      console.error('Error creating campaign:', error);
+      // You might want to show an error message to the user here
+    }
+  };
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -43,10 +56,7 @@ export default function CampaignPage() {
       <CampaignForm
         open={isFormOpen}
         onClose={() => setIsFormOpen(false)}
-        onSubmit={() => {
-          setIsFormOpen(false);
-          // The CampaignList component will automatically refresh
-        }}
+        onSubmit={handleSubmit}
       />
     </Container>
   );

@@ -32,7 +32,6 @@ export default function CampaignForm({ open, onClose, campaign, onSubmit }: Prop
   const [rewardDisclaimerText, setRewardDisclaimerText] = useState(campaign?.rewardDisclaimerText || '');
   const [startDate, setStartDate] = useState(campaign?.startDate ? new Date(campaign.startDate).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16));
   const [endDate, setEndDate] = useState(campaign?.endDate ? new Date(campaign.endDate).toISOString().slice(0, 16) : '');
-  const [expirationDate, setExpirationDate] = useState(campaign?.expirationDate ? new Date(campaign.expirationDate).toISOString().slice(0, 16) : '');
   const [maxReferrals, setMaxReferrals] = useState(campaign?.maxReferrals || '');
   const [tags, setTags] = useState(campaign?.tags?.join(', ') || '');
 
@@ -47,8 +46,7 @@ export default function CampaignForm({ open, onClose, campaign, onSubmit }: Prop
       showRewardDisclaimer,
       rewardDisclaimerText,
       startDate: new Date(startDate),
-      endDate: new Date(endDate),
-      expirationDate: expirationDate ? new Date(expirationDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
       maxReferrals: maxReferrals ? Number(maxReferrals) : undefined,
       tags: tags.split(',').map((tag: string) => tag.trim()).filter(Boolean),
     });
@@ -137,21 +135,10 @@ export default function CampaignForm({ open, onClose, campaign, onSubmit }: Prop
             />
             <TextField
               fullWidth
-              label="End Date"
+              label="End Date (Optional)"
               type="datetime-local"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              required
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-            <TextField
-              fullWidth
-              label="Expiration Date (Optional)"
-              type="datetime-local"
-              value={expirationDate}
-              onChange={(e) => setExpirationDate(e.target.value)}
               InputLabelProps={{
                 shrink: true,
               }}
