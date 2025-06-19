@@ -10,7 +10,7 @@ services:
       - key: PORT
         value: "3000"
       - key: REACT_APP_API_URL
-        value: "https://refrr-backend.onrender.com"
+        value: "https://refrr.onrender.com"
       - key: GENERATE_SOURCEMAP
         value: "true"
       - key: CI
@@ -30,13 +30,13 @@ services:
       - key: REACT_APP_DISABLE_STRICT_MODE
         value: "true"
       - key: BACKEND_URL
-        value: "https://refrr-backend.onrender.com"
+        value: "https://refrr.onrender.com"
     healthCheckPath: /
     autoDeploy: true
     plan: free
 
   - type: web
-    name: refrr-backend
+    name: refrr
     env: node
     buildCommand: cd backend && npm install && npm run build
     startCommand: cd backend && NODE_ENV=production npm start

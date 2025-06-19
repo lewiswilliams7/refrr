@@ -13,7 +13,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 const config: Config = {
   apiUrl: isDevelopment 
     ? 'http://localhost:5000' 
-    : 'https://refrr-backend.onrender.com', // Point to the backend service
+    : 'https://refrr.onrender.com', // Point to the backend service
   environment: isDevelopment ? 'development' : 'production',
   isDevelopment,
 };
@@ -25,7 +25,7 @@ console.log('API Configuration:', {
   isDevelopment,
   nodeEnv: process.env.NODE_ENV,
   fullUrl: `${config.apiUrl}/auth/register/business`, // Log a sample URL
-  windowLocation: window.location.href, // Log the current URL
+  windowLocation: window.location.href, // Log the origin
   windowOrigin: window.location.origin, // Log the origin
 });
 
