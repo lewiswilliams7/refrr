@@ -35,10 +35,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(response => {
-          setUser(response.data);
+          const user = response.data;
+          localStorage.setItem('userEmail', user.email);
+          setUser(user);
         })
         .catch(() => {
           localStorage.removeItem('token');
+          localStorage.removeItem('userEmail');
           setUser(null);
         })
         .finally(() => {
@@ -62,6 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const { token, user } = response.data;
       localStorage.setItem('token', token);
+      localStorage.setItem('userEmail', user.email);
       setUser(user);
       return user;
     } catch (error) {
@@ -83,6 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       const { token, user } = response.data;
       localStorage.setItem('token', token);
+      localStorage.setItem('userEmail', user.email);
       setUser(user);
       return user;
     } catch (error) {
@@ -93,11 +98,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('userEmail');
     setUser(null);
   };
 
   const setUserFromResponse = (user: User, token: string) => {
     localStorage.setItem('token', token);
+    localStorage.setItem('userEmail', user.email);
     setUser(user);
   };
 
