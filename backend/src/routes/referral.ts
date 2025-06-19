@@ -29,6 +29,12 @@ const loggerMiddleware = async (req: Request, res: Response, next: NextFunction)
 // Apply logger middleware to all routes
 router.use(loggerMiddleware);
 
+// Simple health check for referral routes
+router.get('/health', (req: Request, res: Response) => {
+  console.log('Referral routes health check');
+  res.json({ message: 'Referral routes are working', timestamp: new Date().toISOString() });
+});
+
 // Public routes
 router.get('/track/:code', asyncHandler(referralController.trackReferral));
 router.get('/code/:code', asyncHandler(referralController.getReferralByCode));

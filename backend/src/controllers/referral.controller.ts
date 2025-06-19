@@ -246,11 +246,18 @@ export const referralController = {
       console.log('=== Complete Referral Request ===');
       console.log('Params:', req.params);
       console.log('Body:', req.body);
+      console.log('Headers:', req.headers);
       
       const { code } = req.params;
       const { referredEmail, referredName, referredPhone } = req.body;
 
       console.log('Extracted data:', { code, referredEmail, referredName, referredPhone });
+
+      if (!code) {
+        console.log('Missing referral code');
+        res.status(400).json({ message: 'Referral code is required' });
+        return;
+      }
 
       if (!referredEmail || !validateEmail(referredEmail)) {
         console.log('Email validation failed:', referredEmail);
@@ -259,8 +266,24 @@ export const referralController = {
       }
 
       console.log('Looking for referral with code:', code);
+      
+      // Add database connection check
+      if (mongoose.connection.readyState !== 1) {
+        console.log('Database not connected. Ready state:', mongoose.connection.readyState);
+        res.status(500).json({ message: 'Database connection error' });
+        return;
+      }
+
       const referral = await Referral.findOne({ code });
-      console.log('Found referral:', referral);
+      console.log('Found referral:', referral ? 'Yes' : 'No');
+      if (referral) {
+        console.log('Referral details:', {
+          id: referral._id,
+          status: referral.status,
+          createdAt: referral.createdAt,
+          referrerEmail: referral.referrerEmail
+        });
+      }
       
       if (!referral) {
         console.log('Referral not found for code:', code);
@@ -338,6 +361,8 @@ export const referralController = {
       console.error('Error stack:', error?.stack);
       console.error('Error message:', error?.message);
       console.error('Error name:', error?.name);
+      console.error('Error code:', error?.code);
+      console.error('MongoDB connection state:', mongoose.connection.readyState);
       res.status(500).json({ message: 'Error completing referral' });
     }
   },
