@@ -65,6 +65,11 @@ export default function VerifyEmail() {
       const response = await authApi.verifyEmail(token);
       console.log('Verification response:', response);
       
+      // If we don't have an email locally but the response includes one, use it
+      if (!email && response.email) {
+        setEmail(response.email);
+      }
+      
       setVerificationSuccess(true);
       // Wait for 3 seconds before redirecting
       setTimeout(() => {

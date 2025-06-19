@@ -513,7 +513,10 @@ export const authController = {
       await user.save();
       console.log('User verified successfully:', user.email);
 
-      res.json({ message: 'Email verified successfully' });
+      res.json({ 
+        message: 'Email verified successfully',
+        email: user.email
+      });
     } catch (error) {
       console.error('Error verifying email:', error);
       res.status(500).json({ message: 'Error verifying email' });
