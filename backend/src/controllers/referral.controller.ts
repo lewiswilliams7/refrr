@@ -7,7 +7,7 @@ import { validateEmail } from '../utils/validators';
 import { IPopulatedReferral } from '../types/referral.types';
 import { User } from '../models/user.model';
 import { sendEmail } from '../utils/email';
-import mongoose, { Types } from 'mongoose';
+import mongoose, { Types, Schema } from 'mongoose';
 import { Business } from '../models/business.model';
 import { asyncHandler } from '../middleware/asyncHandler';
 
@@ -23,8 +23,8 @@ interface ReferralDocument extends IReferral {
     lastViewed: Date;
     viewCount: number;
   };
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Schema.Types.Date;
+  updatedAt: Schema.Types.Date;
 }
 
 export const referralController = {
