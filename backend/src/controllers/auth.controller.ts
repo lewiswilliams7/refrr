@@ -292,8 +292,12 @@ export const authController = {
       // Send verification email
       try {
         console.log('Attempting to send verification email to:', email);
-        await sendVerificationEmail(email, user.verificationToken);
-        console.log('Verification email sent successfully');
+        if (user.verificationToken) {
+          await sendVerificationEmail(email, user.verificationToken);
+          console.log('Verification email sent successfully');
+        } else {
+          console.error('No verification token found for user');
+        }
       } catch (error) {
         console.error('Error sending verification email:', error);
         // Don't fail the registration if email fails
