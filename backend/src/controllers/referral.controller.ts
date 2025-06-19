@@ -292,16 +292,24 @@ export const referralController = {
       }
 
       console.log('Updating referral with new data');
+      
+      // Update only the fields that exist in the current model
       referral.referredEmail = referredEmail;
-      referral.referredName = referredName;
-      referral.referredPhone = referredPhone;
       referral.status = 'completed';
+      
+      // Only set these fields if they exist in the model
+      if (referral.schema.paths.referredName) {
+        referral.referredName = referredName;
+      }
+      if (referral.schema.paths.referredPhone) {
+        referral.referredPhone = referredPhone;
+      }
       
       console.log('Saving referral...');
       await referral.save();
       console.log('Referral saved successfully');
 
-      // Send completion notifications
+      // Send completion notifications (optional - don't fail if email fails)
       try {
         const frontendUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://refrr-frontend.onrender.com');
         console.log('Sending completion emails...');
@@ -319,6 +327,7 @@ export const referralController = {
         console.log('Completion emails sent successfully');
       } catch (emailError) {
         console.error('Error sending completion emails:', emailError);
+        // Don't fail the request if email fails
       }
 
       console.log('Referral completion successful');
@@ -328,6 +337,7 @@ export const referralController = {
       console.error('Error details:', error);
       console.error('Error stack:', error?.stack);
       console.error('Error message:', error?.message);
+      console.error('Error name:', error?.name);
       res.status(500).json({ message: 'Error completing referral' });
     }
   },
