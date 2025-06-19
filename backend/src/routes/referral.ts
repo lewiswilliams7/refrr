@@ -47,6 +47,7 @@ router.get('/health', (req: Request, res: Response) => {
 // Public routes - NO AUTHENTICATION REQUIRED
 router.get('/track/:code', asyncHandler(referralController.trackReferral));
 router.get('/code/:code', asyncHandler(referralController.getReferralByCode));
+router.get('/test/:code', asyncHandler(referralController.testReferral));
 router.post('/complete/:code', asyncHandler(referralController.completeReferral));
 
 // Protected routes - Apply authentication middleware

@@ -241,6 +241,72 @@ export const referralController = {
     }
   },
 
+  // Test endpoint to check referral details
+  testReferral: async (req: Request, res: Response): Promise<void> => {
+    try {
+      console.log('=== Test Referral Request ===');
+      const { code } = req.params;
+      console.log('Testing referral code:', code);
+      
+      // Check database connection
+      if (mongoose.connection.readyState !== 1) {
+        console.log('Database not connected. Ready state:', mongoose.connection.readyState);
+        res.status(500).json({ 
+          message: 'Database connection error',
+          readyState: mongoose.connection.readyState
+        });
+        return;
+      }
+
+      // Try to find the referral
+      const referral = await Referral.findOne({ code });
+      console.log('Referral found:', referral ? 'Yes' : 'No');
+      
+      if (referral) {
+        console.log('Referral details:', {
+          id: referral._id,
+          code: referral.code,
+          status: referral.status,
+          createdAt: referral.createdAt,
+          referrerEmail: referral.referrerEmail,
+          referredEmail: referral.referredEmail,
+          businessId: referral.businessId,
+          campaignId: referral.campaignId
+        });
+        
+        res.json({
+          message: 'Referral found',
+          referral: {
+            id: referral._id,
+            code: referral.code,
+            status: referral.status,
+            createdAt: referral.createdAt,
+            referrerEmail: referral.referrerEmail,
+            referredEmail: referral.referredEmail,
+            businessId: referral.businessId,
+            campaignId: referral.campaignId
+          }
+        });
+      } else {
+        console.log('No referral found with code:', code);
+        res.status(404).json({ 
+          message: 'Referral not found',
+          code: code,
+          availableCodes: await Referral.distinct('code')
+        });
+      }
+    } catch (error: any) {
+      console.error('=== Error testing referral ===');
+      console.error('Error details:', error);
+      console.error('Error stack:', error?.stack);
+      console.error('Error message:', error?.message);
+      res.status(500).json({ 
+        message: 'Error testing referral',
+        error: error?.message
+      });
+    }
+  },
+
   completeReferral: async (req: Request, res: Response): Promise<void> => {
     try {
       console.log('=== Complete Referral Request ===');
