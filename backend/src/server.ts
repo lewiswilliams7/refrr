@@ -55,8 +55,23 @@ app.get('/', (req, res) => {
       campaign: '/api/campaign',
       customer: '/api/customer',
       dashboard: '/api/dashboard',
-      referral: '/api/referral',
-      health: '/api/health'
+      referral: '/api/referrals',
+      health: '/api/health',
+      referralHealth: '/api/referrals/health'
+    }
+  });
+});
+
+// Simple test route to verify server is working
+app.get('/api/test', (req, res) => {
+  console.log('Test route hit');
+  res.json({ 
+    message: 'Server is working', 
+    timestamp: new Date().toISOString(),
+    routes: {
+      mainHealth: '/api/health',
+      referralHealth: '/api/referrals/health',
+      referralComplete: '/api/referrals/complete/:code'
     }
   });
 });
