@@ -323,11 +323,11 @@ export const referralController = {
 
       console.log('Referral completion successful');
       res.json({ message: 'Referral completed successfully' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('=== Error completing referral ===');
       console.error('Error details:', error);
-      console.error('Error stack:', error.stack);
-      console.error('Error message:', error.message);
+      console.error('Error stack:', error?.stack);
+      console.error('Error message:', error?.message);
       res.status(500).json({ message: 'Error completing referral' });
     }
   },
