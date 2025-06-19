@@ -22,8 +22,18 @@ if (!require('fs').existsSync(buildPath)) {
   process.exit(1);
 }
 
-// Serve static files
-app.use(express.static(buildPath));
+// Serve static files with explicit MIME types
+app.use(express.static(buildPath, {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    } else if (path.endsWith('.json')) {
+      res.setHeader('Content-Type', 'application/json');
+    }
+  }
+}));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -36,6 +46,7 @@ app.get('/health', (req, res) => {
 
 // Handle all other routes by serving index.html
 app.get('*', (req, res) => {
+  console.log('Serving index.html for route:', req.path);
   res.sendFile(path.join(buildPath, 'index.html'));
 });
 
