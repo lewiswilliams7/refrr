@@ -183,7 +183,7 @@ export default function CustomerCampaigns() {
         }
       );
       // Copy referral link to clipboard
-      const referralLink = `${window.location.origin}/#/referral/${response.data.code}`;
+      const referralLink = `${window.location.origin}/referral/${response.data.code}`;
       await navigator.clipboard.writeText(referralLink);
       alert('Referral link copied to clipboard!');
     } catch (err: any) {

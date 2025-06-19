@@ -1,20 +1,60 @@
 const axios = require('axios');
+const readline = require('readline');
 
 // Configuration
 const API_BASE_URL = 'https://refrr.onrender.com';
-const EMAILS_TO_DELETE = [
-  // Add the email addresses you want to delete here
-  'test@example.com',
-  'user@example.com',
-  // Add more emails as needed
-];
+
+// Create readline interface
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+async function askQuestion(question) {
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      resolve(answer);
+    });
+  });
+}
 
 async function deleteUsers() {
-  console.log('Starting user deletion process...');
+  console.log('=== User Deletion Tool ===\n');
   
-  for (const email of EMAILS_TO_DELETE) {
+  const emails = [];
+  
+  while (true) {
+    const email = await askQuestion('Enter email address to delete (or "done" to finish): ');
+    
+    if (email.toLowerCase() === 'done') {
+      break;
+    }
+    
+    if (email.trim()) {
+      emails.push(email.trim());
+    }
+  }
+  
+  if (emails.length === 0) {
+    console.log('No emails provided. Exiting...');
+    rl.close();
+    return;
+  }
+  
+  console.log(`\nEmails to delete: ${emails.join(', ')}`);
+  const confirm = await askQuestion('\nAre you sure you want to delete these users? (yes/no): ');
+  
+  if (confirm.toLowerCase() !== 'yes') {
+    console.log('Deletion cancelled.');
+    rl.close();
+    return;
+  }
+  
+  console.log('\nStarting user deletion process...');
+  
+  for (const email of emails) {
     try {
-      console.log(`Attempting to delete user: ${email}`);
+      console.log(`\nAttempting to delete user: ${email}`);
       
       const response = await axios.post(`${API_BASE_URL}/api/auth/delete-user`, {
         email: email
@@ -32,7 +72,8 @@ async function deleteUsers() {
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
   
-  console.log('User deletion process completed!');
+  console.log('\nUser deletion process completed!');
+  rl.close();
 }
 
 // Run the script
