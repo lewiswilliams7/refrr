@@ -30,7 +30,6 @@ console.log('API Configuration:', {
 });
 
 // Configure axios defaults
-axios.defaults.withCredentials = true;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 // Export a function to get the config to ensure it's always fresh
