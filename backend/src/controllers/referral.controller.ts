@@ -244,7 +244,7 @@ export const referralController = {
   completeReferral: async (req: Request, res: Response): Promise<void> => {
     try {
       const { code } = req.params;
-      const { referredEmail } = req.body;
+      const { referredEmail, referredName, referredPhone } = req.body;
 
       if (!referredEmail || !validateEmail(referredEmail)) {
         res.status(400).json({ message: 'Valid referred email is required' });
@@ -278,6 +278,8 @@ export const referralController = {
       }
 
       referral.referredEmail = referredEmail;
+      referral.referredName = referredName;
+      referral.referredPhone = referredPhone;
       referral.status = 'completed';
       await referral.save();
 

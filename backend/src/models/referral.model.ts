@@ -3,7 +3,10 @@ import mongoose, { Document, Schema, Types } from 'mongoose';
 export interface IReferral {
   campaignId: Types.ObjectId;
   referrerId: Types.ObjectId;
+  referrerEmail: string;
   referredEmail: string;
+  referredName?: string;
+  referredPhone?: string;
   status: 'pending' | 'completed' | 'expired';
   lastViewed: Schema.Types.Date;
   rewardClaimed: boolean;
@@ -22,11 +25,25 @@ const referralSchema = new Schema<IReferral>({
     ref: 'User',
     required: true
   },
+  referrerEmail: {
+    type: String,
+    required: true,
+    trim: true,
+    lowercase: true
+  },
   referredEmail: {
     type: String,
     required: true,
     trim: true,
     lowercase: true
+  },
+  referredName: {
+    type: String,
+    trim: true
+  },
+  referredPhone: {
+    type: String,
+    trim: true
   },
   status: {
     type: String,
