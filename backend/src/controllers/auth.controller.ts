@@ -286,16 +286,13 @@ export const authController = {
         verificationToken: crypto.randomBytes(32).toString('hex')
       });
 
-      // Generate verification token
-      const verificationToken = crypto.randomBytes(32).toString('hex');
-      user.verificationToken = verificationToken;
       await user.save();
       console.log('Customer user saved:', user);
 
       // Send verification email
       try {
         console.log('Attempting to send verification email to:', email);
-        await sendVerificationEmail(email, verificationToken);
+        await sendVerificationEmail(email, user.verificationToken);
         console.log('Verification email sent successfully');
       } catch (error) {
         console.error('Error sending verification email:', error);
