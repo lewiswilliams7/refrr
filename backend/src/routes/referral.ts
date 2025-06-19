@@ -29,13 +29,22 @@ const loggerMiddleware = async (req: Request, res: Response, next: NextFunction)
 // Apply logger middleware to all routes
 router.use(loggerMiddleware);
 
-// Simple health check for referral routes
+// Simple health check for referral routes - NO AUTHENTICATION REQUIRED
 router.get('/health', (req: Request, res: Response) => {
-  console.log('Referral routes health check');
-  res.json({ message: 'Referral routes are working', timestamp: new Date().toISOString() });
+  console.log('Referral routes health check - no auth required');
+  res.json({ 
+    message: 'Referral routes are working', 
+    timestamp: new Date().toISOString(),
+    routes: {
+      health: 'GET /health',
+      track: 'GET /track/:code',
+      getByCode: 'GET /code/:code',
+      complete: 'POST /complete/:code'
+    }
+  });
 });
 
-// Public routes
+// Public routes - NO AUTHENTICATION REQUIRED
 router.get('/track/:code', asyncHandler(referralController.trackReferral));
 router.get('/code/:code', asyncHandler(referralController.getReferralByCode));
 router.post('/complete/:code', asyncHandler(referralController.completeReferral));
