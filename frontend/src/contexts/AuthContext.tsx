@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      api.get('/auth/me', {
+      api.get('/api/auth/me', {
         headers: { Authorization: `Bearer ${token}` }
       })
         .then(response => {
@@ -52,8 +52,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string, role?: 'business' | 'customer'): Promise<User> => {
     try {
       const endpoint = role === 'customer' 
-        ? '/auth/customer/login'
-        : '/auth/business/login';
+        ? '/api/auth/customer/login'
+        : '/api/auth/business/login';
 
       const response = await api.post(endpoint, {
         email,
@@ -73,8 +73,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (email: string, password: string, userData: any): Promise<User> => {
     try {
       const endpoint = userData.role === 'customer' 
-        ? '/auth/customer/register'
-        : '/auth/register';
+        ? '/api/auth/customer/register'
+        : '/api/auth/register';
 
       const response = await api.post(endpoint, {
         email,

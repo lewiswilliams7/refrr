@@ -89,7 +89,7 @@ const Dashboard = () => {
   const fetchDashboardStats = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/dashboard/stats');
+      const response = await api.get('/api/dashboard/stats');
       setStats(response.data);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load dashboard stats');
@@ -124,7 +124,7 @@ const Dashboard = () => {
   const handleStatusChange = async (referralId: string, newStatus: string) => {
     try {
       setLoading(true);
-      await api.patch(`/referrals/${referralId}/status`, { status: newStatus });
+      await api.patch(`/api/referrals/${referralId}/status`, { status: newStatus });
       await fetchDashboardStats();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to update referral status');
@@ -138,7 +138,7 @@ const Dashboard = () => {
       setLoading(true);
       await Promise.all(
         selectedReferrals.map(referralId =>
-          api.patch(`/referrals/${referralId}/status`, { status: newStatus })
+          api.patch(`/api/referrals/${referralId}/status`, { status: newStatus })
         )
       );
       setSelectedReferrals([]);
