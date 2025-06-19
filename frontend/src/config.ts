@@ -13,7 +13,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 const config: Config = {
   apiUrl: isDevelopment 
     ? 'http://localhost:5000' 
-    : 'https://refrr.onrender.com', // Remove /api from base URL
+    : 'https://refrr-backend.onrender.com', // Point to the backend service
   environment: isDevelopment ? 'development' : 'production',
   isDevelopment,
 };
