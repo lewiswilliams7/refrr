@@ -243,22 +243,34 @@ export const referralController = {
 
   completeReferral: async (req: Request, res: Response): Promise<void> => {
     try {
+      console.log('=== Complete Referral Request ===');
+      console.log('Params:', req.params);
+      console.log('Body:', req.body);
+      
       const { code } = req.params;
       const { referredEmail, referredName, referredPhone } = req.body;
 
+      console.log('Extracted data:', { code, referredEmail, referredName, referredPhone });
+
       if (!referredEmail || !validateEmail(referredEmail)) {
+        console.log('Email validation failed:', referredEmail);
         res.status(400).json({ message: 'Valid referred email is required' });
         return;
       }
 
+      console.log('Looking for referral with code:', code);
       const referral = await Referral.findOne({ code });
+      console.log('Found referral:', referral);
+      
       if (!referral) {
+        console.log('Referral not found for code:', code);
         res.status(404).json({ message: 'Referral not found' });
         return;
       }
 
       // Check if referral is already completed
       if (referral.status !== 'pending') {
+        console.log('Referral already completed:', referral.status);
         res.status(400).json({ message: 'This referral has already been completed' });
         return;
       }
@@ -267,25 +279,32 @@ export const referralController = {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       if (referral.createdAt < thirtyDaysAgo) {
+        console.log('Referral expired:', referral.createdAt);
         res.status(400).json({ message: 'This referral link has expired' });
         return;
       }
 
       // Prevent self-referral
       if (referredEmail.toLowerCase() === referral.referrerEmail.toLowerCase()) {
+        console.log('Self-referral detected');
         res.status(400).json({ message: 'You cannot refer yourself' });
         return;
       }
 
+      console.log('Updating referral with new data');
       referral.referredEmail = referredEmail;
       referral.referredName = referredName;
       referral.referredPhone = referredPhone;
       referral.status = 'completed';
+      
+      console.log('Saving referral...');
       await referral.save();
+      console.log('Referral saved successfully');
 
       // Send completion notifications
       try {
         const frontendUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://refrr-frontend.onrender.com');
+        console.log('Sending completion emails...');
         await sendEmail({
           to: referral.referrerEmail,
           subject: 'Referral Completed',
@@ -297,13 +316,18 @@ export const referralController = {
           subject: 'Welcome to Our Platform',
           text: 'Your referral has been completed. Welcome aboard!'
         });
+        console.log('Completion emails sent successfully');
       } catch (emailError) {
         console.error('Error sending completion emails:', emailError);
       }
 
+      console.log('Referral completion successful');
       res.json({ message: 'Referral completed successfully' });
     } catch (error) {
-      console.error('Error completing referral:', error);
+      console.error('=== Error completing referral ===');
+      console.error('Error details:', error);
+      console.error('Error stack:', error.stack);
+      console.error('Error message:', error.message);
       res.status(500).json({ message: 'Error completing referral' });
     }
   },
