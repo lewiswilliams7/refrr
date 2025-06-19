@@ -51,6 +51,8 @@ services:
         value: "false"
       - key: NPM_CONFIG_FUND
         value: "false"
+      - key: FRONTEND_URL
+        value: "https://refrr-frontend.onrender.com"
     healthCheckPath: /api/health
     autoDeploy: true
     plan: free 

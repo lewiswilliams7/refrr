@@ -283,7 +283,7 @@ export const referralController = {
 
       // Send completion notifications
       try {
-        const frontendUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://refrr.com';
+        const frontendUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://refrr-frontend.onrender.com');
         await sendEmail({
           to: referral.referrerEmail,
           subject: 'Referral Completed',
@@ -364,7 +364,7 @@ export const referralController = {
 
       // Send email to referrer with the referral link
       try {
-        const frontendUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://refrr.com';
+        const frontendUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://refrr-frontend.onrender.com');
         await sendEmail({
           to: referrerEmail,
           subject: 'Your Referral Link',
@@ -374,7 +374,7 @@ export const referralController = {
         console.error('Error sending referral email:', emailError);
       }
 
-      const frontendUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://refrr.com';
+      const frontendUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://refrr-frontend.onrender.com');
       res.status(201).json({
         code,
         referralLink: `${frontendUrl}/#/refer/${code}`
@@ -462,6 +462,7 @@ export const referralController = {
 
       // Send email notifications
       try {
+        const frontendUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://refrr-frontend.onrender.com');
         await sendEmail({
           to: referral.referrerEmail,
           subject: 'Referral Completed',
@@ -524,6 +525,7 @@ export const referralController = {
 
       // Send email notification
       try {
+        const frontendUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://refrr-frontend.onrender.com');
         await sendEmail({
           to: referral.referrerEmail,
           subject: 'Referral Expired',
