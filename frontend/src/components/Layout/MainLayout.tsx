@@ -29,11 +29,19 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
 
-  const menuItems = [
+  const businessMenuItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
     { text: 'Campaigns', icon: <Campaign />, path: '/campaigns' },
     { text: 'Referrals', icon: <People />, path: '/referrals' },
   ];
+
+  const customerMenuItems = [
+    { text: 'Dashboard', icon: <Dashboard />, path: '/customer/dashboard' },
+    { text: 'Campaigns', icon: <Campaign />, path: '/customer/campaigns' },
+    { text: 'Referrals', icon: <People />, path: '/referrals' },
+  ];
+
+  const menuItems = user?.role === 'customer' ? customerMenuItems : businessMenuItems;
 
   return (
     <Box sx={{ display: 'flex' }}>

@@ -15,6 +15,7 @@ import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 import CustomerCampaigns from './pages/CustomerCampaigns';
+import CustomerDashboard from './pages/CustomerDashboard';
 import Home from './pages/Home';
 import CampaignDetails from './pages/CampaignDetails';
 import Features from './pages/Features';
@@ -65,6 +66,11 @@ function App() {
             <Route path="/customer/campaign/:id" element={
               <RoleBasedRoute allowedRoles={['customer']}>
                 <CampaignDetails />
+              </RoleBasedRoute>
+            } />
+            <Route path="/customer/dashboard" element={
+              <RoleBasedRoute allowedRoles={['customer']}>
+                <CustomerDashboard />
               </RoleBasedRoute>
             } />
 
