@@ -54,14 +54,6 @@ export default function ReferralLanding() {
   const [success, setSuccess] = useState(false);
   const [campaignDetails, setCampaignDetails] = useState<CampaignDetails | null>(null);
 
-  console.log('ReferralLanding component state:', {
-    code,
-    loading,
-    error,
-    success,
-    hasCampaignDetails: !!campaignDetails
-  });
-
   const fetchReferralDetails = useCallback(async () => {
     if (!code) {
       console.log('No referral code provided');
