@@ -8,6 +8,9 @@ const router = Router();
 // Protected routes
 router.use(authenticate);
 
+// Customer dashboard
+router.get('/dashboard', asyncHandler(customerController.getDashboard));
+
 // Customer profile routes
 router.get('/profile', asyncHandler(customerController.getProfile));
 router.put('/profile', asyncHandler(customerController.updateProfile));

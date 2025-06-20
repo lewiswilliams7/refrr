@@ -21,6 +21,62 @@ interface IReferral {
 interface ReferralDocument extends IReferral, Document {}
 
 export const customerController = {
+  getDashboard: async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      if (!req.user?.userId) {
+        res.status(400).json({ message: 'User ID is required' });
+        return;
+      }
+
+      const user = await User.findById(req.user.userId);
+      if (!user) {
+        res.status(404).json({ message: 'User not found' });
+        return;
+      }
+
+      // Get all referrals for this customer (as referrer)
+      const referrals = await Referral.find({ referrerEmail: user.email })
+        .populate('campaignId', 'title rewardType rewardValue')
+        .populate('businessId', 'businessName')
+        .sort({ createdAt: -1 })
+        .limit(10);
+
+      // Get available campaigns count
+      const availableCampaigns = await Campaign.countDocuments({ status: 'active' });
+
+      // Calculate stats
+      const totalReferrals = referrals.length;
+      const completedReferrals = referrals.filter(ref => ref.status === 'completed').length;
+      const pendingReferrals = referrals.filter(ref => ref.status === 'pending').length;
+
+      // Format recent referrals
+      const recentReferrals = referrals.map(referral => ({
+        _id: referral._id,
+        campaignId: {
+          title: referral.campaignId.title,
+          rewardType: referral.campaignId.rewardType,
+          rewardValue: referral.campaignId.rewardValue,
+          businessName: referral.businessId?.businessName || 'Unknown Business'
+        },
+        status: referral.status,
+        createdAt: referral.createdAt
+      }));
+
+      const dashboardStats = {
+        totalReferrals,
+        completedReferrals,
+        pendingReferrals,
+        availableCampaigns,
+        recentReferrals
+      };
+
+      res.json(dashboardStats);
+    } catch (error) {
+      console.error('Error getting customer dashboard:', error);
+      res.status(500).json({ message: 'Error getting dashboard stats' });
+    }
+  },
+
   getAnalytics: async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       if (!req.user?.userId) {
