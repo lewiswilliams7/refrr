@@ -17,12 +17,28 @@ import {
   ListItemText,
   ListItemAvatar,
   Divider,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Tooltip,
+  IconButton,
+  Collapse,
 } from '@mui/material';
 import {
   Campaign as CampaignIcon,
   People as PeopleIcon,
   TrendingUp as TrendingUpIcon,
   Star as StarIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
+  LocationOn as LocationIcon,
+  Email as EmailIcon,
+  Phone as PhoneIcon,
+  Person as PersonIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -32,17 +48,68 @@ interface CustomerStats {
   totalReferrals: number;
   completedReferrals: number;
   pendingReferrals: number;
+  expiredReferrals: number;
   availableCampaigns: number;
+  referralStats: {
+    total: number;
+    completed: number;
+    pending: number;
+    expired: number;
+    completionRate: number;
+  };
   recentReferrals: Array<{
     _id: string;
+    code: string;
     campaignId: {
       title: string;
       rewardType: string;
       rewardValue: number;
+      rewardDescription: string;
       businessName: string;
+      businessType: string;
+      location: {
+        address?: string;
+        city?: string;
+        postcode?: string;
+      };
     };
+    referredEmail: string;
+    referredName: string;
+    referredPhone: string;
     status: string;
     createdAt: string;
+    updatedAt: string;
+    trackingData?: {
+      lastViewed: string;
+      viewCount: number;
+    };
+  }>;
+  allReferrals: Array<{
+    _id: string;
+    code: string;
+    campaignId: {
+      title: string;
+      rewardType: string;
+      rewardValue: number;
+      rewardDescription: string;
+      businessName: string;
+      businessType: string;
+      location: {
+        address?: string;
+        city?: string;
+        postcode?: string;
+      };
+    };
+    referredEmail: string;
+    referredName: string;
+    referredPhone: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+    trackingData?: {
+      lastViewed: string;
+      viewCount: number;
+    };
   }>;
 }
 
@@ -50,6 +117,9 @@ const CustomerDashboard = () => {
   const [stats, setStats] = useState<CustomerStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showDetailedTable, setShowDetailedTable] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -93,6 +163,25 @@ const CustomerDashboard = () => {
       default:
         return status;
     }
+  };
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   if (loading) {
@@ -204,8 +293,29 @@ const CustomerDashboard = () => {
         </Grid>
       </Grid>
 
-      {/* Quick Actions */}
+      {/* Completion Rate Card */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Completion Rate
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h3" color="primary" sx={{ mr: 2 }}>
+                  {stats?.referralStats.completionRate || 0}%
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  of your referrals have been completed
+                </Typography>
+              </Box>
+              <Typography variant="body2" color="textSecondary">
+                {stats?.completedReferrals || 0} out of {stats?.totalReferrals || 0} referrals completed
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
         <Grid item xs={12} md={6}>
           <Card>
             <CardContent>
@@ -225,29 +335,145 @@ const CustomerDashboard = () => {
                   startIcon={<PeopleIcon />}
                   onClick={() => navigate('/referrals')}
                 >
-                  View Referrals
+                  View All Referrals
                 </Button>
               </Box>
             </CardContent>
           </Card>
         </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Your Activity
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                You've made {stats?.totalReferrals || 0} referrals so far.
-                {stats?.completedReferrals || 0} have been completed successfully!
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
       </Grid>
 
-      {/* Recent Referrals */}
+      {/* Detailed Referrals Table Toggle */}
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h6">
+          Your Referral Tracking
+        </Typography>
+        <Button
+          variant="outlined"
+          startIcon={showDetailedTable ? <VisibilityOffIcon /> : <VisibilityIcon />}
+          onClick={() => setShowDetailedTable(!showDetailedTable)}
+        >
+          {showDetailedTable ? 'Hide Details' : 'Show Details'}
+        </Button>
+      </Box>
+
+      {/* Detailed Referrals Table */}
+      <Collapse in={showDetailedTable}>
+        <Card sx={{ mb: 4 }}>
+          <CardContent>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Campaign</TableCell>
+                    <TableCell>Business</TableCell>
+                    <TableCell>Referred To</TableCell>
+                    <TableCell>Contact Info</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Created</TableCell>
+                    <TableCell>Views</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {stats?.allReferrals
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((referral) => (
+                    <TableRow key={referral._id}>
+                      <TableCell>
+                        <Box>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            {referral.campaignId.title}
+                          </Typography>
+                          <Typography variant="caption" color="textSecondary">
+                            {referral.campaignId.rewardValue}
+                            {referral.campaignId.rewardType === 'percentage' ? '%' : ' points'}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box>
+                          <Typography variant="body2" fontWeight="medium">
+                            {referral.campaignId.businessName}
+                          </Typography>
+                          <Typography variant="caption" color="textSecondary">
+                            {referral.campaignId.businessType}
+                          </Typography>
+                          {referral.campaignId.location.city && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                              <LocationIcon sx={{ fontSize: 12, mr: 0.5 }} />
+                              <Typography variant="caption" color="textSecondary">
+                                {referral.campaignId.location.city}
+                              </Typography>
+                            </Box>
+                          )}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box>
+                          <Typography variant="body2" fontWeight="medium">
+                            {referral.referredName !== 'Not provided' ? referral.referredName : 'Anonymous'}
+                          </Typography>
+                          <Typography variant="caption" color="textSecondary">
+                            {referral.referredEmail !== 'Not provided' ? referral.referredEmail : 'No email'}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box>
+                          {referral.referredEmail !== 'Not provided' && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                              <EmailIcon sx={{ fontSize: 12, mr: 0.5 }} />
+                              <Typography variant="caption" color="textSecondary">
+                                {referral.referredEmail}
+                              </Typography>
+                            </Box>
+                          )}
+                          {referral.referredPhone !== 'Not provided' && (
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <PhoneIcon sx={{ fontSize: 12, mr: 0.5 }} />
+                              <Typography variant="caption" color="textSecondary">
+                                {referral.referredPhone}
+                              </Typography>
+                            </Box>
+                          )}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={getStatusText(referral.status)}
+                          color={getStatusColor(referral.status) as any}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="caption">
+                          {formatDate(referral.createdAt)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="caption">
+                          {referral.trackingData?.viewCount || 0} views
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={stats?.allReferrals.length || 0}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </CardContent>
+        </Card>
+      </Collapse>
+
+      {/* Recent Referrals Summary */}
       <Card>
         <CardContent>
           <Typography variant="h6" gutterBottom>
@@ -272,7 +498,7 @@ const CustomerDashboard = () => {
                             {referral.campaignId.rewardType === 'percentage' ? '%' : ' points'}
                           </Typography>
                           <Typography variant="caption" color="textSecondary">
-                            {new Date(referral.createdAt).toLocaleDateString()}
+                            Referred: {referral.referredName !== 'Not provided' ? referral.referredName : 'Anonymous'} • {formatDate(referral.createdAt)}
                           </Typography>
                         </Box>
                       }
