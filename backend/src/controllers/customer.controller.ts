@@ -36,10 +36,9 @@ export const customerController = {
 
       // Get all referrals for this customer (as referrer)
       const referrals = await Referral.find({ referrerEmail: user.email })
-        .populate('campaignId', 'title rewardType rewardValue')
-        .populate('businessId', 'businessName')
-        .sort({ createdAt: -1 })
-        .limit(10);
+        .populate('campaignId', 'title rewardType rewardValue rewardDescription')
+        .populate('businessId', 'businessName businessType location')
+        .sort({ createdAt: -1 });
 
       // Get available campaigns count
       const availableCampaigns = await Campaign.countDocuments({ status: 'active' });
@@ -48,26 +47,51 @@ export const customerController = {
       const totalReferrals = referrals.length;
       const completedReferrals = referrals.filter(ref => ref.status === 'completed').length;
       const pendingReferrals = referrals.filter(ref => ref.status === 'pending').length;
+      const expiredReferrals = referrals.filter(ref => ref.status === 'expired').length;
 
-      // Format recent referrals
-      const recentReferrals = referrals.map(referral => ({
+      // Format detailed referrals with tracking information
+      const detailedReferrals = referrals.map(referral => ({
         _id: referral._id,
+        code: referral.code,
         campaignId: {
           title: referral.campaignId.title,
           rewardType: referral.campaignId.rewardType,
           rewardValue: referral.campaignId.rewardValue,
-          businessName: referral.businessId?.businessName || 'Unknown Business'
+          rewardDescription: referral.campaignId.rewardDescription,
+          businessName: referral.businessId?.businessName || 'Unknown Business',
+          businessType: referral.businessId?.businessType || 'Unknown Type',
+          location: referral.businessId?.location || {}
         },
+        referredEmail: referral.referredEmail || 'Not provided',
+        referredName: referral.referredName || 'Not provided',
+        referredPhone: referral.referredPhone || 'Not provided',
         status: referral.status,
-        createdAt: referral.createdAt
+        createdAt: referral.createdAt,
+        updatedAt: referral.updatedAt,
+        trackingData: referral.trackingData || null
       }));
+
+      // Get recent referrals (last 10) for the summary
+      const recentReferrals = detailedReferrals.slice(0, 10);
+
+      // Calculate additional stats
+      const referralStats = {
+        total: totalReferrals,
+        completed: completedReferrals,
+        pending: pendingReferrals,
+        expired: expiredReferrals,
+        completionRate: totalReferrals > 0 ? Math.round((completedReferrals / totalReferrals) * 100) : 0
+      };
 
       const dashboardStats = {
         totalReferrals,
         completedReferrals,
         pendingReferrals,
+        expiredReferrals,
         availableCampaigns,
-        recentReferrals
+        referralStats,
+        recentReferrals,
+        allReferrals: detailedReferrals // Include all referrals for detailed view
       };
 
       res.json(dashboardStats);
