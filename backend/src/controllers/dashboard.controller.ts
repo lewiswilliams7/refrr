@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { User } from '../models/user.model';
 import { Campaign } from '../models/campaign.model';
-import Referral from '../models/referrals';
+import { Referral } from '../models/referral.model';
 import { Business } from '../models/business.model';
 import mongoose from 'mongoose';
 import { asyncHandler } from '../middleware/asyncHandler';

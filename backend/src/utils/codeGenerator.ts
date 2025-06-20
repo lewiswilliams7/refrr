@@ -1,4 +1,4 @@
-import Referral from '../models/referrals';
+import { Referral } from '../models/referral.model';
 
 const CHARACTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 const CODE_LENGTH = 8;

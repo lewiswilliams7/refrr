@@ -39,6 +39,7 @@ router.get('/health', (req: Request, res: Response) => {
       health: 'GET /health',
       track: 'GET /track/:code',
       getByCode: 'GET /code/:code',
+      test: 'GET /test/:code',
       complete: 'POST /complete/:code'
     }
   });
@@ -47,7 +48,6 @@ router.get('/health', (req: Request, res: Response) => {
 // Public routes - NO AUTHENTICATION REQUIRED
 router.get('/track/:code', asyncHandler(referralController.trackReferral));
 router.get('/code/:code', asyncHandler(referralController.getReferralByCode));
-router.get('/test/:code', asyncHandler(referralController.testReferral));
 router.post('/complete/:code', asyncHandler(referralController.completeReferral));
 
 // Protected routes - Apply authentication middleware

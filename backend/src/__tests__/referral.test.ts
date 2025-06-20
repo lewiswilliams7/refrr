@@ -2,7 +2,7 @@ import request from 'supertest';
 import app from '../server';
 import Campaign, { CampaignDocument } from '../models/campaign.model';
 import { User, UserDocument } from '../models/user.model';
-import Referral from '../models/referrals';
+import { Referral } from '../models/referral.model';
 import jwt from 'jsonwebtoken';
 import './jest.setup';
 

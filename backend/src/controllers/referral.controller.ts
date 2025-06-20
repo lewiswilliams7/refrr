@@ -200,18 +200,54 @@ export const referralController = {
   // Public endpoints
   getReferralByCode: async (req: Request, res: Response): Promise<void> => {
     try {
+      console.log('=== Get Referral By Code Request ===');
       const { code } = req.params;
+      console.log('Looking for referral code:', code);
+      
+      // Check database connection
+      if (mongoose.connection.readyState !== 1) {
+        console.log('Database not connected. Ready state:', mongoose.connection.readyState);
+        res.status(500).json({ 
+          message: 'Database connection error',
+          readyState: mongoose.connection.readyState
+        });
+        return;
+      }
+
       const referral = await Referral.findOne({ code })
         .populate('campaignId', 'title description rewardType rewardValue rewardDescription')
         .populate('businessId', 'businessName businessType location');
 
+      console.log('Referral found:', referral ? 'Yes' : 'No');
+      if (referral) {
+        console.log('Referral details:', {
+          id: referral._id,
+          code: referral.code,
+          status: referral.status,
+          createdAt: referral.createdAt,
+          referrerEmail: referral.referrerEmail,
+          referredEmail: referral.referredEmail,
+          businessId: referral.businessId,
+          campaignId: referral.campaignId
+        });
+      }
+
       if (!referral) {
-        res.status(404).json({ message: 'Referral not found' });
+        console.log('No referral found with code:', code);
+        // Get all available codes for debugging
+        const availableCodes = await Referral.distinct('code');
+        console.log('Available codes:', availableCodes);
+        res.status(404).json({ 
+          message: 'Referral not found',
+          code: code,
+          availableCodes: availableCodes
+        });
         return;
       }
 
       // Check if referral is already completed
       if (referral.status !== 'pending') {
+        console.log('Referral already completed:', referral.status);
         res.status(400).json({ message: 'This referral has already been completed' });
         return;
       }
@@ -220,6 +256,7 @@ export const referralController = {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       if (referral.createdAt < thirtyDaysAgo) {
+        console.log('Referral expired:', referral.createdAt);
         res.status(400).json({ message: 'This referral link has expired' });
         return;
       }
