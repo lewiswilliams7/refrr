@@ -27,6 +27,8 @@ import {
   Tooltip,
   IconButton,
   Collapse,
+  alpha,
+  useTheme,
 } from '@mui/material';
 import {
   Campaign as CampaignIcon,
@@ -39,6 +41,9 @@ import {
   Email as EmailIcon,
   Phone as PhoneIcon,
   Person as PersonIcon,
+  CheckCircle as CheckCircleIcon,
+  Schedule as ScheduleIcon,
+  Cancel as CancelIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -122,6 +127,7 @@ const CustomerDashboard = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const theme = useTheme();
 
   useEffect(() => {
     fetchCustomerStats();
@@ -209,149 +215,346 @@ const CustomerDashboard = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom>
+      {/* Enhanced Header */}
+      <Box 
+        sx={{ 
+          mb: 6,
+          p: 4,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
+          borderRadius: 4,
+          border: '1px solid',
+          borderColor: alpha(theme.palette.primary.main, 0.1),
+        }}
+      >
+        <Typography 
+          variant="h3" 
+          gutterBottom 
+          sx={{ 
+            fontWeight: 700,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            mb: 1
+          }}
+        >
           Customer Dashboard
         </Typography>
-        <Typography variant="subtitle1" color="textSecondary">
+        <Typography 
+          variant="h6" 
+          color="text.secondary"
+          sx={{ fontWeight: 500 }}
+        >
           Welcome back, {user?.firstName || user?.email}!
         </Typography>
       </Box>
 
-      {/* Stats Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      {/* Enhanced Stats Cards */}
+      <Grid container spacing={3} sx={{ mb: 6 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <PeopleIcon sx={{ fontSize: 40, color: 'primary.main', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4" component="div">
-                    {stats?.totalReferrals || 0}
-                  </Typography>
-                  <Typography color="textSecondary">
-                    Total Referrals
-                  </Typography>
-                </Box>
+          <Card 
+            sx={{ 
+              p: 3,
+              borderRadius: 3,
+              background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
+              border: '1px solid',
+              borderColor: alpha(theme.palette.primary.main, 0.2),
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 12px 40px rgba(25, 118, 210, 0.15)',
+              }
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Box 
+                sx={{ 
+                  p: 1.5, 
+                  borderRadius: 2, 
+                  bgcolor: alpha(theme.palette.primary.main, 0.1),
+                  mr: 2
+                }}
+              >
+                <PeopleIcon sx={{ color: 'primary.main', fontSize: 24 }} />
               </Box>
-            </CardContent>
+              <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 600 }}>
+                Total Referrals
+              </Typography>
+            </Box>
+            <Typography variant="h3" sx={{ fontWeight: 700, color: 'primary.main' }}>
+              {stats?.totalReferrals || 0}
+            </Typography>
           </Card>
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <StarIcon sx={{ fontSize: 40, color: 'success.main', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4" component="div">
-                    {stats?.completedReferrals || 0}
-                  </Typography>
-                  <Typography color="textSecondary">
-                    Completed
-                  </Typography>
-                </Box>
+          <Card 
+            sx={{ 
+              p: 3,
+              borderRadius: 3,
+              background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1)} 0%, ${alpha(theme.palette.success.main, 0.05)} 100%)`,
+              border: '1px solid',
+              borderColor: alpha(theme.palette.success.main, 0.2),
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 12px 40px rgba(76, 175, 80, 0.15)',
+              }
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Box 
+                sx={{ 
+                  p: 1.5, 
+                  borderRadius: 2, 
+                  bgcolor: alpha(theme.palette.success.main, 0.1),
+                  mr: 2
+                }}
+              >
+                <CheckCircleIcon sx={{ color: 'success.main', fontSize: 24 }} />
               </Box>
-            </CardContent>
+              <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 600 }}>
+                Completed
+              </Typography>
+            </Box>
+            <Typography variant="h3" sx={{ fontWeight: 700, color: 'success.main' }}>
+              {stats?.completedReferrals || 0}
+            </Typography>
           </Card>
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <TrendingUpIcon sx={{ fontSize: 40, color: 'warning.main', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4" component="div">
-                    {stats?.pendingReferrals || 0}
-                  </Typography>
-                  <Typography color="textSecondary">
-                    Pending
-                  </Typography>
-                </Box>
+          <Card 
+            sx={{ 
+              p: 3,
+              borderRadius: 3,
+              background: `linear-gradient(135deg, ${alpha(theme.palette.warning.main, 0.1)} 0%, ${alpha(theme.palette.warning.main, 0.05)} 100%)`,
+              border: '1px solid',
+              borderColor: alpha(theme.palette.warning.main, 0.2),
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 12px 40px rgba(255, 152, 0, 0.15)',
+              }
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Box 
+                sx={{ 
+                  p: 1.5, 
+                  borderRadius: 2, 
+                  bgcolor: alpha(theme.palette.warning.main, 0.1),
+                  mr: 2
+                }}
+              >
+                <ScheduleIcon sx={{ color: 'warning.main', fontSize: 24 }} />
               </Box>
-            </CardContent>
+              <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 600 }}>
+                Pending
+              </Typography>
+            </Box>
+            <Typography variant="h3" sx={{ fontWeight: 700, color: 'warning.main' }}>
+              {stats?.pendingReferrals || 0}
+            </Typography>
           </Card>
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <CampaignIcon sx={{ fontSize: 40, color: 'info.main', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4" component="div">
-                    {stats?.availableCampaigns || 0}
-                  </Typography>
-                  <Typography color="textSecondary">
-                    Available Campaigns
-                  </Typography>
-                </Box>
+          <Card 
+            sx={{ 
+              p: 3,
+              borderRadius: 3,
+              background: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.1)} 0%, ${alpha(theme.palette.info.main, 0.05)} 100%)`,
+              border: '1px solid',
+              borderColor: alpha(theme.palette.info.main, 0.2),
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 12px 40px rgba(3, 169, 244, 0.15)',
+              }
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Box 
+                sx={{ 
+                  p: 1.5, 
+                  borderRadius: 2, 
+                  bgcolor: alpha(theme.palette.info.main, 0.1),
+                  mr: 2
+                }}
+              >
+                <CampaignIcon sx={{ color: 'info.main', fontSize: 24 }} />
               </Box>
-            </CardContent>
+              <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 600 }}>
+                Available Campaigns
+              </Typography>
+            </Box>
+            <Typography variant="h3" sx={{ fontWeight: 700, color: 'info.main' }}>
+              {stats?.availableCampaigns || 0}
+            </Typography>
           </Card>
         </Grid>
       </Grid>
 
-      {/* Completion Rate Card */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      {/* Enhanced Completion Rate and Quick Actions */}
+      <Grid container spacing={3} sx={{ mb: 6 }}>
         <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Completion Rate
+          <Card 
+            sx={{ 
+              p: 4,
+              borderRadius: 3,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+              border: '1px solid',
+              borderColor: alpha(theme.palette.divider, 0.1),
+            }}
+          >
+            <Typography 
+              variant="h5" 
+              gutterBottom 
+              sx={{ 
+                fontWeight: 700,
+                mb: 3
+              }}
+            >
+              Completion Rate
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Typography 
+                variant="h2" 
+                sx={{ 
+                  fontWeight: 700,
+                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mr: 2
+                }}
+              >
+                {stats?.referralStats.completionRate || 0}%
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h3" color="primary" sx={{ mr: 2 }}>
-                  {stats?.referralStats.completionRate || 0}%
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  of your referrals have been completed
-                </Typography>
-              </Box>
-              <Typography variant="body2" color="textSecondary">
-                {stats?.completedReferrals || 0} out of {stats?.totalReferrals || 0} referrals completed
-              </Typography>
-            </CardContent>
+            </Box>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+              of your referrals have been completed
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {stats?.completedReferrals || 0} out of {stats?.totalReferrals || 0} referrals completed
+            </Typography>
           </Card>
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Quick Actions
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                <Button
-                  variant="contained"
-                  startIcon={<CampaignIcon />}
-                  onClick={() => navigate('/customer/campaigns')}
-                >
-                  Browse Campaigns
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<PeopleIcon />}
-                  onClick={() => navigate('/referrals')}
-                >
-                  View All Referrals
-                </Button>
-              </Box>
-            </CardContent>
+          <Card 
+            sx={{ 
+              p: 4,
+              borderRadius: 3,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+              border: '1px solid',
+              borderColor: alpha(theme.palette.divider, 0.1),
+            }}
+          >
+            <Typography 
+              variant="h5" 
+              gutterBottom 
+              sx={{ 
+                fontWeight: 700,
+                mb: 3
+              }}
+            >
+              Quick Actions
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <Button
+                variant="contained"
+                startIcon={<CampaignIcon />}
+                onClick={() => navigate('/customer/campaigns')}
+                sx={{
+                  px: 3,
+                  py: 1.5,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                  boxShadow: '0 4px 14px rgba(25, 118, 210, 0.3)',
+                  '&:hover': {
+                    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 20px rgba(25, 118, 210, 0.4)',
+                    transition: 'all 0.3s ease'
+                  }
+                }}
+              >
+                Browse Campaigns
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<PeopleIcon />}
+                onClick={() => navigate('/referrals')}
+                sx={{
+                  px: 3,
+                  py: 1.5,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  borderWidth: 2,
+                  '&:hover': {
+                    borderWidth: 2,
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    transition: 'all 0.3s ease'
+                  }
+                }}
+              >
+                View All Referrals
+              </Button>
+            </Box>
           </Card>
         </Grid>
       </Grid>
 
-      {/* Detailed Referrals Table Toggle */}
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6">
+      {/* Enhanced Referral Tracking Section */}
+      <Box 
+        sx={{ 
+          mb: 4, 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          p: 3,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
+          borderRadius: 3,
+          border: '1px solid',
+          borderColor: alpha(theme.palette.primary.main, 0.1),
+        }}
+      >
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            fontWeight: 700,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
           Your Referral Tracking
         </Typography>
         <Button
           variant="outlined"
           startIcon={showDetailedTable ? <VisibilityOffIcon /> : <VisibilityIcon />}
           onClick={() => setShowDetailedTable(!showDetailedTable)}
+          sx={{
+            px: 3,
+            py: 1.5,
+            borderRadius: 2,
+            textTransform: 'none',
+            fontWeight: 600,
+            borderWidth: 2,
+            '&:hover': {
+              borderWidth: 2,
+              transform: 'translateY(-2px)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              transition: 'all 0.3s ease'
+            }
+          }}
         >
           {showDetailedTable ? 'Hide Details' : 'Show Details'}
         </Button>

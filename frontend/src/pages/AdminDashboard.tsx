@@ -22,8 +22,16 @@ import {
   Card,
   CardContent,
   Button,
+  alpha,
+  useTheme,
 } from '@mui/material';
-import { MoreVert as MoreVertIcon } from '@mui/icons-material';
+import { 
+  MoreVert as MoreVertIcon,
+  People as PeopleIcon,
+  Campaign as CampaignIcon,
+  TrendingUp as TrendingUpIcon,
+  AdminPanelSettings as AdminIcon,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import config from '../config';
@@ -85,6 +93,7 @@ export default function AdminDashboard() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedItem, setSelectedItem] = useState<{ id: string; type: string } | null>(null);
   const navigate = useNavigate();
+  const theme = useTheme();
 
   const fetchData = useCallback(async () => {
     try {
@@ -206,72 +215,211 @@ export default function AdminDashboard() {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Admin Dashboard
-      </Typography>
+    <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
+      {/* Enhanced Header */}
+      <Box 
+        sx={{ 
+          mb: 6,
+          p: 4,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
+          borderRadius: 4,
+          border: '1px solid',
+          borderColor: alpha(theme.palette.primary.main, 0.1),
+        }}
+      >
+        <Typography 
+          variant="h3" 
+          gutterBottom 
+          sx={{ 
+            fontWeight: 700,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            mb: 1
+          }}
+        >
+          Admin Dashboard
+        </Typography>
+        <Typography 
+          variant="h6" 
+          color="text.secondary"
+          sx={{ fontWeight: 500 }}
+        >
+          Manage your platform and monitor system activity
+        </Typography>
+      </Box>
 
-      <Grid container spacing={3}>
+      {/* Enhanced Stats Cards */}
+      <Grid container spacing={3} sx={{ mb: 6 }}>
         <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
+          <Card 
+            sx={{ 
+              p: 4,
+              borderRadius: 3,
+              background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
+              border: '1px solid',
+              borderColor: alpha(theme.palette.primary.main, 0.2),
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 12px 40px rgba(25, 118, 210, 0.15)',
+              }
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <Box 
+                sx={{ 
+                  p: 2, 
+                  borderRadius: 2, 
+                  bgcolor: alpha(theme.palette.primary.main, 0.1),
+                  mr: 2
+                }}
+              >
+                <PeopleIcon sx={{ color: 'primary.main', fontSize: 28 }} />
+              </Box>
+              <Typography variant="h5" sx={{ fontWeight: 600 }}>
                 Users
               </Typography>
-              <Typography variant="h3">
-                {users.length}
-              </Typography>
-              <Button
-                variant="outlined"
-                size="small"
-                sx={{ mt: 2 }}
-                onClick={() => navigate('/admin/users')}
-              >
-                View All Users
-              </Button>
-            </CardContent>
+            </Box>
+            <Typography variant="h2" sx={{ fontWeight: 700, color: 'primary.main', mb: 3 }}>
+              {users.length}
+            </Typography>
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={() => navigate('/admin/users')}
+              sx={{
+                px: 3,
+                py: 1.5,
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                borderWidth: 2,
+                '&:hover': {
+                  borderWidth: 2,
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  transition: 'all 0.3s ease'
+                }
+              }}
+            >
+              View All Users
+            </Button>
           </Card>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
+          <Card 
+            sx={{ 
+              p: 4,
+              borderRadius: 3,
+              background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1)} 0%, ${alpha(theme.palette.success.main, 0.05)} 100%)`,
+              border: '1px solid',
+              borderColor: alpha(theme.palette.success.main, 0.2),
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 12px 40px rgba(76, 175, 80, 0.15)',
+              }
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <Box 
+                sx={{ 
+                  p: 2, 
+                  borderRadius: 2, 
+                  bgcolor: alpha(theme.palette.success.main, 0.1),
+                  mr: 2
+                }}
+              >
+                <CampaignIcon sx={{ color: 'success.main', fontSize: 28 }} />
+              </Box>
+              <Typography variant="h5" sx={{ fontWeight: 600 }}>
                 Campaigns
               </Typography>
-              <Typography variant="h3">
-                {campaigns.length}
-              </Typography>
-              <Button
-                variant="outlined"
-                size="small"
-                sx={{ mt: 2 }}
-                onClick={() => navigate('/admin/campaigns')}
-              >
-                View All Campaigns
-              </Button>
-            </CardContent>
+            </Box>
+            <Typography variant="h2" sx={{ fontWeight: 700, color: 'success.main', mb: 3 }}>
+              {campaigns.length}
+            </Typography>
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={() => navigate('/admin/campaigns')}
+              sx={{
+                px: 3,
+                py: 1.5,
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                borderWidth: 2,
+                '&:hover': {
+                  borderWidth: 2,
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  transition: 'all 0.3s ease'
+                }
+              }}
+            >
+              View All Campaigns
+            </Button>
           </Card>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
+          <Card 
+            sx={{ 
+              p: 4,
+              borderRadius: 3,
+              background: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.1)} 0%, ${alpha(theme.palette.info.main, 0.05)} 100%)`,
+              border: '1px solid',
+              borderColor: alpha(theme.palette.info.main, 0.2),
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 12px 40px rgba(3, 169, 244, 0.15)',
+              }
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <Box 
+                sx={{ 
+                  p: 2, 
+                  borderRadius: 2, 
+                  bgcolor: alpha(theme.palette.info.main, 0.1),
+                  mr: 2
+                }}
+              >
+                <TrendingUpIcon sx={{ color: 'info.main', fontSize: 28 }} />
+              </Box>
+              <Typography variant="h5" sx={{ fontWeight: 600 }}>
                 Referrals
               </Typography>
-              <Typography variant="h3">
-                {referrals.length}
-              </Typography>
-              <Button
-                variant="outlined"
-                size="small"
-                sx={{ mt: 2 }}
-                onClick={() => navigate('/admin/referrals')}
-              >
-                View All Referrals
-              </Button>
-            </CardContent>
+            </Box>
+            <Typography variant="h2" sx={{ fontWeight: 700, color: 'info.main', mb: 3 }}>
+              {referrals.length}
+            </Typography>
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={() => navigate('/admin/referrals')}
+              sx={{
+                px: 3,
+                py: 1.5,
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                borderWidth: 2,
+                '&:hover': {
+                  borderWidth: 2,
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  transition: 'all 0.3s ease'
+                }
+              }}
+            >
+              View All Referrals
+            </Button>
           </Card>
         </Grid>
       </Grid>
