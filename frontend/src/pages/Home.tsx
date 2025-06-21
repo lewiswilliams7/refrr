@@ -287,6 +287,30 @@ const Home: React.FC = () => {
                 Register as Business
               </Button>
             </Stack>
+            <Box sx={{ textAlign: 'center', mt: 3 }}>
+              <Button
+                variant="outlined"
+                color="inherit"
+                size="large"
+                onClick={() => navigate('/contact')}
+                sx={{ 
+                  px: 4,
+                  py: 1.5,
+                  fontSize: '1rem',
+                  textTransform: 'none',
+                  borderColor: 'rgba(255,255,255,0.5)',
+                  color: 'white',
+                  '&:hover': {
+                    borderColor: 'white',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    transform: 'translateY(-1px)',
+                    transition: 'all 0.3s ease'
+                  }
+                }}
+              >
+                Book a Demo
+              </Button>
+            </Box>
           </Container>
         </Box>
 

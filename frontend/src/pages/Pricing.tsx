@@ -43,6 +43,7 @@ const tiers = [
     buttonText: 'Start Free Trial',
     buttonVariant: 'contained',
     highlighted: true,
+    hasDemoButton: true,
   },
   {
     title: 'Enterprise',
@@ -61,6 +62,7 @@ const tiers = [
     buttonText: 'Coming Soon',
     buttonVariant: 'outlined',
     disabled: true,
+    hasDemoButton: false,
   },
 ];
 
@@ -235,6 +237,32 @@ const Pricing: React.FC = () => {
                   >
                     {tier.buttonText}
                   </Button>
+                  {tier.hasDemoButton && (
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      fullWidth
+                      size="large"
+                      onClick={() => navigate('/contact')}
+                      sx={{ 
+                        mt: 2,
+                        py: 1.5,
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        fontSize: '1rem',
+                        fontWeight: 500,
+                        borderWidth: 2,
+                        '&:hover': {
+                          borderWidth: 2,
+                          transform: 'translateY(-1px)',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                          transition: 'all 0.3s ease'
+                        }
+                      }}
+                    >
+                      Book a Demo
+                    </Button>
+                  )}
                 </Box>
               </Card>
             </Grid>

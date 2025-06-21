@@ -21,6 +21,7 @@ import CampaignDetails from './pages/CampaignDetails';
 import Features from './pages/Features';
 import Pricing from './pages/Pricing';
 import WhyRefrr from './pages/WhyRefrr';
+import Contact from './pages/Contact';
 import VerifyEmail from './pages/VerifyEmail';
 
 const theme = createTheme({
@@ -51,6 +52,7 @@ function App() {
             <Route path="/features" element={<Features />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/why-refrr" element={<WhyRefrr />} />
+            <Route path="/contact" element={<Contact />} />
 
             {/* Protected routes */}
             <Route path="/dashboard" element={<RoleBasedRoute><Dashboard /></RoleBasedRoute>} />
