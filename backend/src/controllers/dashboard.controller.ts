@@ -62,9 +62,9 @@ export const dashboardController = {
       // Get referral statistics
       const referralStats = {
         total: totalReferrals,
-        approved: await Referral.countDocuments({ businessId, status: 'approved' }),
+        completed: await Referral.countDocuments({ businessId, status: 'completed' }),
         pending: pendingApprovals,
-        rejected: await Referral.countDocuments({ businessId, status: 'rejected' })
+        expired: await Referral.countDocuments({ businessId, status: 'expired' })
       };
 
       // Get campaign statistics
@@ -166,7 +166,7 @@ export const dashboardController = {
       // Get successful referrals count
       const successfulReferrals = await Referral.countDocuments({
         businessId: business._id,
-        status: 'approved'
+        status: 'completed'
       });
 
       // Calculate conversion rate
@@ -193,7 +193,7 @@ export const dashboardController = {
 
           const campaignSuccessful = await Referral.countDocuments({
             campaignId: campaign._id,
-            status: 'approved'
+            status: 'completed'
           });
 
           const performance: ICampaignPerformance = {

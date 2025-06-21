@@ -66,9 +66,9 @@ interface DashboardStats {
   }>;
   referralStats: {
     total: number;
-    approved: number;
+    completed: number;
     pending: number;
-    rejected: number;
+    expired: number;
   };
   campaignStats: {
     total: number;
@@ -84,7 +84,7 @@ const Dashboard = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedReferral, setSelectedReferral] = useState<string | null>(null);
   const [selectedReferrals, setSelectedReferrals] = useState<string[]>([]);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'pending' | 'rejected'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'pending' | 'expired'>('all');
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -122,7 +122,7 @@ const Dashboard = () => {
         return 'success';
       case 'pending':
         return 'warning';
-      case 'rejected':
+      case 'expired':
         return 'error';
       default:
         return 'warning';
@@ -422,12 +422,12 @@ const Dashboard = () => {
                 >
                   <CheckCircleIcon sx={{ color: 'info.main', fontSize: 24 }} />
                 </Box>
-                <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 600 }}>
-                  Approved Referrals
+                <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.secondary', mb: 1 }}>
+                  Completed Referrals
                 </Typography>
               </Box>
               <Typography variant="h3" sx={{ fontWeight: 700, color: 'info.main' }}>
-                {stats?.referralStats?.approved || 0}
+                {stats?.referralStats?.completed || 0}
               </Typography>
             </Card>
           </Grid>
@@ -534,9 +534,9 @@ const Dashboard = () => {
                 Completed ({getFilteredCount('completed')})
               </Button>
               <Button
-                variant={statusFilter === 'rejected' ? 'contained' : 'outlined'}
+                variant={statusFilter === 'expired' ? 'contained' : 'outlined'}
                 size="small"
-                onClick={() => setStatusFilter('rejected')}
+                onClick={() => setStatusFilter('expired')}
                 sx={{
                   px: 2,
                   py: 0.5,
@@ -545,9 +545,9 @@ const Dashboard = () => {
                   fontWeight: 600,
                   fontSize: '0.8rem',
                   minWidth: 'auto',
-                  color: statusFilter === 'rejected' ? 'white' : 'error.main',
+                  color: statusFilter === 'expired' ? 'white' : 'error.main',
                   borderColor: 'error.main',
-                  ...(statusFilter === 'rejected' && {
+                  ...(statusFilter === 'expired' && {
                     background: `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.error.dark} 100%)`,
                     boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
                   }),
@@ -557,7 +557,7 @@ const Dashboard = () => {
                   }
                 }}
               >
-                Rejected ({getFilteredCount('rejected')})
+                Expired ({getFilteredCount('expired')})
               </Button>
             </Box>
           </Box>
@@ -588,7 +588,7 @@ const Dashboard = () => {
                 <Button
                   variant="contained"
                   color="error"
-                  onClick={() => handleBulkStatusChange('rejected')}
+                  onClick={() => handleBulkStatusChange('expired')}
                   disabled={loading}
                   sx={{
                     px: 3,
@@ -604,7 +604,7 @@ const Dashboard = () => {
                     }
                   }}
                 >
-                  Reject Selected ({selectedReferrals.length})
+                  Mark Selected as Expired ({selectedReferrals.length})
                 </Button>
               </Stack>
             )}
@@ -699,11 +699,11 @@ const Dashboard = () => {
         </MenuItem>
         <MenuItem 
           onClick={() => {
-            selectedReferral && handleStatusChange(selectedReferral, 'rejected');
+            selectedReferral && handleStatusChange(selectedReferral, 'expired');
             handleMenuClose();
           }}
         >
-          Reject
+          Mark as Expired
         </MenuItem>
       </Menu>
     </>
