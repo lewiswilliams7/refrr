@@ -71,7 +71,11 @@ const Navigation: React.FC = () => {
               <IconButton
                 color="inherit"
                 onClick={() => setDrawerOpen(true)}
-                sx={{ ml: 1 }}
+                sx={{ 
+                  ml: 1,
+                  display: 'flex',
+                  zIndex: 1
+                }}
               >
                 <MenuIcon />
               </IconButton>

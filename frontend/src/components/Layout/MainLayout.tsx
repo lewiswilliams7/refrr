@@ -12,6 +12,8 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -28,6 +30,8 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { logout, user } = useAuth();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const businessMenuItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
@@ -58,7 +62,11 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             color="inherit"
             edge="start"
             onClick={() => setDrawerOpen(true)}
-            sx={{ mr: 2 }}
+            sx={{ 
+              mr: 2,
+              display: 'flex',
+              zIndex: 1
+            }}
           >
             <MenuIcon />
           </IconButton>
@@ -76,7 +84,12 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <Logo />
             </Box>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: isMobile ? 1 : 2,
+            flexWrap: 'wrap'
+          }}>
             <Avatar
               src={user?.avatar}
               firstName={user?.firstName}
@@ -92,7 +105,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 }
               }}
             />
-            {user?.businessName && (
+            {user?.businessName && !isMobile && (
               <Typography variant="body1" sx={{ fontWeight: 500 }}>
                 {user.businessName}
               </Typography>
@@ -102,8 +115,12 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               onClick={logout}
               variant="outlined"
               size="small"
+              sx={{
+                fontSize: isMobile ? '0.75rem' : '0.875rem',
+                px: isMobile ? 1 : 2
+              }}
             >
-              Logout
+              {isMobile ? 'Logout' : 'Logout'}
             </Button>
           </Box>
         </Toolbar>

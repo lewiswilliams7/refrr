@@ -68,17 +68,48 @@ export default function ReferralLinkGenerator({ open, onClose, campaignId }: Pro
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(referralLink);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
+      // Try the modern clipboard API first
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(referralLink);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+        return;
+      }
+      
+      // Fallback for older browsers or non-secure contexts
+      const textArea = document.createElement('textarea');
+      textArea.value = referralLink;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        document.execCommand('copy');
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+      } catch (err) {
+        console.error('Fallback copy failed:', err);
+        setError('Failed to copy link. Please copy it manually.');
+      } finally {
+        document.body.removeChild(textArea);
+      }
     } catch (err) {
       console.error('Error copying to clipboard:', err);
-      setError('Failed to copy link to clipboard');
+      setError('Failed to copy link. Please copy it manually.');
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="sm" 
+      fullWidth
+      fullScreen={window.innerWidth < 600} // Full screen on mobile
+    >
       <DialogTitle>Generate Referral Link</DialogTitle>
       <DialogContent>
         {error && (
@@ -102,7 +133,7 @@ export default function ReferralLinkGenerator({ open, onClose, campaignId }: Pro
           variant="contained"
           onClick={handleGenerateLink}
           disabled={isLoading || !email}
-          sx={{ mb: 2 }}
+          sx={{ mb: 2, width: '100%' }}
         >
           {isLoading ? <CircularProgress size={24} /> : 'Generate Link'}
         </Button>
@@ -112,18 +143,20 @@ export default function ReferralLinkGenerator({ open, onClose, campaignId }: Pro
             <Typography variant="subtitle1" gutterBottom>
               Your Referral Link:
             </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <TextField
                 fullWidth
                 value={referralLink}
                 InputProps={{ readOnly: true }}
+                sx={{ mb: 1 }}
               />
               <Button
                 variant="outlined"
                 onClick={handleCopyLink}
                 disabled={!referralLink}
+                sx={{ width: '100%' }}
               >
-                {copySuccess ? 'Copied!' : 'Copy'}
+                {copySuccess ? 'Copied!' : 'Copy Link'}
               </Button>
             </Box>
           </Box>
