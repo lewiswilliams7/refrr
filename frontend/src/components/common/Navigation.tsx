@@ -73,11 +73,19 @@ const Navigation: React.FC = () => {
                 onClick={() => setDrawerOpen(true)}
                 sx={{ 
                   ml: 1,
-                  display: 'flex',
-                  zIndex: 1
+                  display: 'flex !important',
+                  zIndex: 9999,
+                  minWidth: '48px',
+                  minHeight: '48px',
+                  backgroundColor: 'rgba(0,0,0,0.1)',
+                  border: '1px solid rgba(0,0,0,0.1)',
+                  borderRadius: '8px',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0,0,0,0.15)',
+                  }
                 }}
               >
-                <MenuIcon />
+                <MenuIcon sx={{ fontSize: '24px' }} />
               </IconButton>
             </Box>
           </>

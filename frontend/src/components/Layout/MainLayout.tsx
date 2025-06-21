@@ -57,20 +57,40 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           boxShadow: '0 1px 3px rgba(0,0,0,0.12)'
         }}
       >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            edge="start"
-            onClick={() => setDrawerOpen(true)}
-            sx={{ 
-              mr: 2,
-              display: 'flex',
-              zIndex: 1
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+        <Toolbar sx={{ position: 'relative' }}>
+          <Box sx={{ 
+            position: 'absolute', 
+            left: 0, 
+            top: '50%', 
+            transform: 'translateY(-50%)',
+            zIndex: 9999,
+            display: { xs: 'block', md: 'block' }
+          }}>
+            <IconButton
+              color="inherit"
+              edge="start"
+              onClick={() => setDrawerOpen(true)}
+              sx={{ 
+                mr: 2,
+                display: 'flex !important',
+                zIndex: 9999,
+                minWidth: '48px',
+                minHeight: '48px',
+                backgroundColor: 'rgba(0,0,0,0.04)',
+                '&:hover': {
+                  backgroundColor: 'rgba(0,0,0,0.08)',
+                },
+                '@media (max-width: 768px)': {
+                  backgroundColor: 'rgba(0,0,0,0.1)',
+                  border: '1px solid rgba(0,0,0,0.1)',
+                  borderRadius: '8px',
+                }
+              }}
+            >
+              <MenuIcon sx={{ fontSize: '24px' }} />
+            </IconButton>
+          </Box>
+          <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', ml: 7 }}>
             <Box 
               sx={{
                 cursor: 'pointer',
