@@ -84,7 +84,7 @@ const Dashboard = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedReferral, setSelectedReferral] = useState<string | null>(null);
   const [selectedReferrals, setSelectedReferrals] = useState<string[]>([]);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'approved' | 'pending' | 'rejected'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'pending' | 'rejected'>('all');
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -118,7 +118,7 @@ const Dashboard = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved':
+      case 'completed':
         return 'success';
       case 'pending':
         return 'warning';
@@ -508,9 +508,9 @@ const Dashboard = () => {
                 Pending ({getFilteredCount('pending')})
               </Button>
               <Button
-                variant={statusFilter === 'approved' ? 'contained' : 'outlined'}
+                variant={statusFilter === 'completed' ? 'contained' : 'outlined'}
                 size="small"
-                onClick={() => setStatusFilter('approved')}
+                onClick={() => setStatusFilter('completed')}
                 sx={{
                   px: 2,
                   py: 0.5,
@@ -519,9 +519,9 @@ const Dashboard = () => {
                   fontWeight: 600,
                   fontSize: '0.8rem',
                   minWidth: 'auto',
-                  color: statusFilter === 'approved' ? 'white' : 'success.main',
+                  color: statusFilter === 'completed' ? 'white' : 'success.main',
                   borderColor: 'success.main',
-                  ...(statusFilter === 'approved' && {
+                  ...(statusFilter === 'completed' && {
                     background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
                     boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
                   }),
@@ -531,7 +531,7 @@ const Dashboard = () => {
                   }
                 }}
               >
-                Approved ({getFilteredCount('approved')})
+                Completed ({getFilteredCount('completed')})
               </Button>
               <Button
                 variant={statusFilter === 'rejected' ? 'contained' : 'outlined'}
@@ -567,7 +567,7 @@ const Dashboard = () => {
                 <Button
                   variant="contained"
                   color="success"
-                  onClick={() => handleBulkStatusChange('approved')}
+                  onClick={() => handleBulkStatusChange('completed')}
                   disabled={loading}
                   sx={{
                     px: 3,
@@ -583,7 +583,7 @@ const Dashboard = () => {
                     }
                   }}
                 >
-                  Approve Selected ({selectedReferrals.length})
+                  Complete Selected ({selectedReferrals.length})
                 </Button>
                 <Button
                   variant="contained"
@@ -691,11 +691,11 @@ const Dashboard = () => {
       >
         <MenuItem 
           onClick={() => {
-            selectedReferral && handleStatusChange(selectedReferral, 'approved');
+            selectedReferral && handleStatusChange(selectedReferral, 'completed');
             handleMenuClose();
           }}
         >
-          Approve
+          Complete
         </MenuItem>
         <MenuItem 
           onClick={() => {
