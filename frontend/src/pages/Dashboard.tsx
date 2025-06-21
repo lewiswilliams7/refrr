@@ -84,6 +84,7 @@ const Dashboard = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedReferral, setSelectedReferral] = useState<string | null>(null);
   const [selectedReferrals, setSelectedReferrals] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'approved' | 'pending' | 'rejected'>('all');
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -163,6 +164,17 @@ const Dashboard = () => {
         ? prev.filter(id => id !== referralId)
         : [...prev, referralId]
     );
+  };
+
+  // Filter activities based on status
+  const filteredActivities = stats?.recentActivity.filter(activity => {
+    if (statusFilter === 'all') return true;
+    return activity.status === statusFilter;
+  }) || [];
+
+  // Get filtered counts
+  const getFilteredCount = (status: string) => {
+    return stats?.recentActivity.filter(activity => activity.status === status).length || 0;
   };
 
   if (loading) {
@@ -444,6 +456,112 @@ const Dashboard = () => {
             >
               Recent Activity
             </Typography>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                variant={statusFilter === 'all' ? 'contained' : 'outlined'}
+                size="small"
+                onClick={() => setStatusFilter('all')}
+                sx={{
+                  px: 2,
+                  py: 0.5,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  minWidth: 'auto',
+                  ...(statusFilter === 'all' && {
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                    boxShadow: '0 2px 8px rgba(25, 118, 210, 0.3)',
+                  }),
+                  '&:hover': {
+                    transform: 'translateY(-1px)',
+                    transition: 'all 0.2s ease'
+                  }
+                }}
+              >
+                All ({stats?.recentActivity.length || 0})
+              </Button>
+              <Button
+                variant={statusFilter === 'pending' ? 'contained' : 'outlined'}
+                size="small"
+                onClick={() => setStatusFilter('pending')}
+                sx={{
+                  px: 2,
+                  py: 0.5,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  minWidth: 'auto',
+                  color: statusFilter === 'pending' ? 'white' : 'warning.main',
+                  borderColor: 'warning.main',
+                  ...(statusFilter === 'pending' && {
+                    background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
+                    boxShadow: '0 2px 8px rgba(255, 152, 0, 0.3)',
+                  }),
+                  '&:hover': {
+                    transform: 'translateY(-1px)',
+                    transition: 'all 0.2s ease'
+                  }
+                }}
+              >
+                Pending ({getFilteredCount('pending')})
+              </Button>
+              <Button
+                variant={statusFilter === 'approved' ? 'contained' : 'outlined'}
+                size="small"
+                onClick={() => setStatusFilter('approved')}
+                sx={{
+                  px: 2,
+                  py: 0.5,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  minWidth: 'auto',
+                  color: statusFilter === 'approved' ? 'white' : 'success.main',
+                  borderColor: 'success.main',
+                  ...(statusFilter === 'approved' && {
+                    background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
+                    boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
+                  }),
+                  '&:hover': {
+                    transform: 'translateY(-1px)',
+                    transition: 'all 0.2s ease'
+                  }
+                }}
+              >
+                Approved ({getFilteredCount('approved')})
+              </Button>
+              <Button
+                variant={statusFilter === 'rejected' ? 'contained' : 'outlined'}
+                size="small"
+                onClick={() => setStatusFilter('rejected')}
+                sx={{
+                  px: 2,
+                  py: 0.5,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  minWidth: 'auto',
+                  color: statusFilter === 'rejected' ? 'white' : 'error.main',
+                  borderColor: 'error.main',
+                  ...(statusFilter === 'rejected' && {
+                    background: `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.error.dark} 100%)`,
+                    boxShadow: '0 2px 8px rgba(244, 67, 54, 0.3)',
+                  }),
+                  '&:hover': {
+                    transform: 'translateY(-1px)',
+                    transition: 'all 0.2s ease'
+                  }
+                }}
+              >
+                Rejected ({getFilteredCount('rejected')})
+              </Button>
+            </Box>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             {selectedReferrals.length > 0 && (
               <Stack direction="row" spacing={2}>
                 <Button
@@ -465,7 +583,7 @@ const Dashboard = () => {
                     }
                   }}
                 >
-                  Approve Selected
+                  Approve Selected ({selectedReferrals.length})
                 </Button>
                 <Button
                   variant="contained"
@@ -486,13 +604,13 @@ const Dashboard = () => {
                     }
                   }}
                 >
-                  Reject Selected
+                  Reject Selected ({selectedReferrals.length})
                 </Button>
               </Stack>
             )}
           </Box>
 
-          {stats?.recentActivity.map((activity) => (
+          {filteredActivities.map((activity) => (
             <Card 
               key={activity._id} 
               sx={{ 

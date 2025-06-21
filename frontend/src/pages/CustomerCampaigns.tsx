@@ -24,6 +24,8 @@ import {
   DialogContent,
   DialogActions,
   Stack,
+  alpha,
+  useTheme,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -37,6 +39,7 @@ import {
   AccessTime as AccessTimeIcon,
   LocationOn as LocationIcon,
   Add as AddIcon,
+  Campaign as CampaignIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -105,6 +108,7 @@ export default function CustomerCampaigns() {
 
   const navigate = useNavigate();
   const { user } = useAuth();
+  const theme = useTheme();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -300,98 +304,241 @@ export default function CustomerCampaigns() {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
+      {/* Enhanced Header */}
       <Box 
         sx={{ 
-          mb: 4,
-          cursor: 'pointer',
-          transition: 'transform 0.2s ease-in-out',
-          '&:hover': {
-            transform: 'scale(1.05)'
-          }
+          mb: 6,
+          p: 4,
+          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
+          borderRadius: 4,
+          border: '1px solid',
+          borderColor: alpha(theme.palette.primary.main, 0.1),
         }}
-        onClick={() => navigate('/')}
       >
-        <Logo />
+        <Box 
+          sx={{ 
+            mb: 3,
+            cursor: 'pointer',
+            transition: 'transform 0.2s ease-in-out',
+            '&:hover': {
+              transform: 'scale(1.02)'
+            }
+          }}
+          onClick={() => navigate('/')}
+        >
+          <Logo />
+        </Box>
+
+        <Typography 
+          variant="h3" 
+          gutterBottom 
+          sx={{ 
+            fontWeight: 700,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            mb: 1
+          }}
+        >
+          Available Campaigns
+        </Typography>
+        <Typography 
+          variant="h6" 
+          color="text.secondary"
+          sx={{ fontWeight: 500 }}
+        >
+          Discover and participate in referral campaigns from local businesses
+        </Typography>
+
+        {/* Show Create Campaign button for business users */}
+        {user?.role === 'business' && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => navigate('/campaigns')}
+              sx={{
+                px: 4,
+                py: 1.5,
+                fontSize: '1rem',
+                fontWeight: 600,
+                textTransform: 'none',
+                borderRadius: 3,
+                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                boxShadow: '0 8px 25px rgba(25, 118, 210, 0.3), 0 4px 10px rgba(0,0,0,0.1)',
+                '&:hover': {
+                  background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 12px 35px rgba(25, 118, 210, 0.4), 0 6px 15px rgba(0,0,0,0.15)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                }
+              }}
+            >
+              Create Campaign
+            </Button>
+          </Box>
+        )}
       </Box>
 
-      <Typography variant="h4" component="h1" gutterBottom>
-        Available Campaigns
-      </Typography>
-
-      {/* Show Create Campaign button for business users */}
-      {user?.role === 'business' && (
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => navigate('/campaigns')}
-            sx={{ 
-              backgroundColor: 'primary.main',
-              '&:hover': {
-                backgroundColor: 'primary.dark',
-              }
-            }}
-          >
-            Create Campaign
-          </Button>
-        </Box>
-      )}
-
+      {/* Enhanced Analytics Cards */}
       {analytics && (
-        <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid container spacing={3} sx={{ mb: 6 }}>
           <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
+            <Card 
+              sx={{ 
+                p: 3,
+                borderRadius: 3,
+                background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
+                border: '1px solid',
+                borderColor: alpha(theme.palette.primary.main, 0.2),
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 12px 40px rgba(25, 118, 210, 0.15)',
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Box 
+                  sx={{ 
+                    p: 1.5, 
+                    borderRadius: 2, 
+                    bgcolor: alpha(theme.palette.primary.main, 0.1),
+                    mr: 2
+                  }}
+                >
+                  <PeopleIcon sx={{ color: 'primary.main', fontSize: 24 }} />
+                </Box>
+                <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 600 }}>
                   Total Referrals
                 </Typography>
-                <Typography variant="h3">
-                  {analytics.totalReferrals}
-                </Typography>
-              </CardContent>
+              </Box>
+              <Typography variant="h3" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                {analytics.totalReferrals}
+              </Typography>
             </Card>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
+            <Card 
+              sx={{ 
+                p: 3,
+                borderRadius: 3,
+                background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1)} 0%, ${alpha(theme.palette.success.main, 0.05)} 100%)`,
+                border: '1px solid',
+                borderColor: alpha(theme.palette.success.main, 0.2),
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 12px 40px rgba(76, 175, 80, 0.15)',
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Box 
+                  sx={{ 
+                    p: 1.5, 
+                    borderRadius: 2, 
+                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                    mr: 2
+                  }}
+                >
+                  <TrendingUpIcon sx={{ color: 'success.main', fontSize: 24 }} />
+                </Box>
+                <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 600 }}>
                   Successful Referrals
                 </Typography>
-                <Typography variant="h3">
-                  {analytics.successfulReferrals}
-                </Typography>
-              </CardContent>
+              </Box>
+              <Typography variant="h3" sx={{ fontWeight: 700, color: 'success.main' }}>
+                {analytics.successfulReferrals}
+              </Typography>
             </Card>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
+            <Card 
+              sx={{ 
+                p: 3,
+                borderRadius: 3,
+                background: `linear-gradient(135deg, ${alpha(theme.palette.warning.main, 0.1)} 0%, ${alpha(theme.palette.warning.main, 0.05)} 100%)`,
+                border: '1px solid',
+                borderColor: alpha(theme.palette.warning.main, 0.2),
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 12px 40px rgba(255, 152, 0, 0.15)',
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Box 
+                  sx={{ 
+                    p: 1.5, 
+                    borderRadius: 2, 
+                    bgcolor: alpha(theme.palette.warning.main, 0.1),
+                    mr: 2
+                  }}
+                >
+                  <AccessTimeIcon sx={{ color: 'warning.main', fontSize: 24 }} />
+                </Box>
+                <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 600 }}>
                   Pending Referrals
                 </Typography>
-                <Typography variant="h3">
-                  {analytics.pendingReferrals}
-                </Typography>
-              </CardContent>
+              </Box>
+              <Typography variant="h3" sx={{ fontWeight: 700, color: 'warning.main' }}>
+                {analytics.pendingReferrals}
+              </Typography>
             </Card>
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
+            <Card 
+              sx={{ 
+                p: 3,
+                borderRadius: 3,
+                background: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.1)} 0%, ${alpha(theme.palette.info.main, 0.05)} 100%)`,
+                border: '1px solid',
+                borderColor: alpha(theme.palette.info.main, 0.2),
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 12px 40px rgba(3, 169, 244, 0.15)',
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Box 
+                  sx={{ 
+                    p: 1.5, 
+                    borderRadius: 2, 
+                    bgcolor: alpha(theme.palette.info.main, 0.1),
+                    mr: 2
+                  }}
+                >
+                  <CampaignIcon sx={{ color: 'info.main', fontSize: 24 }} />
+                </Box>
+                <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 600 }}>
                   Total Rewards
                 </Typography>
-                <Typography variant="h3">
-                  {analytics.totalRewards}
-                </Typography>
-              </CardContent>
+              </Box>
+              <Typography variant="h3" sx={{ fontWeight: 700, color: 'info.main' }}>
+                {analytics.totalRewards}
+              </Typography>
             </Card>
           </Grid>
         </Grid>
       )}
 
-      <Paper sx={{ p: 3, mb: 4 }}>
+      {/* Enhanced Search and Filter Section */}
+      <Card 
+        sx={{ 
+          p: 4,
+          mb: 4,
+          borderRadius: 3,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+          border: '1px solid',
+          borderColor: alpha(theme.palette.divider, 0.1),
+        }}
+      >
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} md={6}>
             <TextField
@@ -406,6 +553,10 @@ export default function CustomerCampaigns() {
                     <SearchIcon />
                   </InputAdornment>
                 ),
+                sx: {
+                  borderRadius: 2,
+                  bgcolor: 'background.default',
+                }
               }}
             />
           </Grid>
@@ -415,6 +566,20 @@ export default function CustomerCampaigns() {
                 variant="outlined"
                 startIcon={<FilterIcon />}
                 onClick={() => setShowFilters(!showFilters)}
+                sx={{
+                  px: 3,
+                  py: 1.5,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  borderWidth: 2,
+                  '&:hover': {
+                    borderWidth: 2,
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    transition: 'all 0.3s ease'
+                  }
+                }}
               >
                 {showFilters ? 'Hide Filters' : 'Show Filters'}
               </Button>
@@ -432,6 +597,7 @@ export default function CustomerCampaigns() {
                     value={filters.businessType}
                     onChange={(e) => setFilters({ ...filters, businessType: e.target.value })}
                     label="Business Type"
+                    sx={{ borderRadius: 2 }}
                   >
                     <MenuItem value="">All Types</MenuItem>
                     <MenuItem value="restaurant">Restaurant</MenuItem>
@@ -446,6 +612,7 @@ export default function CustomerCampaigns() {
                   label="City"
                   value={filters.city}
                   onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                 />
               </Grid>
               <Grid item xs={12} md={3}>
@@ -455,6 +622,7 @@ export default function CustomerCampaigns() {
                     value={filters.rewardType}
                     onChange={(e) => setFilters({ ...filters, rewardType: e.target.value as FilterState['rewardType'] })}
                     label="Reward Type"
+                    sx={{ borderRadius: 2 }}
                   >
                     <MenuItem value="all">All Rewards</MenuItem>
                     <MenuItem value="percentage">Percentage</MenuItem>
@@ -469,12 +637,13 @@ export default function CustomerCampaigns() {
                   type="number"
                   value={filters.minRewardValue}
                   onChange={(e) => setFilters({ ...filters, minRewardValue: Number(e.target.value) })}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                 />
               </Grid>
             </Grid>
           </Box>
         )}
-      </Paper>
+      </Card>
 
       <Grid container spacing={3}>
         {sortedCampaigns.map((campaign) => (
