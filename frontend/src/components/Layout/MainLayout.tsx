@@ -63,7 +63,18 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <MenuIcon />
           </IconButton>
           <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-            <Logo />
+            <Box 
+              sx={{
+                cursor: 'pointer',
+                transition: 'transform 0.2s ease-in-out',
+                '&:hover': {
+                  transform: 'scale(1.02)'
+                }
+              }}
+              onClick={() => navigate('/')}
+            >
+              <Logo />
+            </Box>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Avatar
@@ -104,7 +115,21 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         onClose={() => setDrawerOpen(false)}
       >
         <Box sx={{ width: 250, pt: 2, pb: 2 }}>
-          <Box sx={{ px: 2, mb: 3 }}>
+          <Box 
+            sx={{ 
+              px: 2, 
+              mb: 3,
+              cursor: 'pointer',
+              transition: 'transform 0.2s ease-in-out',
+              '&:hover': {
+                transform: 'scale(1.02)'
+              }
+            }}
+            onClick={() => {
+              navigate('/');
+              setDrawerOpen(false);
+            }}
+          >
             <Logo />
           </Box>
           <List>

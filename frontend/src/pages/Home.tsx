@@ -240,8 +240,9 @@ const Home: React.FC = () => {
             </Typography>
             <Stack 
               direction={{ xs: 'column', sm: 'row' }} 
-              spacing={2} 
+              spacing={3} 
               justifyContent="center"
+              sx={{ mb: 2 }}
             >
               <Button
                 variant="contained"
@@ -249,15 +250,25 @@ const Home: React.FC = () => {
                 size="large"
                 onClick={() => navigate('/register/customer')}
                 sx={{ 
-                  px: 4,
-                  py: 1.5,
+                  px: 5,
+                  py: 2,
                   fontSize: '1.1rem',
+                  fontWeight: 600,
                   textTransform: 'none',
-                  boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+                  borderRadius: 3,
+                  background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                  boxShadow: '0 8px 25px rgba(25, 118, 210, 0.3), 0 4px 10px rgba(0,0,0,0.1)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  backdropFilter: 'blur(10px)',
                   '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
-                    transition: 'all 0.3s ease'
+                    background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
+                    transform: 'translateY(-3px)',
+                    boxShadow: '0 12px 35px rgba(25, 118, 210, 0.4), 0 6px 15px rgba(0,0,0,0.15)',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                  },
+                  '&:active': {
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 6px 20px rgba(25, 118, 210, 0.3)'
                   }
                 }}
               >
@@ -269,42 +280,61 @@ const Home: React.FC = () => {
                 size="large"
                 onClick={() => navigate('/register')}
                 sx={{ 
-                  px: 4,
-                  py: 1.5,
+                  px: 5,
+                  py: 2,
                   fontSize: '1.1rem',
+                  fontWeight: 600,
                   textTransform: 'none',
+                  borderRadius: 3,
                   bgcolor: 'white',
                   color: 'primary.main',
-                  boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
+                  boxShadow: '0 8px 25px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.1)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  backdropFilter: 'blur(10px)',
                   '&:hover': {
-                    bgcolor: 'grey.100',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
-                    transition: 'all 0.3s ease'
+                    bgcolor: 'grey.50',
+                    transform: 'translateY(-3px)',
+                    boxShadow: '0 12px 35px rgba(0,0,0,0.2), 0 6px 15px rgba(0,0,0,0.15)',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                  },
+                  '&:active': {
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 6px 20px rgba(0,0,0,0.15)'
                   }
                 }}
               >
                 Register as Business
               </Button>
             </Stack>
-            <Box sx={{ textAlign: 'center', mt: 3 }}>
+            <Box sx={{ textAlign: 'center', mt: 2 }}>
               <Button
                 variant="outlined"
                 color="inherit"
                 size="large"
                 onClick={() => navigate('/contact')}
                 sx={{ 
-                  px: 4,
-                  py: 1.5,
+                  px: 5,
+                  py: 1.8,
                   fontSize: '1rem',
+                  fontWeight: 600,
                   textTransform: 'none',
-                  borderColor: 'rgba(255,255,255,0.5)',
+                  borderRadius: 3,
+                  borderColor: 'rgba(255,255,255,0.6)',
+                  borderWidth: 2,
                   color: 'white',
+                  backdropFilter: 'blur(10px)',
+                  background: 'rgba(255,255,255,0.05)',
                   '&:hover': {
                     borderColor: 'white',
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    transform: 'translateY(-1px)',
-                    transition: 'all 0.3s ease'
+                    borderWidth: 2,
+                    backgroundColor: 'rgba(255,255,255,0.15)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 8px 25px rgba(255,255,255,0.2)',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                  },
+                  '&:active': {
+                    transform: 'translateY(0px)',
+                    boxShadow: '0 4px 15px rgba(255,255,255,0.15)'
                   }
                 }}
               >
